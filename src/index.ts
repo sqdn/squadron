@@ -1,5 +1,5 @@
 /**
  * @packageDocumentation
- * @module Module @sqrn/squadron
+ * @module Module @sqdn/squadron
  */
 export * from './unit';

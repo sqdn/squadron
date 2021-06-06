@@ -1,23 +1,23 @@
 {
-  "name": "@sqrn/squadron",
+  "name": "@sqdn/squadron",
   "version": "0.1.0",
   "description": "Squadron of executable Node.js units",
   "keywords": [
     "application-server",
     "worker-threads"
   ],
-  "homepage": "https://github.com/sqdn/hatsy",
+  "homepage": "https://github.com/sqdn/squadron",
   "repository": {
     "type": "git",
-    "url": "ssh://git@github.com:sqdn/hatsy.git"
+    "url": "ssh://git@github.com:sqdn/squadron.git"
   },
   "license": "MIT",
   "author": "Ruslan Lopatin <ruslan.lopatin@gmail.com>",
   "bugs": {
-    "url": "https://github.com/sqdn/hatsy/issues"
+    "url": "https://github.com/sqdn/squadron/issues"
   },
   "type": "module",
-  "main": "./dist/hatsy.js",
+  "main": "./dist/squadron.js",
   "types": "./index.d.ts",
   "exports": "./dist/squadron.js",
   "dependencies": {

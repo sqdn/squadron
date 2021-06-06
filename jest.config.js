@@ -24,7 +24,7 @@ export default {
     [
       'jest-junit',
       {
-        suiteName: '@hatsy/hatsy',
+        suiteName: '@sqdn/squadron',
         outputDirectory: './target/test-results',
         classNameTemplate: '{classname}: {title}',
         titleTemplate: '{classname}: {title}',
