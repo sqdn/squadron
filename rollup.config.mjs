@@ -32,14 +32,6 @@ export default {
         compilerOptions: {
           declarationMap: true,
         },
-        entries: {
-          core: {
-            file: 'core/index.d.ts',
-          },
-          testing: {
-            file: 'testing/index.d.ts',
-          },
-        },
       }),
     ],
   },
