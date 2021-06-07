@@ -17,6 +17,10 @@ export abstract class Unit<TUnit extends Unit<TUnit>> {
     return this[Unit$Internals__symbol].origin;
   }
 
+  get tag(): string {
+    return this[Unit$Internals__symbol].tag;
+  }
+
   get uid(): string {
     return this[Unit$Internals__symbol].uid;
   }
@@ -35,7 +39,7 @@ export namespace Unit {
 
   export interface Init {
 
-    readonly id?: string;
+    readonly tag?: string;
 
   }
 
@@ -44,10 +48,12 @@ export namespace Unit {
 class Unit$Internals<TUnit extends Unit<TUnit>> {
 
   stack!: string;
+  readonly tag: string;
   private _origin?: string;
   private _uid?: string;
 
-  constructor(readonly unit: TUnit, private readonly _init: Unit.Init = {}) {
+  constructor(readonly unit: TUnit, { tag = '' }: Unit.Init = {}) {
+    this.tag = tag;
   }
 
   get name(): string {
@@ -68,14 +74,13 @@ class Unit$Internals<TUnit extends Unit<TUnit>> {
   get uid(): string {
     if (!this._uid) {
 
-      const { id } = this._init;
       const hash = createHash('sha256');
 
       hash.update(this.stack);
 
-      const uid = hash.digest('hex');
+      const stackHash = hash.digest('hex');
 
-      this._uid = id ? `${id}@${uid}` : uid;
+      this._uid = this.tag ? `${this.tag}@${stackHash}` : stackHash;
     }
 
     return this._uid;

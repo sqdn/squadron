@@ -7,6 +7,15 @@ describe('Unit', () => {
   class TestUnit extends Unit<TestUnit> {
   }
 
+  describe('tag', () => {
+    it('is empty by default', () => {
+      expect(new TestUnit().tag).toBe('');
+    });
+    it('can be specified', () => {
+      expect(new TestUnit({ tag: 'test' }).tag).toBe('test');
+    });
+  });
+
   describe('uid', () => {
     it('is unique to each unit instantiation location', () => {
 
@@ -27,12 +36,12 @@ describe('Unit', () => {
 
       expect(unit1.uid).toBe(unit2.uid);
     });
-    it('is unique for different ids and the same instantiation location', () => {
+    it('is unique for different tags and the same instantiation location', () => {
 
       const units: TestUnit[] = [];
 
       for (let i = 0; i < 2; ++i) {
-        units.push(createUnit({ id: String(i) }));
+        units.push(createUnit({ tag: String(i) }));
       }
 
       const [unit1, unit2] = units;
