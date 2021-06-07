@@ -1,7 +1,7 @@
 {
   "name": "@sqdn/squadron",
   "version": "0.1.0",
-  "description": "Squadron of executable Node.js units",
+  "description": "Squadron of executive Node.js units",
   "keywords": [
     "application-server",
     "worker-threads"
