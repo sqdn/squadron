@@ -30,7 +30,10 @@ export abstract class Unit<TUnit extends Unit<TUnit>> {
   }
 
   toString(): string {
-    return `${this[Symbol.toStringTag]}-${this.uid}(${this.origin})`;
+
+    const { uid } = this[Unit$Internals__symbol];
+
+    return `${this[Symbol.toStringTag]}...${uid.slice(-7)}(${this.origin})`;
   }
 
 }
@@ -66,8 +69,13 @@ class Unit$Internals<TUnit extends Unit<TUnit>> {
 
   get origin(): string {
     if (!this._origin) {
-      this._origin = Unit$origin(this.stack);
+
+      const origin = Unit$origin(this.stack);
+      const tag = this.tag;
+
+      this._origin = tag ? `${origin}:${tag}` : origin;
     }
+
     return this._origin;
   }
 

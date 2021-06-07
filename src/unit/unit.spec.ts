@@ -55,13 +55,27 @@ describe('Unit', () => {
 
       const unit = createUnit();
       const filePath = fileURLToPath(import.meta.url);
-      const pattern = new RegExp(`^TestUnit-${unit.uid}\\((.+)\\)$`);
+      const pattern = new RegExp(`^TestUnit...${unit.uid.slice(-7)}\\((.+)\\)$`);
 
       expect(unit.toString()).toMatch(pattern);
 
       const location = pattern.exec(unit.toString())![1];
 
       expect(location).toContain(filePath);
+      expect(location).toMatch(/.*:\d+:\d+$/);
+    });
+    it('reflects unit tag', () => {
+
+      const unit = createUnit({ tag: 'test' });
+      const filePath = fileURLToPath(import.meta.url);
+      const pattern = new RegExp(`^TestUnit...${unit.uid.slice(-7)}\\((.+)\\)$`);
+
+      expect(unit.toString()).toMatch(pattern);
+
+      const location = pattern.exec(unit.toString())![1];
+
+      expect(location).toContain(filePath);
+      expect(location).toMatch(/.*:\d+:\d+:test$/);
     });
   });
 
