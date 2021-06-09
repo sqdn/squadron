@@ -1,5 +1,6 @@
 import nodeResolve from '@rollup/plugin-node-resolve';
 import { externalModules } from '@run-z/rollup-helpers';
+import path from 'path';
 import { defineConfig } from 'rollup';
 import flatDts from 'rollup-plugin-flat-dts';
 import sourcemaps from 'rollup-plugin-sourcemaps';
@@ -9,6 +10,7 @@ import typescript from 'typescript';
 export default defineConfig({
   input: {
     squadron: './src/index.ts',
+    'squadron.testing': './src/testing/index.ts',
   },
   plugins: [
     ts({
@@ -20,6 +22,12 @@ export default defineConfig({
     sourcemaps(),
   ],
   external: externalModules(),
+  manualChunks(id) {
+    if (id.startsWith(path.resolve('src', 'testing') + path.sep)) {
+      return 'squadron.testing';
+    }
+    return 'squadron';
+  },
   output: {
     dir: '.',
     format: 'esm',
@@ -32,6 +40,11 @@ export default defineConfig({
         lib: true,
         compilerOptions: {
           declarationMap: true,
+        },
+        entries: {
+          testing: {
+            file: 'testing/index.d.ts',
+          },
         },
         internal: ['**/impl/**', '**/*.impl'],
       }),

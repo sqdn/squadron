@@ -1,11 +1,23 @@
-import { describe, expect, it } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { fileURLToPath } from 'url';
+import { Formation } from '../formation';
+import { OrderPromulgator } from '../order';
+import { OrderTest } from '../testing';
 import { Unit } from './unit';
 
 describe('Unit', () => {
 
   class TestUnit extends Unit {
   }
+
+  let test: OrderTest;
+
+  beforeEach(() => {
+    test = OrderTest.setup();
+  });
+  afterEach(() => {
+    test.reset();
+  });
 
   describe('tag', () => {
     it('is empty by default', () => {
@@ -76,6 +88,61 @@ describe('Unit', () => {
 
       expect(location).toContain(filePath);
       expect(location).toMatch(/.*:\d+:\d+:test$/);
+    });
+  });
+
+  describe('order', () => {
+    it('promulgates the order', async () => {
+
+      const promulgator: OrderPromulgator<TestUnit> = jest.fn();
+      const unit = createUnit();
+
+      unit.order(promulgator);
+      test.formation.deploy(unit);
+
+      await test.executeOrder();
+
+      expect(promulgator).toHaveBeenCalledWith(expect.objectContaining({
+        formation: test.formation,
+        unit,
+      }));
+    });
+    it('does not promulgates the order when disabled', async () => {
+
+      const promulgator: OrderPromulgator<TestUnit> = jest.fn();
+      const unit = createUnit();
+
+      unit.order(promulgator);
+      test.formation.deploy(unit);
+      unit.off();
+
+      await test.executeOrder();
+
+      expect(promulgator).not.toHaveBeenCalled();
+    });
+    it('does not promulgates the order when not deployed', async () => {
+
+      const promulgator: OrderPromulgator<TestUnit> = jest.fn();
+      const unit = createUnit();
+
+      unit.order(promulgator);
+
+      await test.executeOrder();
+
+      expect(promulgator).not.toHaveBeenCalled();
+    });
+    it('does not promulgates the order when deployed to another formation', async () => {
+
+      const formation2 = new Formation({ tag: 'other' });
+      const promulgator: OrderPromulgator<TestUnit> = jest.fn();
+      const unit = createUnit();
+
+      unit.order(promulgator);
+      formation2.deploy(unit);
+
+      await test.executeOrder();
+
+      expect(promulgator).not.toHaveBeenCalled();
     });
   });
 

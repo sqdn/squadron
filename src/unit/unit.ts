@@ -1,34 +1,41 @@
+import { lazyValue } from '@proc7ts/primitives';
 import Order from '@sqdn/order';
 import { createHash } from 'crypto';
-import { OrderExecutor } from '../impl';
+import { Order$Executor, Unit$Executor, Unit$Executor__symbol } from '../impl';
 import { OrderPromulgator } from '../order';
 
-const Unit$Internals__symbol = (/*#__PURE__*/ Symbol('Unit.internals'));
+const Unit$Id__symbol = (/*#__PURE__*/ Symbol('Unit.id'));
 
 export abstract class Unit {
 
   /**
    * @internal
    */
-  private readonly [Unit$Internals__symbol]: Unit$Internals;
+  private readonly [Unit$Id__symbol]: Unit$Id;
+
+  /**
+   * @internal
+   */
+  private readonly [Unit$Executor__symbol]: () => Unit$Executor<this>;
 
   constructor(init?: Unit.Init) {
     Error.captureStackTrace(
-        this[Unit$Internals__symbol] = new Unit$Internals(this, init),
+        this[Unit$Id__symbol] = new Unit$Id(this, init),
         new.target,
     );
+    this[Unit$Executor__symbol] = lazyValue(() => Order.get(Order$Executor).unit(this));
   }
 
   get origin(): string {
-    return this[Unit$Internals__symbol].origin;
+    return this[Unit$Id__symbol].origin;
   }
 
   get tag(): string {
-    return this[Unit$Internals__symbol].tag;
+    return this[Unit$Id__symbol].tag;
   }
 
   get uid(): string {
-    return this[Unit$Internals__symbol].uid;
+    return this[Unit$Id__symbol].uid;
   }
 
   get [Symbol.toStringTag](): string {
@@ -36,13 +43,18 @@ export abstract class Unit {
   }
 
   order(promulgator: OrderPromulgator<this>): this {
-    Order.get(OrderExecutor).order(this, promulgator);
+    this[Unit$Executor__symbol]().order(promulgator);
+    return this;
+  }
+
+  off(): this {
+    this[Unit$Executor__symbol]().supply.off();
     return this;
   }
 
   toString(): string {
 
-    const { uid } = this[Unit$Internals__symbol];
+    const { uid } = this[Unit$Id__symbol];
 
     return `${this[Symbol.toStringTag]}...${uid.slice(-7)}(${this.origin})`;
   }
@@ -59,7 +71,7 @@ export namespace Unit {
 
 }
 
-class Unit$Internals {
+class Unit$Id {
 
   stack!: string;
   readonly tag: string;
