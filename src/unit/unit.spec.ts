@@ -4,7 +4,7 @@ import { Unit } from './unit';
 
 describe('Unit', () => {
 
-  class TestUnit extends Unit<TestUnit> {
+  class TestUnit extends Unit {
   }
 
   describe('tag', () => {

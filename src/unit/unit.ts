@@ -1,14 +1,20 @@
+import Order from '@sqdn/order';
 import { createHash } from 'crypto';
+import { OrderExecutor } from '../impl';
+import { OrderPromulgator } from '../order';
 
 const Unit$Internals__symbol = (/*#__PURE__*/ Symbol('Unit.internals'));
 
-export abstract class Unit<TUnit extends Unit<TUnit>> {
+export abstract class Unit {
 
-  private readonly [Unit$Internals__symbol]: Unit$Internals<TUnit>;
+  /**
+   * @internal
+   */
+  private readonly [Unit$Internals__symbol]: Unit$Internals;
 
   constructor(init?: Unit.Init) {
     Error.captureStackTrace(
-        this[Unit$Internals__symbol] = new Unit$Internals(this as Unit<TUnit> as TUnit, init),
+        this[Unit$Internals__symbol] = new Unit$Internals(this, init),
         new.target,
     );
   }
@@ -27,6 +33,11 @@ export abstract class Unit<TUnit extends Unit<TUnit>> {
 
   get [Symbol.toStringTag](): string {
     return this.constructor.name;
+  }
+
+  order(promulgator: OrderPromulgator<this>): this {
+    Order.get(OrderExecutor).order(this, promulgator);
+    return this;
   }
 
   toString(): string {
@@ -48,14 +59,14 @@ export namespace Unit {
 
 }
 
-class Unit$Internals<TUnit extends Unit<TUnit>> {
+class Unit$Internals {
 
   stack!: string;
   readonly tag: string;
   private _origin?: string;
   private _uid?: string;
 
-  constructor(readonly unit: TUnit, { tag = '' }: Unit.Init = {}) {
+  constructor(readonly unit: Unit, { tag = '' }: Unit.Init = {}) {
     this.tag = tag;
   }
 
