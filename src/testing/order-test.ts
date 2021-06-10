@@ -1,27 +1,15 @@
-import { ContextRegistry } from '@proc7ts/context-values';
+import { ContextRegistry, ContextValueProvider } from '@proc7ts/context-values';
+import { silentLogger } from '@proc7ts/logger';
 import { valueRecipe } from '@proc7ts/primitives';
 import Order from '@sqdn/order';
 import MockOrder from '@sqdn/order/mock';
+import { UnitLogger } from '../common';
 import { Formation } from '../formation';
 import { Order$Executor } from '../impl';
 
-export namespace OrderTest {
-
-  export interface Init {
-
-    readonly orderId?: string;
-
-    readonly formation?:
-        | Formation
-        | ((this: void, context: MockOrder) => Formation);
-
-    setup?(registry: ContextRegistry<MockOrder>): void;
-
-  }
-
-}
-
 export interface OrderTest {
+
+  readonly registry: ContextRegistry<MockOrder>;
 
   readonly order: MockOrder;
 
@@ -33,36 +21,82 @@ export interface OrderTest {
 
 }
 
-export const OrderTest = {
+export namespace OrderTest {
+
+  export interface Init {
+
+    readonly orderId?: string;
+
+    readonly formation?: Formation | ContextValueProvider<Formation, MockOrder>;
+
+    readonly logger?: UnitLogger | ContextValueProvider<UnitLogger, MockOrder>;
+
+  }
+
+  export interface Global extends OrderTest {
+
+    setup(this: void, init?: OrderTest.Init): OrderTest;
+
+  }
+
+}
+
+let OrderTest$instance: OrderTest | undefined;
+
+export const OrderTest: OrderTest.Global = {
 
   setup(this: void, init: OrderTest.Init = {}): OrderTest {
 
-    const { orderId, formation = new Formation({ tag: 'test' }) } = init;
+    const {
+      orderId,
+      formation = new Formation({ tag: 'test' }),
+      logger = silentLogger,
+    } = init;
     const registry = new ContextRegistry<MockOrder>();
 
     registry.provide({ a: Order, is: MockOrder });
     registry.provide({ a: Formation, by: valueRecipe(formation) });
-    init.setup?.(registry);
+    registry.provide({ a: UnitLogger, by: valueRecipe(logger) });
 
     MockOrder.mock({
       get: registry.newValues().get,
       orderId,
     });
 
-    return {
+    return OrderTest$instance = {
+      registry,
       order: MockOrder,
       formation: MockOrder.get(Formation),
-      executeOrder: OrderTest.executeOrder,
+      executeOrder() {
+        return MockOrder.get(Order$Executor).execute();
+      },
       reset: OrderTest.reset,
     };
   },
 
-  executeOrder(this: void): Promise<void> {
-    return MockOrder.get(Order$Executor).execute();
+  get registry(): ContextRegistry<MockOrder> {
+    return OrderTest$get().registry;
+  },
+
+  get order(): MockOrder {
+    return OrderTest$get().order;
+  },
+
+  get formation(): Formation {
+    return OrderTest$get().formation;
+  },
+
+  get executeOrder() {
+    return OrderTest$get().executeOrder;
   },
 
   reset(this: void): void {
+    OrderTest$instance = undefined;
     MockOrder.mockReset();
   },
 
 };
+
+function OrderTest$get(): OrderTest {
+  return OrderTest$instance || OrderTest.setup();
+}

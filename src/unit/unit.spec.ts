@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { asis } from '@proc7ts/primitives';
 import { fileURLToPath } from 'url';
+import { UnitLogger } from '../common';
 import { Formation } from '../formation';
 import { OrderPromulgator } from '../order';
 import { OrderTest } from '../testing';
@@ -143,6 +145,42 @@ describe('Unit', () => {
       await test.executeOrder();
 
       expect(promulgator).not.toHaveBeenCalled();
+    });
+    it('does not promulgates the order to disabled formation', async () => {
+
+      const promulgator: OrderPromulgator<TestUnit> = jest.fn();
+      const unit = createUnit();
+
+      unit.order(promulgator);
+      test.formation.deploy(unit);
+      test.formation.off();
+
+      await test.executeOrder();
+
+      expect(promulgator).not.toHaveBeenCalled();
+      expect(await unit.supply.whenDone()).toBeUndefined();
+    });
+    it('cuts unit supply off when promulgation fails', async () => {
+
+      const logger = {
+        error: jest.fn<void, any[]>(),
+      } as Partial<UnitLogger> as UnitLogger;
+
+      test.registry.provide({ a: UnitLogger, is: logger });
+
+      const error = new Error('test');
+      const promulgator: OrderPromulgator<TestUnit> = jest.fn(() => {
+        throw error;
+      });
+      const unit = createUnit();
+
+      unit.order(promulgator);
+      test.formation.deploy(unit);
+
+      await test.executeOrder();
+
+      expect(await unit.supply.whenDone().catch(asis)).toBe(error);
+      expect(logger.error).toHaveBeenCalledWith(`Failed to promulgate the orders for ${unit}`, error);
     });
   });
 
