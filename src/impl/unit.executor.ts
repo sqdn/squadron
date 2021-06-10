@@ -1,5 +1,5 @@
 import { noop } from '@proc7ts/primitives';
-import { Supply } from '@proc7ts/supply';
+import { Supply, SupplyPeer } from '@proc7ts/supply';
 import { OrderPromulgation, OrderPromulgator } from '../order';
 import { Unit } from '../unit';
 import { Formation$Executor } from './formation.executor';
@@ -7,7 +7,7 @@ import { Order$Executor } from './order.executor';
 
 export const Unit$Executor__symbol = (/*#__PURE__*/ Symbol('Unit.executor'));
 
-export class Unit$Executor<TUnit extends Unit> {
+export class Unit$Executor<TUnit extends Unit> implements SupplyPeer {
 
   private _promulgation: OrderPromulgation<TUnit> | null = null;
   readonly supply = new Supply();

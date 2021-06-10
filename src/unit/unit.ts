@@ -1,4 +1,5 @@
 import { lazyValue } from '@proc7ts/primitives';
+import { Supply, SupplyPeer } from '@proc7ts/supply';
 import Order from '@sqdn/order';
 import { createHash } from 'crypto';
 import { Order$Executor, Unit$Executor, Unit$Executor__symbol } from '../impl';
@@ -6,7 +7,7 @@ import { OrderPromulgator } from '../order';
 
 const Unit$Id__symbol = (/*#__PURE__*/ Symbol('Unit.id'));
 
-export abstract class Unit {
+export abstract class Unit implements SupplyPeer {
 
   /**
    * @internal
@@ -36,6 +37,10 @@ export abstract class Unit {
 
   get uid(): string {
     return this[Unit$Id__symbol].uid;
+  }
+
+  get supply(): Supply {
+    return this[Unit$Executor__symbol]().supply;
   }
 
   get [Symbol.toStringTag](): string {
