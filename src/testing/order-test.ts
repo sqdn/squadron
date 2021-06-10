@@ -33,7 +33,7 @@ export namespace OrderTest {
 
   }
 
-  export interface Global extends OrderTest {
+  export interface Static extends OrderTest {
 
     setup(this: void, init?: OrderTest.Init): OrderTest;
 
@@ -43,7 +43,7 @@ export namespace OrderTest {
 
 let OrderTest$instance: OrderTest | undefined;
 
-export const OrderTest: OrderTest.Global = {
+export const OrderTest: OrderTest.Static = {
 
   setup(this: void, init: OrderTest.Init = {}): OrderTest {
 
