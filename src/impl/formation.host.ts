@@ -3,6 +3,7 @@ import Order from '@sqdn/order';
 import { UnitLogger } from '../common';
 import { Formation, FormationContext } from '../formation';
 import { newFormationContext } from '../formation/formation-context.impl';
+import { Formation__key } from '../formation/formation.key.impl';
 import { Unit, UnitContext, UnitTask } from '../unit';
 import { Unit$Deployment } from '../unit/unit.deployment.impl';
 import { Unit$Host } from '../unit/unit.host.impl';
@@ -22,15 +23,20 @@ export class Formation$Host implements Unit$Host {
   readonly perOrderRegistry: ContextRegistry<Order>;
   readonly perUnitRegistry: ContextRegistry<UnitContext>;
 
+  private _formation: Formation | null = null;
   private readonly _deployments = new Map<string, Unit$Deployment<any>>();
 
-  constructor(readonly formation: Formation) {
+  constructor(createFormation: (this: void, order: Order) => Formation) {
     this.registry = new ContextRegistry();
     this.registry.provide({ a: Formation$Host, is: this });
-    this.context = newFormationContext(this);
+    this.context = newFormationContext(this, createFormation);
 
     this.perOrderRegistry = new ContextRegistry(this.context);
     this.perUnitRegistry = new ContextRegistry(this.context);
+  }
+
+  get formation(): Formation {
+    return this._formation ||= Order.get(Formation__key);
   }
 
   get log(): UnitLogger {
@@ -61,6 +67,7 @@ export class Formation$Host implements Unit$Host {
     const registry = new ContextRegistry<Order>(this.perOrderRegistry.seeds());
     const order: Order = {
       [ContextKey__symbol]: Order[ContextKey__symbol],
+      active: true,
       orderId,
       get: registry.newValues().get,
     };

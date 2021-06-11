@@ -1,4 +1,4 @@
-import { noop, valueProvider } from '@proc7ts/primitives';
+import { noop } from '@proc7ts/primitives';
 import { Formation } from '../formation';
 import { Order$Evaluator } from '../impl';
 import { OrderPromulgation, OrderPromulgator } from '../order';
@@ -19,13 +19,12 @@ export class Unit$Evaluator<TUnit extends Unit> extends Unit$Backend<TUnit, Orde
     this.supply.needs(formation);
 
     const { host } = this;
-    const { workbench, log } = host;
 
-    let execute = (task: UnitTask<TUnit>): void => workbench.execute(async () => {
+    let execute = (task: UnitTask<TUnit>): void => host.workbench.execute(async () => {
       try {
         await host.executeUnitTask(this.unit, task);
       } catch (error) {
-        log.error(`Failed to start ${this.unit}`, error);
+        host.log.error(`Failed to start ${this.unit}`, error);
         this.supply.off(error);
       }
     });
@@ -37,13 +36,13 @@ export class Unit$Evaluator<TUnit extends Unit> extends Unit$Backend<TUnit, Orde
     };
 
     const promulgate = (promulgator: OrderPromulgator<TUnit>): void => {
-      workbench.promulgate(async () => {
+      host.workbench.promulgate(async () => {
         if (promulgation) {
           try {
             await promulgator(promulgation);
           } catch (error) {
             this.supply.off(error);
-            log.error(`Failed to promulgate the orders for ${this.unit}`, error);
+            host.log.error(`Failed to promulgate the orders for ${this.unit}`, error);
           }
         }
       });
@@ -55,12 +54,12 @@ export class Unit$Evaluator<TUnit extends Unit> extends Unit$Backend<TUnit, Orde
       }
       this._promulgators.length = 0;
       this.order = promulgate;
-      this.host.workbench.deliver(() => this._deliver());
+      this.host.deliver(() => this._deliver());
     }
 
     this.supply.whenOff(reason => {
       this.order = Unit$rejectOrder;
-      this._deliver = noop;
+      this._deliver = noop; // Do not deliver withdrawn unit.
       this._promulgators.length = 0;
       promulgation = null;
       execute = Unit$doNotStart(reason);
@@ -75,7 +74,7 @@ export class Unit$Evaluator<TUnit extends Unit> extends Unit$Backend<TUnit, Orde
     this.unit[Unit$Id__symbol] = deployment.unit[Unit$Id__symbol];
 
     // Replace unit evaluator with unit deployment.
-    this.unit[Unit$Backend__symbol] = valueProvider(deployment);
+    this.unit[Unit$Backend__symbol] = deployment;
 
     // Evaluator depends on deployment from now on.
     this.supply.needs(deployment.supply);

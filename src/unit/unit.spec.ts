@@ -103,7 +103,7 @@ describe('Unit', () => {
       unit.order(promulgator);
       test.formation.deploy(unit);
 
-      await test.executeOrder();
+      await test.evaluate();
 
       expect(promulgator).toHaveBeenCalledWith(expect.objectContaining({
         formation: test.formation,
@@ -118,14 +118,14 @@ describe('Unit', () => {
       test.formation.deploy(unit);
       unit.order(promulgator);
 
-      await test.executeOrder();
+      await test.evaluate();
 
       expect(promulgator).toHaveBeenCalledWith(expect.objectContaining({
         formation: test.formation,
         unit,
       }));
     });
-    it('does not promulgates the order when disabled', async () => {
+    it('does not promulgate the order when unit withdrawn', async () => {
 
       const promulgator: OrderPromulgator<TestUnit> = jest.fn();
       const unit = new TestUnit();
@@ -134,22 +134,36 @@ describe('Unit', () => {
       test.formation.deploy(unit);
       unit.off();
 
-      await test.executeOrder();
+      await test.evaluate();
 
       expect(promulgator).not.toHaveBeenCalled();
     });
-    it('does not promulgates the order when not deployed', async () => {
+    it('is not promulgated right after unit withdrawal', async () => {
+
+      const unit = new TestUnit();
+      const promulgator: OrderPromulgator<TestUnit> = jest.fn();
+
+      test.formation.deploy(unit);
+      unit.order(({ supply }) => {
+        supply.off();
+        unit.order(promulgator);
+      });
+      await test.evaluate();
+
+      expect(promulgator).not.toHaveBeenCalled();
+    });
+    it('does not promulgate the order when not deployed', async () => {
 
       const promulgator: OrderPromulgator<TestUnit> = jest.fn();
       const unit = new TestUnit();
 
       unit.order(promulgator);
 
-      await test.executeOrder();
+      await test.evaluate();
 
       expect(promulgator).not.toHaveBeenCalled();
     });
-    it('does not promulgates the order when deployed to another formation', async () => {
+    it('does not promulgate the order when deployed to another formation', async () => {
 
       const formation2 = new Formation({ tag: 'other' });
       const promulgator: OrderPromulgator<TestUnit> = jest.fn();
@@ -158,11 +172,11 @@ describe('Unit', () => {
       unit.order(promulgator);
       formation2.deploy(unit);
 
-      await test.executeOrder();
+      await test.evaluate();
 
       expect(promulgator).not.toHaveBeenCalled();
     });
-    it('does not promulgates the order to disabled formation', async () => {
+    it('does not promulgate the order to disabled formation', async () => {
 
       const promulgator: OrderPromulgator<TestUnit> = jest.fn();
       const unit = new TestUnit();
@@ -171,12 +185,12 @@ describe('Unit', () => {
       test.formation.deploy(unit);
       test.formation.off();
 
-      await test.executeOrder();
+      await test.evaluate();
 
       expect(promulgator).not.toHaveBeenCalled();
       expect(await unit.supply.whenDone()).toBeUndefined();
     });
-    it('un-deploys unit when promulgation fails', async () => {
+    it('withdraws the unit when promulgation fails', async () => {
 
       const logger = {
         error: jest.fn<void, any[]>(),
@@ -193,14 +207,14 @@ describe('Unit', () => {
       unit.order(promulgator);
       test.formation.deploy(unit);
 
-      await test.executeOrder();
+      await test.evaluate();
 
       expect(await unit.supply.whenDone().catch(asis)).toBe(error);
       expect(logger.error).toHaveBeenCalledWith(`Failed to promulgate the orders for ${unit}`, error);
     });
 
     describe('for promulgation after order evaluation', () => {
-      it('does not un-deploy unit when promulgation fails', async () => {
+      it('does not withdraw the unit when promulgation fails', async () => {
 
         const logger = {
           error: jest.fn<void, any[]>(),
@@ -213,7 +227,7 @@ describe('Unit', () => {
 
         test.formation.deploy(unit);
 
-        await test.executeOrder();
+        await test.evaluate();
 
         let promulgationSupply!: Supply;
         const promulgator: OrderPromulgator<TestUnit> = jest.fn(({ supply }) => {
@@ -228,15 +242,28 @@ describe('Unit', () => {
         expect(await promulgationSupply.whenDone().catch(asis)).toBe(error);
         expect(logger.error).toHaveBeenCalledWith(`Failed to promulgate the orders for ${unit}`, error);
       });
-      it('is not executed for un-deployed unit', async () => {
+      it('is not executed for withdrawn unit', async () => {
 
         const unit = new TestUnit();
 
         test.formation.deploy(unit);
-
-        await test.executeOrder();
+        await test.evaluate();
 
         unit.off();
+
+        const promulgator: OrderPromulgator<TestUnit> = jest.fn();
+
+        unit.order(promulgator);
+
+        await test.evaluate();
+
+        expect(promulgator).not.toHaveBeenCalled();
+      });
+      it('is not executed for not deployed unit', async () => {
+
+        const unit = new TestUnit();
+
+        await test.evaluate();
 
         const promulgator: OrderPromulgator<TestUnit> = jest.fn();
 
@@ -251,26 +278,22 @@ describe('Unit', () => {
 
   describe('deploy', () => {
     describe('after order evaluation', () => {
-      it.skip('does not deploy the unit', async () => {
+      it('does not deploy the unit', async () => {
 
         const logger = {
-          error: jest.fn<void, any[]>(),
+          warn: jest.fn<void, any[]>(),
         } as Partial<UnitLogger> as UnitLogger;
 
         test.formationRegistry.provide({ a: UnitLogger, is: logger });
 
         const unit = new Unit();
 
-        await test.executeOrder();
-
-        const promulgator: OrderPromulgator<Unit> = jest.fn();
-
         test.formation.deploy(unit);
-        unit.order(promulgator);
-
         await test.evaluate();
 
-        expect(promulgator).not.toHaveBeenCalled();
+        test.formation.deploy(unit);
+        await test.evaluate();
+
         expect(logger.warn).toHaveBeenCalledWith(`${unit} can not be deployed to ${test.formation} outside the order`);
       });
     });

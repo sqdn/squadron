@@ -18,8 +18,6 @@ export interface OrderTest {
 
   readonly formationRegistry: ContextRegistry<FormationContext>;
 
-  executeOrder(this: void): Promise<void>;
-
   evaluate(this: void): Promise<void>;
 
   reset(this: void): void;
@@ -32,9 +30,9 @@ export namespace OrderTest {
 
     readonly orderId?: string;
 
-    readonly formation?: Formation;
-
     readonly logger?: UnitLogger | ContextValueProvider<UnitLogger>;
+
+    formation?(this: void, order: Order): Formation;
 
   }
 
@@ -60,7 +58,7 @@ export const OrderTest: OrderTest.Static = {
 
     const {
       orderId,
-      formation = new Formation({ tag: 'test' }),
+      formation = () => new Formation({ tag: 'test' }),
       logger = silentLogger,
     } = init;
 
@@ -71,7 +69,7 @@ export const OrderTest: OrderTest.Static = {
     host.registry.provide({ a: UnitLogger, by: valueRecipe(logger) });
 
     MockOrder.mock({
-      get: order.get,
+      ...order,
       orderId,
     });
 
@@ -80,11 +78,20 @@ export const OrderTest: OrderTest.Static = {
       order: MockOrder,
       formation: MockOrder.get(Formation),
       formationRegistry: host.registry,
-      executeOrder() {
-        return MockOrder.get(Order$Evaluator).executeOrder();
-      },
       evaluate(): Promise<void> {
-        return host.workbench._workbench.work(host.workbench._executionStage).run(noop);
+        if (MockOrder.active) {
+          return MockOrder
+              .get(Order$Evaluator)
+              .executeOrder()
+              .then(() => {
+                MockOrder.mockReset();
+              });
+        }
+
+        return host.workbench
+            .workbench
+            .work(host.workbench.executionStage)
+            .run(noop);
       },
       reset: OrderTest.reset,
     };
@@ -104,10 +111,6 @@ export const OrderTest: OrderTest.Static = {
 
   get formationRegistry(): ContextRegistry<FormationContext> {
     return OrderTest$get().formationRegistry;
-  },
-
-  get executeOrder() {
-    return OrderTest$get().executeOrder;
   },
 
   get evaluate() {

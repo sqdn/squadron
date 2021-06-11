@@ -1,4 +1,3 @@
-import { lazyValue } from '@proc7ts/primitives';
 import { Supply, SupplyPeer } from '@proc7ts/supply';
 import Order from '@sqdn/order';
 import { Order$Evaluator } from '../impl';
@@ -16,14 +15,15 @@ export class Unit implements SupplyPeer {
   /**
    * @internal
    */
-  [Unit$Backend__symbol]: () => Unit$Backend<this>;
+  [Unit$Backend__symbol]: Unit$Backend<this>;
 
   constructor(init?: Unit.Init) {
     Error.captureStackTrace(
         this[Unit$Id__symbol] = new Unit$Id(this, init),
         new.target,
     );
-    this[Unit$Backend__symbol] = lazyValue(() => Order.get(Order$Evaluator).evalUnit(this));
+
+    this[Unit$Backend__symbol] = Order.get(Order$Evaluator).evalUnit(this);
   }
 
   get origin(): string {
@@ -39,7 +39,7 @@ export class Unit implements SupplyPeer {
   }
 
   get supply(): Supply {
-    return this[Unit$Backend__symbol]().supply;
+    return this[Unit$Backend__symbol].supply;
   }
 
   get [Symbol.toStringTag](): string {
@@ -47,12 +47,12 @@ export class Unit implements SupplyPeer {
   }
 
   order(promulgator: OrderPromulgator<this>): this {
-    this[Unit$Backend__symbol]().order(promulgator);
+    this[Unit$Backend__symbol].order(promulgator);
     return this;
   }
 
   off(): this {
-    this[Unit$Backend__symbol]().supply.off();
+    this[Unit$Backend__symbol].supply.off();
     return this;
   }
 

@@ -24,15 +24,16 @@ describe('FormationContext', () => {
   it('is available during formation execution', async () => {
 
     const formation = OrderTest.formation;
+    const orderFormation = Order.get(Formation);
     let context!: FormationContext;
 
     formation.order(({ execute }) => execute(ctx => {
       context = ctx;
     }));
 
-    await OrderTest.executeOrder();
+    await OrderTest.evaluate();
 
-    expect(context.formation).toBe(Order.get(Formation));
+    expect(context.formation).toBe(orderFormation);
     expect(context.unit).toBe(context.formation);
     expect(context).toBe(context.get(FormationContext));
     expect(context).toBe(context.get(UnitContext));

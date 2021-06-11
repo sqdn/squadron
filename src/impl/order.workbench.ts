@@ -3,10 +3,10 @@ import { Unit$Workbench } from '../unit/unit.workbench.impl';
 
 export class Order$Workbench extends Unit$Workbench {
 
-  private readonly _promulgationStage: WorkStage;
-  private readonly _executionStage: WorkStage;
-  private readonly _deliveryStage: WorkStage;
-  private readonly _finalStage: WorkStage;
+  private readonly promulgationStage: WorkStage;
+  private readonly executionStage: WorkStage;
+  private readonly deliveryStage: WorkStage;
+  private readonly finalStage: WorkStage;
 
   start!: () => void;
 
@@ -15,26 +15,26 @@ export class Order$Workbench extends Unit$Workbench {
 
     const canExec = new Promise<void>(resolve => this.start = resolve);
 
-    this._promulgationStage = new WorkStage('order promulgation', { start: (_work: WorkStage.Work) => canExec });
-    this._executionStage = new WorkStage('order execution', { after: this._promulgationStage });
-    this._deliveryStage = new WorkStage('unit delivery', { after: this._executionStage });
-    this._finalStage = new WorkStage('order done', { after: this._deliveryStage });
+    this.promulgationStage = new WorkStage('order promulgation', { start: (_work: WorkStage.Work) => canExec });
+    this.executionStage = new WorkStage('order execution', { after: this.promulgationStage });
+    this.deliveryStage = new WorkStage('unit delivery', { after: this.executionStage });
+    this.finalStage = new WorkStage('order done', { after: this.deliveryStage });
   }
 
   promulgate(task: Workbench.Task<void>): void {
-    this._run(this._promulgationStage, task);
+    this._run(this.promulgationStage, task);
   }
 
   execute(task: Workbench.Task<void>): void {
-    return this._run(this._executionStage, task);
+    return this._run(this.executionStage, task);
   }
 
   deliver(task: Workbench.Task<void>): void {
-    return this._run(this._deliveryStage, task);
+    return this._run(this.deliveryStage, task);
   }
 
   finalize(task: Workbench.Task<void>): void {
-    return this._run(this._finalStage, task);
+    return this._run(this.finalStage, task);
   }
 
 }

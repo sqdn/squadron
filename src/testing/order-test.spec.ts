@@ -35,7 +35,9 @@ describe('OrderTest', () => {
       expect(test.registry).toBe(OrderTest.registry);
       expect(test.order).toBe(OrderTest.order);
       expect(test.formation).toBe(OrderTest.formation);
-      expect(test.executeOrder).toBe(OrderTest.executeOrder);
+      expect(test.formationRegistry).toBe(OrderTest.formationRegistry);
+      expect(test.evaluate).toBe(OrderTest.evaluate);
+      expect(test.evaluate).toBe(OrderTest.evaluate);
       expect(test.reset).toBe(OrderTest.reset);
     });
   });

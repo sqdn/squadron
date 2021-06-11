@@ -11,10 +11,10 @@ export class Formation extends Unit {
 
   deploy(unit: Unit): this {
 
-    const { host } = this[Unit$Backend__symbol]();
+    const { host } = this[Unit$Backend__symbol];
 
-    if (host.formation.uid === this.uid) {
-      unit[Unit$Backend__symbol]().deployTo(this);
+    if (host && host.formation.uid === this.uid) {
+      unit[Unit$Backend__symbol].deployTo(this);
     }
 
     return this;

@@ -29,7 +29,7 @@ describe('OrderPromulgation', () => {
       });
       test.formation.deploy(unit);
 
-      await test.executeOrder();
+      await test.evaluate();
 
       expect(task).toHaveBeenCalledTimes(1);
       expect(unit.supply.isOff).toBe(false);
@@ -41,7 +41,7 @@ describe('OrderPromulgation', () => {
 
       test.formation.deploy(unit);
 
-      await test.executeOrder();
+      await test.evaluate();
 
       const task: Mock<void, [UnitContext<Unit>]> = jest.fn();
 
@@ -54,7 +54,7 @@ describe('OrderPromulgation', () => {
       expect(task).toHaveBeenCalledTimes(1);
       expect(unit.supply.isOff).toBe(false);
     });
-    it('un-deploys the unit if task execution fails', async () => {
+    it('withdraws the unit if task execution fails', async () => {
 
       const logger = {
         error: jest.fn<void, any[]>(),
@@ -73,7 +73,7 @@ describe('OrderPromulgation', () => {
       });
       test.formation.deploy(unit);
 
-      await test.executeOrder();
+      await test.evaluate();
 
       expect(task).toHaveBeenCalledTimes(1);
       expect(unit.supply.isOff).toBe(true);
@@ -91,8 +91,7 @@ describe('OrderPromulgation', () => {
           exec = execute;
         });
         test.formation.deploy(unit);
-
-        await test.executeOrder();
+        await test.evaluate();
 
         const task: Mock<void, [UnitContext<Unit>]> = jest.fn();
 
@@ -103,29 +102,7 @@ describe('OrderPromulgation', () => {
         expect(task).toHaveBeenCalledTimes(1);
         expect(unit.supply.isOff).toBe(false);
       });
-    });
-
-    describe('for the task created after order evaluation', () => {
-      it('executes the task', async () => {
-
-        const unit = new Unit();
-
-        test.formation.deploy(unit);
-
-        await test.executeOrder();
-
-        const task: Mock<void, [UnitContext<Unit>]> = jest.fn();
-
-        await new Promise<void>(resolve => {
-          unit.order(({ execute }) => {
-            execute(task.mockImplementation(() => resolve()));
-          });
-        });
-
-        expect(task).toHaveBeenCalledTimes(1);
-        expect(unit.supply.isOff).toBe(false);
-      });
-      it('does not un-deploys the unit if task execution fails', async () => {
+      it('does not withdraw the unit if task execution fails', async () => {
 
         const logger = {
           error: jest.fn<void, any[]>(),
@@ -134,31 +111,87 @@ describe('OrderPromulgation', () => {
         test.formationRegistry.provide({ a: UnitLogger, is: logger });
 
         const unit = new Unit();
+        let exec!: OrderPromulgation<Unit>['execute'];
+        let promulgationSupply!: Supply;
 
+        unit.order(({ execute, supply }) => {
+          exec = execute;
+          promulgationSupply = supply;
+        });
         test.formation.deploy(unit);
-
-        await test.executeOrder();
+        await test.evaluate();
 
         const error = new Error('Test');
         const task = jest.fn<void, [UnitContext<Unit>]>(() => {
           throw error;
         });
-        let promulgationSupply!: Supply;
 
-        unit.order(({ execute, supply }) => {
-          promulgationSupply = supply;
-          execute(task);
-        });
-
+        exec(task);
         await test.evaluate();
 
         expect(task).toHaveBeenCalledTimes(1);
         expect(unit.supply.isOff).toBe(false);
 
-        expect(logger.error).toHaveBeenCalledWith(`Failed to execute ${unit}`, error);
+        expect(logger.error).toHaveBeenCalledWith(`Failed to start ${unit}`, error);
         expect(promulgationSupply.isOff).toBe(true);
         expect(await promulgationSupply.whenDone().catch(asis)).toBe(error);
       });
+    });
+  });
+
+  describe('for the task created after order evaluation', () => {
+    it('executes the task', async () => {
+
+      const unit = new Unit();
+
+      test.formation.deploy(unit);
+
+      await test.evaluate();
+
+      const task: Mock<void, [UnitContext<Unit>]> = jest.fn();
+
+      await new Promise<void>(resolve => {
+        unit.order(({ execute }) => {
+          execute(task.mockImplementation(() => resolve()));
+        });
+      });
+
+      expect(task).toHaveBeenCalledTimes(1);
+      expect(unit.supply.isOff).toBe(false);
+    });
+    it('does not withdraw the unit if task execution fails', async () => {
+
+      const logger = {
+        error: jest.fn<void, any[]>(),
+      } as Partial<UnitLogger> as UnitLogger;
+
+      test.formationRegistry.provide({ a: UnitLogger, is: logger });
+
+      const unit = new Unit();
+
+      test.formation.deploy(unit);
+
+      await test.evaluate();
+
+      const error = new Error('Test');
+      const task = jest.fn<void, [UnitContext<Unit>]>(() => {
+        throw error;
+      });
+      let promulgationSupply!: Supply;
+
+      unit.order(({ execute, supply }) => {
+        promulgationSupply = supply;
+        execute(task);
+      });
+
+      await test.evaluate();
+
+      expect(task).toHaveBeenCalledTimes(1);
+      expect(unit.supply.isOff).toBe(false);
+
+      expect(logger.error).toHaveBeenCalledWith(`Failed to execute ${unit}`, error);
+      expect(promulgationSupply.isOff).toBe(true);
+      expect(await promulgationSupply.whenDone().catch(asis)).toBe(error);
     });
   });
 });
