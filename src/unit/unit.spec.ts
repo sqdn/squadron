@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { asis } from '@proc7ts/primitives';
+import { Supply } from '@proc7ts/supply';
 import { fileURLToPath } from 'url';
 import { UnitLogger } from '../common';
 import { Formation } from '../formation';
@@ -33,8 +34,8 @@ describe('Unit', () => {
   describe('uid', () => {
     it('is unique to each unit instantiation location', () => {
 
-      const unit1 = createUnit();
-      const unit2 = createUnit();
+      const unit1 = new TestUnit();
+      const unit2 = new TestUnit();
 
       expect(unit1.uid).not.toBe(unit2.uid);
     });
@@ -43,7 +44,7 @@ describe('Unit', () => {
       const units: TestUnit[] = [];
 
       for (let i = 0; i < 2; ++i) {
-        units.push(createUnit());
+        units.push(new TestUnit());
       }
 
       const [unit1, unit2] = units;
@@ -55,7 +56,7 @@ describe('Unit', () => {
       const units: TestUnit[] = [];
 
       for (let i = 0; i < 2; ++i) {
-        units.push(createUnit({ tag: String(i) }));
+        units.push(new TestUnit({ tag: String(i) }));
       }
 
       const [unit1, unit2] = units;
@@ -67,7 +68,7 @@ describe('Unit', () => {
   describe('toString', () => {
     it('reflects unit type, UID, and origin', () => {
 
-      const unit = createUnit();
+      const unit = new TestUnit();
       const filePath = fileURLToPath(import.meta.url);
       const pattern = new RegExp(`^TestUnit...${unit.uid.slice(-7)}\\((.+)\\)$`);
 
@@ -80,7 +81,7 @@ describe('Unit', () => {
     });
     it('reflects unit tag', () => {
 
-      const unit = createUnit({ tag: 'test' });
+      const unit = new TestUnit({ tag: 'test' });
       const filePath = fileURLToPath(import.meta.url);
       const pattern = new RegExp(`^TestUnit...${unit.uid.slice(-7)}\\((.+)\\)$`);
 
@@ -97,7 +98,7 @@ describe('Unit', () => {
     it('promulgates the order', async () => {
 
       const promulgator: OrderPromulgator<TestUnit> = jest.fn();
-      const unit = createUnit();
+      const unit = new TestUnit();
 
       unit.order(promulgator);
       test.formation.deploy(unit);
@@ -109,10 +110,25 @@ describe('Unit', () => {
         unit,
       }));
     });
+    it('promulgates the order of already deployed unit', async () => {
+
+      const promulgator: OrderPromulgator<TestUnit> = jest.fn();
+      const unit = new TestUnit();
+
+      test.formation.deploy(unit);
+      unit.order(promulgator);
+
+      await test.executeOrder();
+
+      expect(promulgator).toHaveBeenCalledWith(expect.objectContaining({
+        formation: test.formation,
+        unit,
+      }));
+    });
     it('does not promulgates the order when disabled', async () => {
 
       const promulgator: OrderPromulgator<TestUnit> = jest.fn();
-      const unit = createUnit();
+      const unit = new TestUnit();
 
       unit.order(promulgator);
       test.formation.deploy(unit);
@@ -125,7 +141,7 @@ describe('Unit', () => {
     it('does not promulgates the order when not deployed', async () => {
 
       const promulgator: OrderPromulgator<TestUnit> = jest.fn();
-      const unit = createUnit();
+      const unit = new TestUnit();
 
       unit.order(promulgator);
 
@@ -137,7 +153,7 @@ describe('Unit', () => {
 
       const formation2 = new Formation({ tag: 'other' });
       const promulgator: OrderPromulgator<TestUnit> = jest.fn();
-      const unit = createUnit();
+      const unit = new TestUnit();
 
       unit.order(promulgator);
       formation2.deploy(unit);
@@ -149,7 +165,7 @@ describe('Unit', () => {
     it('does not promulgates the order to disabled formation', async () => {
 
       const promulgator: OrderPromulgator<TestUnit> = jest.fn();
-      const unit = createUnit();
+      const unit = new TestUnit();
 
       unit.order(promulgator);
       test.formation.deploy(unit);
@@ -160,7 +176,7 @@ describe('Unit', () => {
       expect(promulgator).not.toHaveBeenCalled();
       expect(await unit.supply.whenDone()).toBeUndefined();
     });
-    it('cuts unit supply off when promulgation fails', async () => {
+    it('un-deploys unit when promulgation fails', async () => {
 
       const logger = {
         error: jest.fn<void, any[]>(),
@@ -172,7 +188,7 @@ describe('Unit', () => {
       const promulgator: OrderPromulgator<TestUnit> = jest.fn(() => {
         throw error;
       });
-      const unit = createUnit();
+      const unit = new TestUnit();
 
       unit.order(promulgator);
       test.formation.deploy(unit);
@@ -182,10 +198,81 @@ describe('Unit', () => {
       expect(await unit.supply.whenDone().catch(asis)).toBe(error);
       expect(logger.error).toHaveBeenCalledWith(`Failed to promulgate the orders for ${unit}`, error);
     });
+
+    describe('for promulgation after order evaluation', () => {
+      it('does not un-deploy unit when promulgation fails', async () => {
+
+        const logger = {
+          error: jest.fn<void, any[]>(),
+        } as Partial<UnitLogger> as UnitLogger;
+
+        test.formationRegistry.provide({ a: UnitLogger, is: logger });
+
+        const error = new Error('test');
+        const unit = new TestUnit();
+
+        test.formation.deploy(unit);
+
+        await test.executeOrder();
+
+        let promulgationSupply!: Supply;
+        const promulgator: OrderPromulgator<TestUnit> = jest.fn(({ supply }) => {
+          promulgationSupply = supply;
+          throw error;
+        });
+        unit.order(promulgator);
+
+        await test.evaluate();
+
+        expect(unit.supply.isOff).toBe(false);
+        expect(await promulgationSupply.whenDone().catch(asis)).toBe(error);
+        expect(logger.error).toHaveBeenCalledWith(`Failed to promulgate the orders for ${unit}`, error);
+      });
+      it('is not executed for un-deployed unit', async () => {
+
+        const unit = new TestUnit();
+
+        test.formation.deploy(unit);
+
+        await test.executeOrder();
+
+        unit.off();
+
+        const promulgator: OrderPromulgator<TestUnit> = jest.fn();
+
+        unit.order(promulgator);
+
+        await test.evaluate();
+
+        expect(promulgator).not.toHaveBeenCalled();
+      });
+    });
   });
 
-  function createUnit(init?: Unit.Init): TestUnit {
-    return new TestUnit(init);
-  }
+  describe('deploy', () => {
+    describe('after order evaluation', () => {
+      it.skip('does not deploy the unit', async () => {
 
+        const logger = {
+          error: jest.fn<void, any[]>(),
+        } as Partial<UnitLogger> as UnitLogger;
+
+        test.formationRegistry.provide({ a: UnitLogger, is: logger });
+
+        const unit = new Unit();
+
+        await test.executeOrder();
+
+        const promulgator: OrderPromulgator<Unit> = jest.fn();
+
+        test.formation.deploy(unit);
+        unit.order(promulgator);
+
+        await test.evaluate();
+
+        expect(promulgator).not.toHaveBeenCalled();
+        expect(logger.warn).toHaveBeenCalledWith(`${unit} can not be deployed to ${test.formation} outside the order`);
+      });
+    });
+  });
 });

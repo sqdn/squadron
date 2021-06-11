@@ -1,8 +1,6 @@
 import { ContextKey, ContextKey__symbol } from '@proc7ts/context-values';
-import { lazyValue } from '@proc7ts/primitives';
-import Order from '@sqdn/order';
-import { Formation$Executor, Formation$Executor__symbol, Order$Executor } from '../impl';
 import { Unit } from '../unit';
+import { Unit$Backend__symbol } from '../unit/unit.backend.impl';
 import { Formation__key } from './formation.key.impl';
 
 export class Formation extends Unit {
@@ -11,24 +9,14 @@ export class Formation extends Unit {
     return Formation__key;
   }
 
-  /**
-   * @internal
-   */
-  private readonly [Formation$Executor__symbol]: () => Formation$Executor;
-
-  constructor(init?: Unit.Init) {
-    super(init);
-    this[Formation$Executor__symbol] = lazyValue(() => Order.get(Order$Executor).formation(this));
-  }
-
   deploy(unit: Unit): this {
-    this[Formation$Executor__symbol]().deploy(unit);
-    return this;
-  }
 
-  override off(): this {
-    super.off();
-    this[Formation$Executor__symbol]().supply.off();
+    const { host } = this[Unit$Backend__symbol]();
+
+    if (host.formation.uid === this.uid) {
+      unit[Unit$Backend__symbol]().deployTo(this);
+    }
+
     return this;
   }
 

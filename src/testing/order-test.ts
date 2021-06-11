@@ -1,11 +1,12 @@
 import { ContextRegistry, ContextValueProvider } from '@proc7ts/context-values';
 import { silentLogger } from '@proc7ts/logger';
-import { valueRecipe } from '@proc7ts/primitives';
+import { noop, valueRecipe } from '@proc7ts/primitives';
 import Order from '@sqdn/order';
 import MockOrder from '@sqdn/order/mock';
 import { UnitLogger } from '../common';
-import { Formation } from '../formation';
-import { Order$Executor } from '../impl';
+import { Formation, FormationContext } from '../formation';
+import { Formation$Host, Order$Evaluator } from '../impl';
+import { Unit, UnitTask } from '../unit';
 
 export interface OrderTest {
 
@@ -15,7 +16,11 @@ export interface OrderTest {
 
   readonly formation: Formation;
 
+  readonly formationRegistry: ContextRegistry<FormationContext>;
+
   executeOrder(this: void): Promise<void>;
+
+  evaluate(this: void): Promise<void>;
 
   reset(this: void): void;
 
@@ -27,9 +32,9 @@ export namespace OrderTest {
 
     readonly orderId?: string;
 
-    readonly formation?: Formation | ContextValueProvider<Formation, MockOrder>;
+    readonly formation?: Formation;
 
-    readonly logger?: UnitLogger | ContextValueProvider<UnitLogger, MockOrder>;
+    readonly logger?: UnitLogger | ContextValueProvider<UnitLogger>;
 
   }
 
@@ -38,6 +43,12 @@ export namespace OrderTest {
     setup(this: void, init?: OrderTest.Init): OrderTest;
 
   }
+
+  export type UnitsStarter = <TUnit extends Unit>(
+      this: void,
+      unit: TUnit,
+      starter: UnitTask<TUnit>,
+  ) => void | PromiseLike<unknown>;
 
 }
 
@@ -52,14 +63,15 @@ export const OrderTest: OrderTest.Static = {
       formation = new Formation({ tag: 'test' }),
       logger = silentLogger,
     } = init;
-    const registry = new ContextRegistry<MockOrder>();
+
+    const host = new Formation$Host(formation);
+    const { registry, order } = host.newOrder(orderId || 'mock-order');
 
     registry.provide({ a: Order, is: MockOrder });
-    registry.provide({ a: Formation, by: valueRecipe(formation) });
-    registry.provide({ a: UnitLogger, by: valueRecipe(logger) });
+    host.registry.provide({ a: UnitLogger, by: valueRecipe(logger) });
 
     MockOrder.mock({
-      get: registry.newValues().get,
+      get: order.get,
       orderId,
     });
 
@@ -67,8 +79,12 @@ export const OrderTest: OrderTest.Static = {
       registry,
       order: MockOrder,
       formation: MockOrder.get(Formation),
+      formationRegistry: host.registry,
       executeOrder() {
-        return MockOrder.get(Order$Executor).execute();
+        return MockOrder.get(Order$Evaluator).executeOrder();
+      },
+      evaluate(): Promise<void> {
+        return host.workbench._workbench.work(host.workbench._executionStage).run(noop);
       },
       reset: OrderTest.reset,
     };
@@ -86,8 +102,16 @@ export const OrderTest: OrderTest.Static = {
     return OrderTest$get().formation;
   },
 
+  get formationRegistry(): ContextRegistry<FormationContext> {
+    return OrderTest$get().formationRegistry;
+  },
+
   get executeOrder() {
     return OrderTest$get().executeOrder;
+  },
+
+  get evaluate() {
+    return OrderTest$get().evaluate;
   },
 
   reset(this: void): void {

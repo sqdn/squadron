@@ -1,6 +1,6 @@
 import { Supply } from '@proc7ts/supply';
 import { Formation } from '../formation';
-import { Unit } from '../unit';
+import { Unit, UnitTask } from '../unit';
 
 export interface OrderPromulgation<TUnit extends Unit> {
 
@@ -9,5 +9,7 @@ export interface OrderPromulgation<TUnit extends Unit> {
   readonly unit: TUnit;
 
   readonly supply: Supply;
+
+  execute(task: UnitTask<TUnit>): void;
 
 }

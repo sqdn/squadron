@@ -1,30 +1,29 @@
 import { lazyValue } from '@proc7ts/primitives';
 import { Supply, SupplyPeer } from '@proc7ts/supply';
 import Order from '@sqdn/order';
-import { createHash } from 'crypto';
-import { Order$Executor, Unit$Executor, Unit$Executor__symbol } from '../impl';
+import { Order$Evaluator } from '../impl';
 import { OrderPromulgator } from '../order';
+import { Unit$Backend, Unit$Backend__symbol } from './unit.backend.impl';
+import { Unit$Id, Unit$Id__symbol } from './unit.id.impl';
 
-const Unit$Id__symbol = (/*#__PURE__*/ Symbol('Unit.id'));
-
-export abstract class Unit implements SupplyPeer {
-
-  /**
-   * @internal
-   */
-  private readonly [Unit$Id__symbol]: Unit$Id;
+export class Unit implements SupplyPeer {
 
   /**
    * @internal
    */
-  private readonly [Unit$Executor__symbol]: () => Unit$Executor<this>;
+  [Unit$Id__symbol]: Unit$Id;
+
+  /**
+   * @internal
+   */
+  [Unit$Backend__symbol]: () => Unit$Backend<this>;
 
   constructor(init?: Unit.Init) {
     Error.captureStackTrace(
         this[Unit$Id__symbol] = new Unit$Id(this, init),
         new.target,
     );
-    this[Unit$Executor__symbol] = lazyValue(() => Order.get(Order$Executor).unit(this));
+    this[Unit$Backend__symbol] = lazyValue(() => Order.get(Order$Evaluator).evalUnit(this));
   }
 
   get origin(): string {
@@ -40,7 +39,7 @@ export abstract class Unit implements SupplyPeer {
   }
 
   get supply(): Supply {
-    return this[Unit$Executor__symbol]().supply;
+    return this[Unit$Backend__symbol]().supply;
   }
 
   get [Symbol.toStringTag](): string {
@@ -48,12 +47,12 @@ export abstract class Unit implements SupplyPeer {
   }
 
   order(promulgator: OrderPromulgator<this>): this {
-    this[Unit$Executor__symbol]().order(promulgator);
+    this[Unit$Backend__symbol]().order(promulgator);
     return this;
   }
 
   off(): this {
-    this[Unit$Executor__symbol]().supply.off();
+    this[Unit$Backend__symbol]().supply.off();
     return this;
   }
 
@@ -74,62 +73,4 @@ export namespace Unit {
 
   }
 
-}
-
-class Unit$Id {
-
-  stack!: string;
-  readonly tag: string;
-  private _origin?: string;
-  private _uid?: string;
-
-  constructor(readonly unit: Unit, { tag = '' }: Unit.Init = {}) {
-    this.tag = tag;
-  }
-
-  get name(): string {
-    return 'Unit';
-  }
-
-  get message(): string {
-    return this.unit.constructor.name;
-  }
-
-  get origin(): string {
-    if (!this._origin) {
-
-      const origin = Unit$origin(this.stack);
-      const tag = this.tag;
-
-      this._origin = tag ? `${origin}:${tag}` : origin;
-    }
-
-    return this._origin;
-  }
-
-  get uid(): string {
-    if (!this._uid) {
-
-      const hash = createHash('sha256');
-
-      hash.update(this.stack);
-
-      const stackHash = hash.digest('hex');
-
-      this._uid = this.tag ? `${this.tag}@${stackHash}` : stackHash;
-    }
-
-    return this._uid;
-  }
-
-}
-
-const Unit$stack$nlPattern = /\n/;
-const Unit$stack$originPattern = /\((.+)\)/;
-
-function Unit$origin(stack: string): string {
-
-  const line = stack.split(Unit$stack$nlPattern, 2)[1];
-
-  return Unit$stack$originPattern.exec(line)![1];
 }
