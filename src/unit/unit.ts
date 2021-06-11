@@ -1,37 +1,64 @@
-import { createHash } from 'crypto';
+import { Supply, SupplyPeer } from '@proc7ts/supply';
+import Order from '@sqdn/order';
+import { Order$Evaluator } from '../impl';
+import { OrderPromulgator } from '../order';
+import { Unit$Backend, Unit$Backend__symbol } from './unit.backend.impl';
+import { Unit$Id, Unit$Id__symbol } from './unit.id.impl';
 
-const Unit$Internals__symbol = (/*#__PURE__*/ Symbol('Unit.internals'));
+export class Unit implements SupplyPeer {
 
-export abstract class Unit<TUnit extends Unit<TUnit>> {
+  /**
+   * @internal
+   */
+  [Unit$Id__symbol]: Unit$Id;
 
-  private readonly [Unit$Internals__symbol]: Unit$Internals<TUnit>;
+  /**
+   * @internal
+   */
+  [Unit$Backend__symbol]: Unit$Backend<this>;
 
   constructor(init?: Unit.Init) {
     Error.captureStackTrace(
-        this[Unit$Internals__symbol] = new Unit$Internals(this as Unit<TUnit> as TUnit, init),
+        this[Unit$Id__symbol] = new Unit$Id(this, init),
         new.target,
     );
+
+    this[Unit$Backend__symbol] = Order.get(Order$Evaluator).evalUnit(this);
   }
 
   get origin(): string {
-    return this[Unit$Internals__symbol].origin;
+    return this[Unit$Id__symbol].origin;
   }
 
   get tag(): string {
-    return this[Unit$Internals__symbol].tag;
+    return this[Unit$Id__symbol].tag;
   }
 
   get uid(): string {
-    return this[Unit$Internals__symbol].uid;
+    return this[Unit$Id__symbol].uid;
+  }
+
+  get supply(): Supply {
+    return this[Unit$Backend__symbol].supply;
   }
 
   get [Symbol.toStringTag](): string {
     return this.constructor.name;
   }
 
+  order(promulgator: OrderPromulgator<this>): this {
+    this[Unit$Backend__symbol].order(promulgator);
+    return this;
+  }
+
+  off(): this {
+    this[Unit$Backend__symbol].supply.off();
+    return this;
+  }
+
   toString(): string {
 
-    const { uid } = this[Unit$Internals__symbol];
+    const { uid } = this[Unit$Id__symbol];
 
     return `${this[Symbol.toStringTag]}...${uid.slice(-7)}(${this.origin})`;
   }
@@ -46,62 +73,4 @@ export namespace Unit {
 
   }
 
-}
-
-class Unit$Internals<TUnit extends Unit<TUnit>> {
-
-  stack!: string;
-  readonly tag: string;
-  private _origin?: string;
-  private _uid?: string;
-
-  constructor(readonly unit: TUnit, { tag = '' }: Unit.Init = {}) {
-    this.tag = tag;
-  }
-
-  get name(): string {
-    return 'Unit';
-  }
-
-  get message(): string {
-    return this.unit.constructor.name;
-  }
-
-  get origin(): string {
-    if (!this._origin) {
-
-      const origin = Unit$origin(this.stack);
-      const tag = this.tag;
-
-      this._origin = tag ? `${origin}:${tag}` : origin;
-    }
-
-    return this._origin;
-  }
-
-  get uid(): string {
-    if (!this._uid) {
-
-      const hash = createHash('sha256');
-
-      hash.update(this.stack);
-
-      const stackHash = hash.digest('hex');
-
-      this._uid = this.tag ? `${this.tag}@${stackHash}` : stackHash;
-    }
-
-    return this._uid;
-  }
-
-}
-
-const Unit$stack$nlPattern = /\n/;
-const Unit$stack$originPattern = /\((.+)\)/;
-
-function Unit$origin(stack: string): string {
-
-  const line = stack.split(Unit$stack$nlPattern, 2)[1];
-
-  return Unit$stack$originPattern.exec(line)![1];
 }

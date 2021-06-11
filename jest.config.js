@@ -19,6 +19,9 @@ export default {
     },
   },
   extensionsToTreatAsEsm: ['.ts'],
+  moduleNameMapper: {
+    '^@sqdn/order$': '@sqdn/order/mock',
+  },
   reporters: [
     'default',
     [
