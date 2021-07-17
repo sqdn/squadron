@@ -1,10 +1,8 @@
 import { CxBuilder, cxConstAsset, CxPeer, CxPeerBuilder } from '@proc7ts/context-builder';
-import { CxEntry, cxSingle } from '@proc7ts/context-values';
+import { CxAccessor, CxEntry, cxSingle } from '@proc7ts/context-values';
 import { Logger } from '@proc7ts/logger';
 import Order from '@sqdn/order';
 import { Formation, FormationContext } from '../formation';
-import { FormationContext$create } from '../formation/formation-context.impl';
-import { Formation__entry } from '../formation/formation.entries.impl';
 import { Unit, UnitContext, UnitTask } from '../unit';
 import { Unit$Deployment } from '../unit/unit.deployment.impl';
 import { Unit$Host } from '../unit/unit.host.impl';
@@ -31,13 +29,17 @@ export class Formation$Host implements Unit$Host {
   private _formation: Formation | null = null;
   private readonly _deployments = new Map<string, Unit$Deployment<any>>();
 
-  constructor(createFormation: (this: void, order: Order) => Formation) {
-    this.cxBuilder = new CxBuilder((get, builder) => FormationContext$create(
-        this,
-        get,
-        builder,
-        createFormation,
-    ));
+  constructor(
+      createContext: (
+          host: Formation$Host,
+          get: CxAccessor,
+          builder: CxBuilder<FormationContext>,
+      ) => FormationContext,
+      private readonly _getFormation: () => Formation,
+  ) {
+    this.cxBuilder = new CxBuilder(
+        (get, builder) => createContext(this, get, builder),
+    );
     this.context = this.cxBuilder.context;
 
     this.perOrderCxPeer = new CxPeerBuilder<Order>(this.cxBuilder.boundPeer);
@@ -45,7 +47,7 @@ export class Formation$Host implements Unit$Host {
   }
 
   get formation(): Formation {
-    return this._formation ||= Order.get(Formation__entry);
+    return this._formation ||= this._getFormation();
   }
 
   get log(): Logger {

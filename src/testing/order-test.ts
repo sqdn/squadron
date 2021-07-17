@@ -4,6 +4,8 @@ import { noop } from '@proc7ts/primitives';
 import Order from '@sqdn/order';
 import MockOrder from '@sqdn/order/mock';
 import { Formation, FormationContext } from '../formation';
+import { FormationContext$create } from '../formation/formation-context.impl';
+import { Formation__entry } from '../formation/formation.entries.impl';
 import { Formation$Host, Order$Evaluator } from '../impl';
 import { Unit, UnitTask } from '../unit';
 
@@ -61,7 +63,15 @@ export const OrderTest: OrderTest.Static = {
       logger = silentLogger,
     } = init;
 
-    const host = new Formation$Host(formation);
+    const host = new Formation$Host(
+        (host, get, builder) => FormationContext$create(
+            host,
+            get,
+            builder,
+            formation,
+        ),
+        () => Order.get(Formation__entry),
+    );
     const cxBuilder = host.newOrderBuilder(orderId || 'mock-order');
 
     cxBuilder.provide(cxConstAsset(Order.entry, MockOrder));
