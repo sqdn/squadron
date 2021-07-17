@@ -1,12 +1,17 @@
-import { ContextKey, ContextKey__symbol } from '@proc7ts/context-values';
+import { CxEntry, cxSingle } from '@proc7ts/context-values';
 import { Unit } from '../unit';
 import { Unit$Backend__symbol } from '../unit/unit.backend.impl';
-import { Formation__key } from './formation.key.impl';
+
+const Formation$perContext: CxEntry.Definer<Formation> = (/*#__PURE__*/ cxSingle());
 
 export class Formation extends Unit {
 
-  static get [ContextKey__symbol](): ContextKey<Formation> {
-    return Formation__key;
+  static perContext(target: CxEntry.Target<Formation>): CxEntry.Definition<Formation> {
+    return Formation$perContext(target);
+  }
+
+  static override toString(): string {
+    return '[Formation]';
   }
 
   deploy(unit: Unit): this {

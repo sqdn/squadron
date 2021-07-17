@@ -1,8 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { cxConstAsset } from '@proc7ts/context-builder';
+import { Logger } from '@proc7ts/logger';
 import { asis } from '@proc7ts/primitives';
 import { Supply } from '@proc7ts/supply';
 import { fileURLToPath } from 'url';
-import { UnitLogger } from '../common';
 import { Formation } from '../formation';
 import { OrderPromulgator } from '../order';
 import { OrderTest } from '../testing';
@@ -194,9 +195,9 @@ describe('Unit', () => {
 
       const logger = {
         error: jest.fn<void, any[]>(),
-      } as Partial<UnitLogger> as UnitLogger;
+      } as Partial<Logger> as Logger;
 
-      test.registry.provide({ a: UnitLogger, is: logger });
+      test.formationCxBuilder.provide(cxConstAsset(Logger, logger));
 
       const error = new Error('test');
       const promulgator: OrderPromulgator<TestUnit> = jest.fn(() => {
@@ -218,9 +219,9 @@ describe('Unit', () => {
 
         const logger = {
           error: jest.fn<void, any[]>(),
-        } as Partial<UnitLogger> as UnitLogger;
+        } as Partial<Logger> as Logger;
 
-        test.formationRegistry.provide({ a: UnitLogger, is: logger });
+        test.formationCxBuilder.provide(cxConstAsset(Logger, logger));
 
         const error = new Error('test');
         const unit = new TestUnit();
@@ -282,9 +283,9 @@ describe('Unit', () => {
 
         const logger = {
           warn: jest.fn<void, any[]>(),
-        } as Partial<UnitLogger> as UnitLogger;
+        } as Partial<Logger> as Logger;
 
-        test.formationRegistry.provide({ a: UnitLogger, is: logger });
+        test.formationCxBuilder.provide(cxConstAsset(Logger, logger));
 
         const unit = new Unit();
 

@@ -1,8 +1,8 @@
-import { ContextKey, ContextKey__symbol, SingleContextKey } from '@proc7ts/context-values';
+import { CxEntry, cxSingle } from '@proc7ts/context-values';
+import { Logger } from '@proc7ts/logger';
 import { noop } from '@proc7ts/primitives';
 import { Workbench } from '@proc7ts/workbench';
 import Order from '@sqdn/order';
-import { UnitLogger } from '../common';
 import { Formation } from '../formation';
 import { Unit, UnitTask } from '../unit';
 import { Unit$Evaluator } from '../unit/unit.evaluator.impl';
@@ -11,19 +11,18 @@ import { Unit$Workbench } from '../unit/unit.workbench.impl';
 import { Formation$Host } from './formation.host';
 import { Order$Workbench } from './order.workbench';
 
-const Order$Evaluator__key: ContextKey<Order$Evaluator> = (/*#__PURE__*/ new SingleContextKey<Order$Evaluator>(
-    'Order.evaluator',
-    {
-      byDefault(context) {
-        return new Order$Evaluator(context.get(Order));
-      },
-    },
-));
+const Order$Evaluator$perContext: CxEntry.Definer<Order$Evaluator> = (/*#__PURE__*/ cxSingle({
+  byDefault: target => new Order$Evaluator(target.get(Order.entry)),
+}));
 
 export class Order$Evaluator implements Unit$Host {
 
-  static get [ContextKey__symbol](): ContextKey<Order$Evaluator> {
-    return Order$Evaluator__key;
+  static perContext(target: CxEntry.Target<Order$Evaluator>): CxEntry.Definition<Order$Evaluator> {
+    return Order$Evaluator$perContext(target);
+  }
+
+  static toString(): string {
+    return '[Order:Evaluator]';
   }
 
   private readonly _workbench = new Order$Workbench();
@@ -47,8 +46,8 @@ export class Order$Evaluator implements Unit$Host {
     this._workbench.finalize(executed);
   }
 
-  get log(): UnitLogger {
-    return this.order.active ? this.order.get(UnitLogger) : this.host.log;
+  get log(): Logger {
+    return this.order.active ? this.order.get(Logger) : this.host.log;
   }
 
   get workbench(): Unit$Workbench {

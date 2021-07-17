@@ -1,8 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { cxConstAsset } from '@proc7ts/context-builder';
+import { Logger } from '@proc7ts/logger';
 import { asis } from '@proc7ts/primitives';
 import { Supply } from '@proc7ts/supply';
 import { Mock } from 'jest-mock';
-import { UnitLogger } from '../common';
 import { OrderTest } from '../testing';
 import { Unit, UnitContext, UnitTask } from '../unit';
 import { OrderPromulgation } from './order-promulgation';
@@ -58,9 +59,9 @@ describe('OrderPromulgation', () => {
 
       const logger = {
         error: jest.fn<void, any[]>(),
-      } as Partial<UnitLogger> as UnitLogger;
+      } as Partial<Logger> as Logger;
 
-      test.registry.provide({ a: UnitLogger, is: logger });
+      test.formationCxBuilder.provide(cxConstAsset(Logger, logger));
 
       const error = new Error('test');
       const task: UnitTask<Unit> = jest.fn(() => {
@@ -106,9 +107,9 @@ describe('OrderPromulgation', () => {
 
         const logger = {
           error: jest.fn<void, any[]>(),
-        } as Partial<UnitLogger> as UnitLogger;
+        } as Partial<Logger> as Logger;
 
-        test.formationRegistry.provide({ a: UnitLogger, is: logger });
+        test.formationCxBuilder.provide(cxConstAsset(Logger, logger));
 
         const unit = new Unit();
         let exec!: OrderPromulgation<Unit>['execute'];
@@ -163,9 +164,9 @@ describe('OrderPromulgation', () => {
 
       const logger = {
         error: jest.fn<void, any[]>(),
-      } as Partial<UnitLogger> as UnitLogger;
+      } as Partial<Logger> as Logger;
 
-      test.formationRegistry.provide({ a: UnitLogger, is: logger });
+      test.formationCxBuilder.provide(cxConstAsset(Logger, logger));
 
       const unit = new Unit();
 

@@ -1,36 +1,30 @@
-import { ContextRegistry } from '@proc7ts/context-values';
-import { Formation } from '../formation';
+import { CxBuilder, cxConstAsset } from '@proc7ts/context-builder';
 import { Formation$Host } from '../impl';
 import { Unit } from './unit';
 import { UnitContext } from './unit-context';
-import { UnitContext__key } from './unit.key.impl';
+import { UnitContext__entry } from './unit.entries.impl';
 
-export function newUnitContext<TUnit extends Unit>(host: Formation$Host, unit: TUnit): UnitContext<TUnit> {
+export function UnitContext$create<TUnit extends Unit>(host: Formation$Host, unit: TUnit): UnitContext<TUnit> {
   if (host.formation.uid === unit.uid) {
     return host.context as UnitContext;
   }
 
   const { formation } = host;
-  const registry = new ContextRegistry<UnitContext<TUnit>>(host.perUnitRegistry.seeds());
-  const values = registry.newValues();
+  const cxBuilder = new CxBuilder<UnitContext<TUnit>>(
+      (get, builder) => {
 
-  class Unit$Context extends UnitContext<TUnit> {
+        const context: UnitContext<TUnit> = {
+          formation,
+          unit,
+          get,
+        };
 
-    readonly get: UnitContext<TUnit>['get'] = values.get;
+        builder.provide(cxConstAsset(UnitContext__entry, context));
 
-    get formation(): Formation {
-      return formation;
-    }
+        return context;
+      },
+      host.perUnitCxPeer,
+  );
 
-    get unit(): TUnit {
-      return unit;
-    }
-
-  }
-
-  const context = new Unit$Context();
-
-  registry.provide({ a: UnitContext__key, is: context });
-
-  return context;
+  return cxBuilder.context;
 }

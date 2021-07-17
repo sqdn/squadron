@@ -1,27 +1,22 @@
+import { cxBuildAsset, CxBuilder, cxConstAsset } from '@proc7ts/context-builder';
+import { CxAccessor, CxGlobals } from '@proc7ts/context-values';
 import Order from '@sqdn/order';
 import { Formation$Host } from '../impl';
-import { UnitContext__key } from '../unit/unit.key.impl';
+import { UnitContext__entry } from '../unit/unit.entries.impl';
 import { Formation } from './formation';
 import { FormationContext } from './formation-context';
-import { Formation__key, FormationContext__key } from './formation.key.impl';
+import { Formation__entry, FormationContext__entry } from './formation.entries.impl';
 
-export function newFormationContext(
+export function FormationContext$create(
     host: Formation$Host,
+    get: CxAccessor,
+    cxBuilder: CxBuilder<FormationContext>,
     createFormation: (this: void, order: Order) => Formation,
 ): FormationContext {
 
-  const { registry } = host;
+  class Formation$Context implements FormationContext {
 
-  registry.provide({
-    a: Formation__key,
-    by: (_context: FormationContext) => createFormation(Order),
-  });
-
-  const values = registry.newValues();
-
-  class Formation$Context extends FormationContext {
-
-    readonly get = values.get;
+    readonly get = get;
 
     get formation(): Formation {
       return host.formation;
@@ -35,8 +30,11 @@ export function newFormationContext(
 
   const context = new Formation$Context();
 
-  registry.provide({ a: FormationContext__key, is: context });
-  registry.provide({ a: UnitContext__key, is: context });
+  cxBuilder.provide(cxConstAsset(CxGlobals, context));
+  cxBuilder.provide(cxConstAsset(Formation$Host, host));
+  cxBuilder.provide(cxBuildAsset(Formation__entry, _target => createFormation(Order)));
+  cxBuilder.provide(cxConstAsset(FormationContext__entry, context));
+  cxBuilder.provide(cxConstAsset(UnitContext__entry, context));
 
   return context;
 }

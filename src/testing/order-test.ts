@@ -1,22 +1,23 @@
-import { ContextRegistry, ContextValueProvider } from '@proc7ts/context-values';
-import { silentLogger } from '@proc7ts/logger';
-import { noop, valueRecipe } from '@proc7ts/primitives';
+import { CxBuilder, cxConstAsset } from '@proc7ts/context-builder';
+import { Logger, silentLogger } from '@proc7ts/logger';
+import { noop } from '@proc7ts/primitives';
 import Order from '@sqdn/order';
 import MockOrder from '@sqdn/order/mock';
-import { UnitLogger } from '../common';
 import { Formation, FormationContext } from '../formation';
+import { FormationContext$create } from '../formation/formation-context.impl';
+import { Formation__entry } from '../formation/formation.entries.impl';
 import { Formation$Host, Order$Evaluator } from '../impl';
 import { Unit, UnitTask } from '../unit';
 
 export interface OrderTest {
 
-  readonly registry: ContextRegistry<MockOrder>;
+  readonly cxBuilder: CxBuilder<Order>;
 
   readonly order: MockOrder;
 
   readonly formation: Formation;
 
-  readonly formationRegistry: ContextRegistry<FormationContext>;
+  readonly formationCxBuilder: CxBuilder<FormationContext>;
 
   evaluate(this: void): Promise<void>;
 
@@ -30,7 +31,7 @@ export namespace OrderTest {
 
     readonly orderId?: string;
 
-    readonly logger?: UnitLogger | ContextValueProvider<UnitLogger>;
+    readonly logger?: Logger;
 
     formation?(this: void, order: Order): Formation;
 
@@ -62,22 +63,32 @@ export const OrderTest: OrderTest.Static = {
       logger = silentLogger,
     } = init;
 
-    const host = new Formation$Host(formation);
-    const { registry, order } = host.newOrder(orderId || 'mock-order');
+    const host = new Formation$Host(
+        (host, get, builder) => FormationContext$create(
+            host,
+            get,
+            builder,
+            formation,
+        ),
+        () => Order.get(Formation__entry),
+    );
+    const cxBuilder = host.newOrderBuilder(orderId || 'mock-order');
 
-    registry.provide({ a: Order, is: MockOrder });
-    host.registry.provide({ a: UnitLogger, by: valueRecipe(logger) });
+    cxBuilder.provide(cxConstAsset(Order.entry, MockOrder));
+    host.cxBuilder.provide(cxConstAsset(Logger, logger));
+
+    const order = cxBuilder.context;
 
     MockOrder.mock({
-      ...order,
-      orderId,
+      orderId: order.orderId,
+      peer: cxBuilder,
     });
 
     return OrderTest$instance = {
-      registry,
+      cxBuilder,
       order: MockOrder,
       formation: MockOrder.get(Formation),
-      formationRegistry: host.registry,
+      formationCxBuilder: host.cxBuilder,
       evaluate(): Promise<void> {
         if (MockOrder.active) {
           return MockOrder
@@ -97,8 +108,8 @@ export const OrderTest: OrderTest.Static = {
     };
   },
 
-  get registry(): ContextRegistry<MockOrder> {
-    return OrderTest$get().registry;
+  get cxBuilder(): CxBuilder<Order> {
+    return OrderTest$get().cxBuilder;
   },
 
   get order(): MockOrder {
@@ -109,8 +120,8 @@ export const OrderTest: OrderTest.Static = {
     return OrderTest$get().formation;
   },
 
-  get formationRegistry(): ContextRegistry<FormationContext> {
-    return OrderTest$get().formationRegistry;
+  get formationCxBuilder(): CxBuilder<FormationContext> {
+    return OrderTest$get().formationCxBuilder;
   },
 
   get evaluate() {
