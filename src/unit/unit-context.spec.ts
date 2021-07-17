@@ -40,4 +40,10 @@ describe('UnitContext', () => {
     expect(context).toBe(context.get(UnitContext));
     expect(context).not.toBe(context.get(FormationContext));
   });
+
+  describe('toString', () => {
+    it('provides string representation', () => {
+      expect(String(UnitContext)).toBe('[UnitContext]');
+    });
+  });
 });

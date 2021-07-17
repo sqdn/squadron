@@ -5,13 +5,13 @@ import { Formation$Host } from '../impl';
 import { OrderPromulgation, OrderPromulgator } from '../order';
 import { Unit } from './unit';
 import { UnitContext } from './unit-context';
-import { newUnitContext } from './unit-context.impl';
+import { UnitContext$create } from './unit-context.impl';
 import { UnitTask } from './unit-task';
 import { Unit$Backend, Unit$doNotStart } from './unit.backend.impl';
 
 export class Unit$Deployment<TUnit extends Unit> extends Unit$Backend<TUnit, Formation$Host> {
 
-  readonly context: () => UnitContext = lazyValue(() => newUnitContext(this.host, this.unit));
+  readonly context: () => UnitContext = lazyValue(() => UnitContext$create(this.host, this.unit));
 
   order(promulgator: OrderPromulgator<TUnit>): void {
 

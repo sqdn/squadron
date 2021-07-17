@@ -1,16 +1,16 @@
-import { ContextKey, ContextKey__symbol, ContextValues } from '@proc7ts/context-values';
+import { CxEntry, cxSingle } from '@proc7ts/context-values';
 import { UnitContext } from '../unit';
 import { Formation } from './formation';
-import { FormationContext__key } from './formation.key.impl';
 
-export abstract class FormationContext extends ContextValues implements UnitContext<Formation> {
+export interface FormationContext extends UnitContext<Formation> {
 
-  static get [ContextKey__symbol](): ContextKey<FormationContext> {
-    return FormationContext__key;
-  }
+  readonly formation: Formation;
 
-  abstract readonly formation: Formation;
-
-  abstract readonly unit: Formation;
+  readonly unit: Formation;
 
 }
+
+export const FormationContext: CxEntry<FormationContext> = {
+  perContext: (/*#__PURE__*/ cxSingle()),
+  toString: () => '[FormationContext]',
+};

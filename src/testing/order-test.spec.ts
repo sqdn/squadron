@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from '@jest/globals';
-import { SingleContextKey } from '@proc7ts/context-values';
+import { cxConstAsset } from '@proc7ts/context-builder';
+import { CxEntry, cxSingle } from '@proc7ts/context-values';
 import { Formation } from '../formation';
 import { OrderTest } from './order-test';
 
@@ -12,11 +13,11 @@ describe('OrderTest', () => {
   describe('registry', () => {
     it('sets up the test automatically', () => {
 
-      const key = new SingleContextKey<string>('test');
+      const entry: CxEntry<string> = { perContext: cxSingle(), toString: () => '[CxEntry test]' };
 
-      OrderTest.registry.provide({ a: key, is: 'test value' });
+      OrderTest.cxBuilder.provide(cxConstAsset(entry, 'test value'));
 
-      expect(OrderTest.order.get(key)).toBe('test value');
+      expect(OrderTest.order.get(entry)).toBe('test value');
     });
   });
 
@@ -32,10 +33,10 @@ describe('OrderTest', () => {
 
       const test = OrderTest.setup();
 
-      expect(test.registry).toBe(OrderTest.registry);
+      expect(test.cxBuilder).toBe(OrderTest.cxBuilder);
       expect(test.order).toBe(OrderTest.order);
       expect(test.formation).toBe(OrderTest.formation);
-      expect(test.formationRegistry).toBe(OrderTest.formationRegistry);
+      expect(test.formationCxBuilder).toBe(OrderTest.formationCxBuilder);
       expect(test.evaluate).toBe(OrderTest.evaluate);
       expect(test.evaluate).toBe(OrderTest.evaluate);
       expect(test.reset).toBe(OrderTest.reset);

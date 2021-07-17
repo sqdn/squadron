@@ -1,46 +1,55 @@
-import { ContextKey, ContextKey__symbol, ContextRegistry, SingleContextKey } from '@proc7ts/context-values';
+import { CxBuilder, cxConstAsset, CxPeer, CxPeerBuilder } from '@proc7ts/context-builder';
+import { CxEntry, cxSingle } from '@proc7ts/context-values';
+import { Logger } from '@proc7ts/logger';
 import Order from '@sqdn/order';
-import { UnitLogger } from '../common';
 import { Formation, FormationContext } from '../formation';
-import { newFormationContext } from '../formation/formation-context.impl';
-import { Formation__key } from '../formation/formation.key.impl';
+import { FormationContext$create } from '../formation/formation-context.impl';
+import { Formation__entry } from '../formation/formation.entries.impl';
 import { Unit, UnitContext, UnitTask } from '../unit';
 import { Unit$Deployment } from '../unit/unit.deployment.impl';
 import { Unit$Host } from '../unit/unit.host.impl';
 import { Formation$Workbench } from './formation.workbench';
 
-const Formation$Host__key = (/*#__PURE__*/ new SingleContextKey<Formation$Host>('FormationHost'));
+const Formation$Host$perContext: CxEntry.Definer<Formation$Host> = (/*#__PURE__*/ cxSingle());
 
 export class Formation$Host implements Unit$Host {
 
-  static get [ContextKey__symbol](): ContextKey<Formation$Host> {
-    return Formation$Host__key;
+  static perContext(target: CxEntry.Target<Formation$Host>): CxEntry.Definition<Formation$Host> {
+    return Formation$Host$perContext(target);
+  }
+
+  static toString(): string {
+    return '[Formation:Host]';
   }
 
   readonly workbench = new Formation$Workbench();
-  readonly registry: ContextRegistry<FormationContext>;
+  readonly cxBuilder: CxBuilder<FormationContext>;
   readonly context: FormationContext;
-  readonly perOrderRegistry: ContextRegistry<Order>;
-  readonly perUnitRegistry: ContextRegistry<UnitContext>;
+  readonly perOrderCxPeer: CxPeerBuilder<Order>;
+  readonly perUnitCxPeer: CxPeer<UnitContext>;
 
   private _formation: Formation | null = null;
   private readonly _deployments = new Map<string, Unit$Deployment<any>>();
 
   constructor(createFormation: (this: void, order: Order) => Formation) {
-    this.registry = new ContextRegistry();
-    this.registry.provide({ a: Formation$Host, is: this });
-    this.context = newFormationContext(this, createFormation);
+    this.cxBuilder = new CxBuilder((get, builder) => FormationContext$create(
+        this,
+        get,
+        builder,
+        createFormation,
+    ));
+    this.context = this.cxBuilder.context;
 
-    this.perOrderRegistry = new ContextRegistry(this.context);
-    this.perUnitRegistry = new ContextRegistry(this.context);
+    this.perOrderCxPeer = new CxPeerBuilder<Order>(this.cxBuilder.boundPeer);
+    this.perUnitCxPeer = new CxPeerBuilder<UnitContext>(this.cxBuilder.boundPeer);
   }
 
   get formation(): Formation {
-    return this._formation ||= Order.get(Formation__key);
+    return this._formation ||= Order.get(Formation__entry);
   }
 
-  get log(): UnitLogger {
-    return this.context.get(UnitLogger);
+  get log(): Logger {
+    return this.context.get(Logger);
   }
 
   async executeUnitTask<TUnit extends Unit>(unit: TUnit, task: UnitTask<TUnit>): Promise<void> {
@@ -59,22 +68,23 @@ export class Formation$Host implements Unit$Host {
     return deployment;
   }
 
-  newOrder(orderId: string): {
-    registry: ContextRegistry<Order>;
-    order: Order;
-  } {
+  newOrderBuilder(orderId: string): CxBuilder<Order> {
+    return new CxBuilder<Order>(
+        (get, builder) => {
 
-    const registry = new ContextRegistry<Order>(this.perOrderRegistry.seeds());
-    const order: Order = {
-      [ContextKey__symbol]: Order[ContextKey__symbol],
-      active: true,
-      orderId,
-      get: registry.newValues().get,
-    };
+          const order: Order = {
+            entry: Order.entry,
+            active: true,
+            orderId,
+            get,
+          };
 
-    registry.provide({ a: Order, is: order });
+          builder.provide(cxConstAsset(Order.entry, order));
 
-    return { registry, order };
+          return order;
+        },
+        this.perOrderCxPeer,
+    );
   }
 
 }

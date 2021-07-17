@@ -38,4 +38,10 @@ describe('FormationContext', () => {
     expect(context).toBe(context.get(FormationContext));
     expect(context).toBe(context.get(UnitContext));
   });
+
+  describe('toString', () => {
+    it('provides string representation', () => {
+      expect(String(FormationContext)).toBe('[FormationContext]');
+    });
+  });
 });
