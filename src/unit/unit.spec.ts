@@ -71,7 +71,7 @@ describe('Unit', () => {
 
       const unit = new TestUnit();
       const filePath = fileURLToPath(import.meta.url);
-      const pattern = new RegExp(`^TestUnit...${unit.uid.slice(-7)}\\((.+)\\)$`);
+      const pattern = new RegExp(`^\\[TestUnit...${unit.uid.slice(-7)}\\((.+)\\)\\]$`);
 
       expect(unit.toString()).toMatch(pattern);
 
@@ -84,14 +84,14 @@ describe('Unit', () => {
 
       const unit = new TestUnit({ tag: 'test' });
       const filePath = fileURLToPath(import.meta.url);
-      const pattern = new RegExp(`^TestUnit...${unit.uid.slice(-7)}\\((.+)\\)$`);
+      const pattern = new RegExp(`^\\[TestUnit...${unit.uid.slice(-7)}\\((.+)\\)\\]$`);
 
       expect(unit.toString()).toMatch(pattern);
 
       const location = pattern.exec(unit.toString())![1];
 
       expect(location).toContain(filePath);
-      expect(location).toMatch(/.*:\d+:\d+:test$/);
+      expect(location).toMatch(/.*:\d+:\d+#test$/);
     });
   });
 

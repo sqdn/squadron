@@ -28,7 +28,7 @@ export class Unit$Id {
       const origin = Unit$origin(this.stack);
       const tag = this.tag;
 
-      this._origin = tag ? `${origin}:${tag}` : origin;
+      this._origin = tag ? `${origin}#${tag}` : origin;
     }
 
     return this._origin;

@@ -60,7 +60,7 @@ export class Unit implements SupplyPeer {
 
     const { uid } = this[Unit$Id__symbol];
 
-    return `${this[Symbol.toStringTag]}...${uid.slice(-7)}(${this.origin})`;
+    return `[${this[Symbol.toStringTag]}...${uid.slice(-7)}(${this.origin})]`;
   }
 
 }
