@@ -11,6 +11,8 @@ export default defineConfig({
   input: {
     squadron: './src/index.ts',
     'squadron.testing': './src/testing/index.ts',
+    'squadron.vm-loader': './src/vm-loader/index.ts',
+    'squadron.vm-loader.formation': './src/vm-loader/formation/index.ts',
   },
   plugins: [
     ts({
@@ -25,6 +27,12 @@ export default defineConfig({
   manualChunks(id) {
     if (id.startsWith(path.resolve('src', 'testing') + path.sep)) {
       return 'squadron.testing';
+    }
+    if (id.startsWith(path.resolve('src', 'vm-loader', 'formation') + path.sep)) {
+      return 'squadron.vm-loader.formation';
+    }
+    if (id.startsWith(path.resolve('src', 'vm-loader') + path.sep)) {
+      return 'squadron.vm-loader';
     }
     return 'squadron';
   },
@@ -44,6 +52,12 @@ export default defineConfig({
         entries: {
           testing: {
             file: 'testing/index.d.ts',
+          },
+          'vm-loader': {
+            file: 'vm-loader/index.d.ts',
+          },
+          'vm-loader/formation': {
+            file: 'vm-loader/formation/index.d.ts',
           },
         },
         internal: ['**/impl/**', '**/*.impl'],

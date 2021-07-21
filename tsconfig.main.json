@@ -2,7 +2,9 @@
   "extends": "./tsconfig.json",
   "files": [
     "./src/index.ts",
-    "./src/testing/index.ts"
+    "./src/testing/index.ts",
+    "./src/vm-loader/index.ts",
+    "./src/vm-loader/formation/index.ts"
   ],
   "include": []
 }

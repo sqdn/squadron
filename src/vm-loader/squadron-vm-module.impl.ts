@@ -1,16 +1,15 @@
-import { valueProvider } from '@proc7ts/primitives';
 import { promises as fs } from 'fs';
 import { fileURLToPath } from 'url';
 import { Module, SourceTextModule } from 'vm';
-import { VMLoader } from './vm-loader';
+import { SquadronVMLoader } from './squadron-vm-loader';
 
-export class VMModuleSource {
+export class SquadronVMModule {
 
   private _getModule: () => Promise<Module>;
   readonly id: string;
 
   constructor(
-      readonly loader: VMLoader,
+      readonly resolver: SquadronVMLoader,
       readonly sourceURL: URL,
       specifier?: string,
   ) {
@@ -18,15 +17,11 @@ export class VMModuleSource {
 
       const promise = this.readSource().then(src => this.createModule(src));
 
-      this._getModule = valueProvider(promise);
+      this._getModule = () => promise;
 
       return promise;
     };
     this.id = !specifier || specifier.startsWith('.') ? sourceURL.href : specifier;
-  }
-
-  get active(): true {
-    return true;
   }
 
   get module(): Promise<Module> {
@@ -46,11 +41,13 @@ export class VMModuleSource {
         source,
         {
           identifier: this.id,
-          context: this.loader.vmContext,
+          context: this.resolver.vmContext,
         },
     );
 
-    return await module.link(this.loader.resolveModule.bind(this.loader));
+    await module.link(this.resolver.resolveModule.bind(this.resolver));
+
+    return module;
   }
 
 }
