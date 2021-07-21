@@ -1,11 +1,10 @@
 import { CxBuilder, cxConstAsset } from '@proc7ts/context-builder';
 import { Logger, silentLogger } from '@proc7ts/logger';
-import { noop } from '@proc7ts/primitives';
+import { lazyValue, noop } from '@proc7ts/primitives';
 import Order from '@sqdn/order';
 import MockOrder from '@sqdn/order/mock';
 import { Formation, FormationContext } from '../formation';
 import { FormationContext$create } from '../formation/formation-context.impl';
-import { Formation__entry } from '../formation/formation.entries.impl';
 import { Formation$Host, Order$Evaluator } from '../impl';
 import { Unit, UnitTask } from '../unit';
 
@@ -33,7 +32,7 @@ export namespace OrderTest {
 
     readonly logger?: Logger;
 
-    formation?(this: void, order: Order): Formation;
+    getFormation?(this: void): Formation;
 
   }
 
@@ -59,19 +58,18 @@ export const OrderTest: OrderTest.Static = {
 
     const {
       orderId,
-      formation = () => new Formation({ tag: 'test' }),
+      getFormation = lazyValue(() => new Formation({ tag: 'test' })),
       logger = silentLogger,
     } = init;
 
-    const host = new Formation$Host(
-        (host, get, builder) => FormationContext$create(
-            host,
-            get,
-            builder,
-            formation,
-        ),
-        () => Order.get(Formation__entry),
-    );
+    const host = new Formation$Host({
+      getFormation,
+      createContext: (host, get, builder) => FormationContext$create(
+          host,
+          get,
+          builder,
+      ),
+    });
     const cxBuilder = host.newOrderBuilder(orderId || 'mock-order');
 
     cxBuilder.provide(cxConstAsset(Order.entry, MockOrder));

@@ -28,7 +28,7 @@ export class Unit$Id {
       const origin = Unit$origin(this.stack);
       const tag = this.tag;
 
-      this._origin = tag ? `${origin}:${tag}` : origin;
+      this._origin = tag ? `${origin}#${tag}` : origin;
     }
 
     return this._origin;
@@ -52,11 +52,13 @@ export class Unit$Id {
 }
 
 const Unit$stack$nlPattern = /\n/;
-const Unit$stack$originPattern = /\((.+)\)/;
+const Unit$stack$originPattern$parents = /\((.+)\)/;
+const Unit$stack$originPattern$noParents = /at (.+)/;
 
 function Unit$origin(stack: string): string {
 
   const line = stack.split(Unit$stack$nlPattern, 2)[1];
+  const result = Unit$stack$originPattern$parents.exec(line) || Unit$stack$originPattern$noParents.exec(line);
 
-  return Unit$stack$originPattern.exec(line)![1];
+  return result![1];
 }

@@ -4,9 +4,9 @@ export default {
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/spec/**',
+    '!src/vm-loader/**',
     '!src/**/*.spec.ts',
     '!src/**/index.ts',
-    '!src/**/main.ts',
     '!**/node_modules/**',
   ],
   coverageDirectory: 'target/coverage',
