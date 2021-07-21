@@ -63,15 +63,15 @@ export const OrderTest: OrderTest.Static = {
       logger = silentLogger,
     } = init;
 
-    const host = new Formation$Host(
-        (host, get, builder) => FormationContext$create(
-            host,
-            get,
-            builder,
-            formation,
-        ),
-        () => Order.get(Formation__entry),
-    );
+    const host = new Formation$Host({
+      getFormation: () => Order.get(Formation__entry),
+      createContext: (host, get, builder) => FormationContext$create(
+          host,
+          get,
+          builder,
+          formation,
+      ),
+    });
     const cxBuilder = host.newOrderBuilder(orderId || 'mock-order');
 
     cxBuilder.provide(cxConstAsset(Order.entry, MockOrder));
