@@ -10,8 +10,11 @@ export class Unit$Id {
   private _origin?: string;
   private _uid?: string;
 
-  constructor(readonly unit: Unit, { tag = '' }: Unit.Init = {}) {
+  constructor(readonly unit: Unit, { tag = '', id }: Unit.Init = {}) {
     this.tag = tag;
+    if (id) {
+      this._uid = tag ? `${tag}@${id}` : id;
+    }
   }
 
   get name(): string {
