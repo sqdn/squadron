@@ -1,0 +1,4 @@
+{
+  "main": "../../dist/squadron.launch.formation.js",
+  "types": "./index.d.ts"
+}

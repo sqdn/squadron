@@ -3,8 +3,7 @@ export default {
   collectCoverage: true,
   collectCoverageFrom: [
     'src/**/*.ts',
-    '!src/spec/**',
-    '!src/vm-loader/**',
+    '!src/launch/**',
     '!src/**/*.spec.ts',
     '!src/**/index.ts',
     '!**/node_modules/**',

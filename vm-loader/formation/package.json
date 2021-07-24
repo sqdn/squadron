@@ -1,4 +1,0 @@
-{
-  "main": "../../dist/squadron.vm-loader.formation.js",
-  "types": "./index.d.ts"
-}

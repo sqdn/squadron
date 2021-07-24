@@ -1,9 +1,9 @@
-import { SquadronVMLoader } from '../vm-loader';
+import { SqdnLauncher } from '../launch';
 import { Formation$Factory } from './formation.factory';
 import { Formation$Host } from './formation.host';
 
 // istanbul ignore next
-export function initSquadronVM(loader: SquadronVMLoader, formationFactory: Formation$Factory): void {
+export function launchSqdn(loader: SqdnLauncher, formationFactory: Formation$Factory): void {
 
   const host = new Formation$Host(formationFactory);
 

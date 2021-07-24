@@ -1,8 +1,8 @@
 /**
  * @packageDocumentation
- * @module Module @sqdn/squadron/vm-loader
+ * @module Module @sqdn/squadron/launch
  */
-export * from './squadron-vm-loader';
+export * from './sqdn-launcher';
 
 declare module 'vm' {
 

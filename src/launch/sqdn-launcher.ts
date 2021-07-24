@@ -2,13 +2,13 @@ import Order from '@sqdn/order';
 import { createRequire } from 'module';
 import { fileURLToPath, pathToFileURL } from 'url';
 import { Module, SyntheticModule } from 'vm';
-import { SquadronVMModule } from './squadron-vm-module.impl';
-import { SquadronVMOrder } from './squadron-vm-order.impl';
+import { SqdnLaunchModule } from './sqdn-launch-module.impl';
+import { SqdnLaunchOrder } from './sqdn-launch-order.impl';
 
-export class SquadronVMLoader {
+export class SqdnLauncher {
 
   private readonly _resolve: RequireResolve;
-  private readonly _cache = new Map<string, SquadronVMModule>();
+  private readonly _cache = new Map<string, SqdnLaunchModule>();
   private _orderModule?: Promise<Module>;
   private _order = Order;
 
@@ -22,7 +22,7 @@ export class SquadronVMLoader {
 
   private async createOrderModule(): Promise<Module> {
 
-    const order = this._order || new SquadronVMOrder(() => this._order);
+    const order = this._order || new SqdnLaunchOrder(() => this._order);
     const module = new SyntheticModule(
         ['default'],
         () => {
@@ -39,15 +39,15 @@ export class SquadronVMLoader {
     return module;
   }
 
-  async loadModule(id: string, options?: Parameters<Module['evaluate']>[0]): Promise<void> {
+  async launchModule(launchModuleId: string, options?: Parameters<Module['evaluate']>[0]): Promise<void> {
 
-    const module = await this.moduleByURL(this.moduleIdToURL(id)).module;
+    const launchModule = await this.moduleByURL(this.moduleIdToURL(launchModuleId)).module;
 
-    await module.evaluate(options);
+    await launchModule.evaluate(options);
 
-    const init = (module.namespace as Record<string, unknown>).default as (loader: SquadronVMLoader) => void;
+    const launch = (launchModule.namespace as Record<string, unknown>).default as (loader: SqdnLauncher) => void;
 
-    return init(this);
+    return launch(this);
   }
 
   initOrder(order: Order): void {
@@ -78,7 +78,7 @@ export class SquadronVMLoader {
     return pathToFileURL(this._resolve(fileURLToPath(new URL(specifier, this.rootURL).href)));
   }
 
-  private moduleByURL(sourceURL: URL, specifier?: string): SquadronVMModule {
+  private moduleByURL(sourceURL: URL, specifier?: string): SqdnLaunchModule {
 
     const href = sourceURL.href;
     const cached = this._cache.get(href);
@@ -87,7 +87,7 @@ export class SquadronVMLoader {
       return cached;
     }
 
-    const newModule = new SquadronVMModule(this, sourceURL, specifier);
+    const newModule = new SqdnLaunchModule(this, sourceURL, specifier);
 
     this._cache.set(href, newModule);
 

@@ -11,8 +11,9 @@ export default defineConfig({
   input: {
     squadron: './src/index.ts',
     'squadron.testing': './src/testing/index.ts',
-    'squadron.vm-loader': './src/vm-loader/index.ts',
-    'squadron.vm-loader.formation': './src/vm-loader/formation/index.ts',
+    'squadron.launch': './src/launch/index.ts',
+    'squadron.launch.formation': './src/launch/formation/index.ts',
+    'squadron.launch.hub': './src/launch/hub/index.ts',
   },
   plugins: [
     ts({
@@ -28,11 +29,14 @@ export default defineConfig({
     if (id.startsWith(path.resolve('src', 'testing') + path.sep)) {
       return 'squadron.testing';
     }
-    if (id.startsWith(path.resolve('src', 'vm-loader', 'formation') + path.sep)) {
-      return 'squadron.vm-loader.formation';
+    if (id.startsWith(path.resolve('src', 'launch', 'formation') + path.sep)) {
+      return 'squadron.launch.formation';
     }
-    if (id.startsWith(path.resolve('src', 'vm-loader') + path.sep)) {
-      return 'squadron.vm-loader';
+    if (id.startsWith(path.resolve('src', 'launch', 'hub') + path.sep)) {
+      return 'squadron.launch.hub';
+    }
+    if (id.startsWith(path.resolve('src', 'launch') + path.sep)) {
+      return 'squadron.launch';
     }
     return 'squadron';
   },
@@ -50,14 +54,17 @@ export default defineConfig({
           declarationMap: true,
         },
         entries: {
+          launch: {
+            file: 'launch/index.d.ts',
+          },
+          'launch/formation': {
+            file: 'launch/formation/index.d.ts',
+          },
+          'launch/hub': {
+            file: 'launch/hub/index.d.ts',
+          },
           testing: {
             file: 'testing/index.d.ts',
-          },
-          'vm-loader': {
-            file: 'vm-loader/index.d.ts',
-          },
-          'vm-loader/formation': {
-            file: 'vm-loader/formation/index.d.ts',
           },
         },
         internal: ['**/impl/**', '**/*.impl'],

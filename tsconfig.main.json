@@ -3,8 +3,9 @@
   "files": [
     "./src/index.ts",
     "./src/testing/index.ts",
-    "./src/vm-loader/index.ts",
-    "./src/vm-loader/formation/index.ts"
+    "./src/launch/index.ts",
+    "./src/launch/formation/index.ts",
+    "./src/launch/hub/index.ts"
   ],
   "include": []
 }

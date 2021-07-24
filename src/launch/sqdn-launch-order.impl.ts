@@ -1,7 +1,7 @@
 import { CxEntry, CxRequest } from '@proc7ts/context-values';
 import Order from '@sqdn/order';
 
-export class SquadronVMOrder implements Order {
+export class SqdnLaunchOrder implements Order {
 
   constructor(readonly $: () => Order) {
   }

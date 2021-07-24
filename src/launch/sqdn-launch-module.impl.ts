@@ -1,15 +1,15 @@
 import { promises as fs } from 'fs';
 import { fileURLToPath } from 'url';
 import { Module, SourceTextModule } from 'vm';
-import { SquadronVMLoader } from './squadron-vm-loader';
+import { SqdnLauncher } from './sqdn-launcher';
 
-export class SquadronVMModule {
+export class SqdnLaunchModule {
 
   private _getModule: () => Promise<Module>;
   readonly id: string;
 
   constructor(
-      readonly resolver: SquadronVMLoader,
+      readonly resolver: SqdnLauncher,
       readonly sourceURL: URL,
       specifier?: string,
   ) {
