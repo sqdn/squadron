@@ -2,10 +2,11 @@
  * @packageDocumentation
  * @module Module @sqdn/squadron/launch/formation
  */
+import { cxConstAsset } from '@proc7ts/context-builder';
 import { lazyValue } from '@proc7ts/primitives';
 import { Formation } from '../../formation';
 import { FormationContext$create } from '../../formation/formation-context.impl';
-import { launchSqdn } from '../../impl';
+import { Formation$LaunchData, launchSqdn } from '../../impl';
 import { SqdnLauncher } from '../sqdn-launcher';
 
 export default function launchFormation(launcher: SqdnLauncher): void {
@@ -13,7 +14,10 @@ export default function launchFormation(launcher: SqdnLauncher): void {
       launcher,
       {
         getFormation: lazyValue(() => new Formation()),
-        createContext: FormationContext$create,
+        createContext(host, get, cxBuilder) {
+          cxBuilder.provide(cxConstAsset(Formation$LaunchData, launcher.launchData));
+          return FormationContext$create(host, get, cxBuilder);
+        },
       },
   );
 }
