@@ -2,6 +2,8 @@ import Order from '@sqdn/order';
 import { createRequire } from 'module';
 import { fileURLToPath, pathToFileURL } from 'url';
 import { Module, SyntheticModule } from 'vm';
+import { isMainThread, moveMessagePortToContext, workerData } from 'worker_threads';
+import { Formation$LaunchData } from '../impl';
 import { SqdnLaunchModule } from './sqdn-launch-module.impl';
 import { SqdnLaunchOrder } from './sqdn-launch-order.impl';
 
@@ -9,11 +11,28 @@ export class SqdnLauncher {
 
   private readonly _resolve: RequireResolve;
   private readonly _cache = new Map<string, SqdnLaunchModule>();
-  private _orderModule?: Promise<Module>;
   private _order = Order;
+  private _launchData?: Formation$LaunchData | null = null;
+  private _orderModule?: Promise<Module>;
 
   constructor(readonly vmContext: object, readonly rootURL: string) {
     this._resolve = createRequire(rootURL).resolve;
+  }
+
+  get launchData(): Formation$LaunchData | undefined {
+    if (this._launchData !== null) {
+      return this._launchData;
+    }
+    if (isMainThread) {
+      return this._launchData = undefined;
+    }
+
+    const launchData = workerData as Formation$LaunchData;
+
+    return this._launchData = {
+      ...launchData,
+      hubPort: moveMessagePortToContext(launchData.hubPort, this.vmContext),
+    };
   }
 
   get orderModule(): Promise<Module> {
@@ -69,13 +88,17 @@ export class SqdnLauncher {
   }
 
   private moduleIdToURL(specifier: string): URL {
-    if (specifier.indexOf(':') > 0 && !specifier.startsWith('node:')) {
-      // Absolute URL.
-      return new URL(specifier);
+    if (
+        specifier.startsWith('./')
+        || specifier.startsWith('../')
+        || specifier === '.'
+        || specifier === '..') {
+      // Relative URL.
+      return pathToFileURL(this._resolve(fileURLToPath(new URL(specifier, this.rootURL).href)));
     }
 
-    // Module specifier.
-    return pathToFileURL(this._resolve(fileURLToPath(new URL(specifier, this.rootURL).href)));
+    // Absolute URL or module name.
+    return pathToFileURL(this._resolve(specifier));
   }
 
   private moduleByURL(sourceURL: URL, specifier?: string): SqdnLaunchModule {

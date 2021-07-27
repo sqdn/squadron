@@ -4,6 +4,7 @@ import { Logger } from '@proc7ts/logger';
 import Order from '@sqdn/order';
 import { Formation, FormationContext } from '../formation';
 import { Unit, UnitContext, UnitTask } from '../unit';
+import { Unit$Backend__symbol } from '../unit/unit.backend.impl';
 import { Unit$Deployment } from '../unit/unit.deployment.impl';
 import { Unit$Host } from '../unit/unit.host.impl';
 import { Formation$Factory } from './formation.factory';
@@ -28,6 +29,7 @@ export class Formation$Host implements Unit$Host {
   readonly perUnitCxPeer: CxPeer<UnitContext>;
 
   private _formation: Formation | null = null;
+  private readonly _unitFormations = new Map<string, Map<string, Formation>>();
   private readonly _deployments = new Map<string, Unit$Deployment<any>>();
 
   constructor(private readonly _factory: Formation$Factory) {
@@ -46,6 +48,28 @@ export class Formation$Host implements Unit$Host {
 
   get log(): Logger {
     return this.context.get(Logger);
+  }
+
+  unitFormations(unit: Unit): readonly Formation[] {
+
+    const formations = this._unitFormations.get(unit.uid);
+
+    return formations ? [...formations.values()] : [];
+  }
+
+  deploy(formation: Formation, unit: Unit): void {
+
+    let unitFormations = this._unitFormations.get(unit.uid);
+
+    if (!unitFormations) {
+      this._unitFormations.set(unit.uid, unitFormations = new Map());
+    }
+
+    unitFormations.set(formation.uid, formation); // Record the formation the unit is deployed to.
+
+    if (this.formation.uid === formation.uid) {
+      unit[Unit$Backend__symbol].deployTo(this.formation);
+    }
   }
 
   async executeUnitTask<TUnit extends Unit>(unit: TUnit, task: UnitTask<TUnit>): Promise<void> {

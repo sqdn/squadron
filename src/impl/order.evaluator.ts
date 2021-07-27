@@ -58,6 +58,10 @@ export class Order$Evaluator implements Unit$Host {
     return this.host.formation;
   }
 
+  deploy(formation: Formation, unit: Unit): void {
+    this.host.deploy(formation, unit);
+  }
+
   executeUnitTask<TUnit extends Unit>(unit: TUnit, task: UnitTask<TUnit>): Promise<void> {
     return this.host.executeUnitTask(unit, task);
   }
