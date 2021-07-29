@@ -3,6 +3,10 @@ import { MessagePort } from 'worker_threads';
 
 export interface Formation$LaunchData {
 
+  readonly uid: string;
+
+  readonly hubUid: string;
+
   readonly hubPort: MessagePort;
 
 }

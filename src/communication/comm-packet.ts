@@ -1,3 +1,5 @@
+import { TransferListItem } from 'worker_threads';
+
 export interface CommPacket {
 
   readonly meta?: CommMeta | undefined;
@@ -6,7 +8,7 @@ export interface CommPacket {
 
 export interface CommMeta {
 
-  readonly transferList?: unknown[] | undefined;
+  readonly transferList?: readonly TransferListItem[] | undefined;
 
   readonly streamId?: string | undefined;
 
