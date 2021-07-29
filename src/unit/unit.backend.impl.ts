@@ -1,4 +1,3 @@
-import { valueProvider } from '@proc7ts/primitives';
 import { Supply, SupplyPeer } from '@proc7ts/supply';
 import { Formation } from '../formation';
 import { OrderPromulgator } from '../order';
@@ -25,5 +24,5 @@ export function Unit$rejectOrder<TUnit extends Unit>(_promulgator: OrderPromulga
 }
 
 export function Unit$doNotStart(error: unknown): () => Promise<void> {
-  return valueProvider(Promise.reject(error));
+  return () => Promise.reject(error);
 }
