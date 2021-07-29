@@ -1,6 +1,7 @@
 import { EventEmitter, OnEvent, onEventBy } from '@proc7ts/fun-events';
 import { consoleLogger, Logger } from '@proc7ts/logger';
 import { Supply } from '@proc7ts/supply';
+import { v4 as uuidv4 } from 'uuid';
 import { MessagePort, TransferListItem } from 'worker_threads';
 import { Unit } from '../../unit';
 import { CommChannel } from '../comm-channel';
@@ -90,7 +91,7 @@ export class MessageCommChannel implements CommChannel {
   ): OnEvent<[TResponse]> {
     return onEventBy(receiver => {
 
-      const streamId = `${name}(${Math.random().toString(36).substr(2)})`;
+      const streamId = `${name}#${uuidv4()}`;
       const [message, transferList] = MessageComm$extractTransferList(request);
       const { meta = {} } = message;
 
