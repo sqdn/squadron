@@ -12,7 +12,7 @@ import { CommPacket } from './comm-packet';
 export interface CommChannel extends SupplyPeer {
 
   /**
-   * Remote unit to communicate with.
+   * Remote unit the channel is opened to.
    */
   readonly to: Unit;
 

@@ -32,7 +32,7 @@ export class MessageCommChannel implements CommChannel {
   /**
    * Constructs messaging communication channel.
    *
-   * @param to - Remote unit to communicate with.
+   * @param to - Remote unit the `port` sends messages to.
    * @param port - Message port to send outgoing messages to and receive inbound ones from.
    * @param processor - Inbound commands processor. Processes nothing by default.
    * @param logger - Logger to report communication issues to.
