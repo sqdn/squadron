@@ -1,5 +1,5 @@
 import { cxDynamic, CxEntry, cxScoped } from '@proc7ts/context-values';
-import { OnEvent } from '@proc7ts/fun-events';
+import { OnEvent, onEventBy } from '@proc7ts/fun-events';
 import { UnitContext } from '../unit';
 import { CommChannel } from './comm-channel';
 import { CommHandler, CommReceiver, CommResponder } from './comm-handler';
@@ -72,7 +72,9 @@ export function createCommProcessor(...handlers: CommHandler[]): CommProcessor {
       const responder = responders.get(name);
 
       if (!responder) {
-        throw new TypeError(`Unknown request received: ${name}`);
+        return onEventBy(({ supply }) => {
+          supply.off(new TypeError(`Unknown request received: ${name}`));
+        });
       }
 
       return responder.respond(request, channel);
