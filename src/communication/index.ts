@@ -1,3 +1,4 @@
+export * from './channels';
 export * from './comm-channel';
 export * from './comm-error';
 export * from './comm-handler';

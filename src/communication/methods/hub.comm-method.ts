@@ -3,9 +3,9 @@ import { CxAsset, CxEntry } from '@proc7ts/context-values';
 import { Logger } from '@proc7ts/logger';
 import { valueByRecipe } from '@proc7ts/primitives';
 import { Formation$LaunchData } from '../../impl';
+import { MessageCommChannel } from '../channels/message.comm-channel';
 import { CommMethod } from '../comm-method';
 import { CommProcessor } from '../comm-processor';
-import { MessageCommChannel } from './message.comm-channel';
 
 export function hubCommMethod(
     {
