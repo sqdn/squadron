@@ -62,7 +62,7 @@ export function createCommProcessor(...handlers: CommHandler[]): CommProcessor {
       const receiver = receivers.get(name);
 
       if (!receiver) {
-        throw new TypeError(`Unknown signal received: ${name}`);
+        throw new TypeError(`Unknown signal received: "${name}"`);
       }
 
       receiver.receive(signal, channel);
@@ -73,7 +73,7 @@ export function createCommProcessor(...handlers: CommHandler[]): CommProcessor {
 
       if (!responder) {
         return onEventBy(({ supply }) => {
-          supply.off(new TypeError(`Unknown request received: ${name}`));
+          supply.off(new TypeError(`Unknown request received: "${name}"`));
         });
       }
 
