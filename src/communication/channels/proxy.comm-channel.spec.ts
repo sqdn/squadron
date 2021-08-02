@@ -11,7 +11,8 @@ import { CommChannel } from '../comm-channel';
 import { CommError } from '../comm-error';
 import { CommReceiver, CommResponder } from '../comm-handler';
 import { CommPacket } from '../comm-packet';
-import { CommProcessor, createCommProcessor, proxyCommProcessor } from '../comm-processor';
+import { CommProcessor } from '../comm-processor';
+import { createCommProcessor, proxyCommProcessor } from '../handlers';
 import { DirectCommChannel } from './direct.comm-channel';
 import { ProxyCommChannel } from './proxy.comm-channel';
 

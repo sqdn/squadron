@@ -9,7 +9,8 @@ import { OrderTest } from '../../testing';
 import { Unit } from '../../unit';
 import { CommHandler, CommReceiver, CommResponder } from '../comm-handler';
 import { CommPacket } from '../comm-packet';
-import { CommProcessor, createCommProcessor, proxyCommProcessor } from '../comm-processor';
+import { CommProcessor } from '../comm-processor';
+import { createCommProcessor, proxyCommProcessor } from '../handlers';
 import { MessageCommChannel } from './message.comm-channel';
 
 interface TestPacket extends CommPacket {

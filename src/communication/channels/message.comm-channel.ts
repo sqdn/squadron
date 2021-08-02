@@ -6,7 +6,8 @@ import { MessagePort, TransferListItem } from 'worker_threads';
 import { Unit } from '../../unit';
 import { CommChannel } from '../comm-channel';
 import { CommPacket } from '../comm-packet';
-import { CommProcessor, createCommProcessor } from '../comm-processor';
+import { CommProcessor } from '../comm-processor';
+import { createCommProcessor } from '../handlers';
 
 const enum MessageComm$Type {
   Signal,
