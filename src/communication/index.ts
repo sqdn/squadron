@@ -9,4 +9,5 @@ export * from './comm-packet';
 export * from './comm-processor';
 export * from './communicator';
 export * from './handlers';
+export * from './linkage';
 export * from './methods';
