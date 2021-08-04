@@ -6,44 +6,44 @@ import { Communicator } from './communicator';
 
 export class Communicator$ implements Communicator {
 
-  private readonly _unit: Unit;
-  private readonly _host: Formation$Host;
-  private readonly _method: CommMethod;
-  private readonly _channels = new Map<string, CommChannel>();
+  readonly #unit: Unit;
+  readonly #host: Formation$Host;
+  readonly #method: CommMethod;
+  readonly #channels = new Map<string, CommChannel>();
 
   constructor(context: UnitContext) {
-    this._unit = context.unit;
-    this._host = context.get(Formation$Host);
-    this._method = context.get(CommMethod);
+    this.#unit = context.unit;
+    this.#host = context.get(Formation$Host);
+    this.#method = context.get(CommMethod);
   }
 
   connect(to: Unit): CommChannel {
 
-    const existing = this._channels.get(to.uid);
+    const existing = this.#channels.get(to.uid);
 
     if (existing) {
       return existing;
     }
 
-    const at = this._host.unitFormations(to);
+    const at = this.#host.unitFormations(to);
 
     if (!at.length) {
-      throw new TypeError(`${this._unit} can not connect to ${to}. The latter is not deployed`);
+      throw new TypeError(`${this.#unit} can not connect to ${to}. The latter is not deployed`);
     }
 
-    const channel = this._method.connect({
-      from: this._unit,
+    const channel = this.#method.connect({
+      from: this.#unit,
       to,
       at,
     });
 
     if (!channel) {
-      throw new TypeError(`${this._unit} can not connect to ${to}`);
+      throw new TypeError(`${this.#unit} can not connect to ${to}`);
     }
 
-    this._channels.set(to.uid, channel);
+    this.#channels.set(to.uid, channel);
     channel.supply.whenOff(() => {
-      this._channels.delete(to.uid);
+      this.#channels.delete(to.uid);
     });
 
     return channel;

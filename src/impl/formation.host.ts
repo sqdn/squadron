@@ -28,13 +28,15 @@ export class Formation$Host implements Unit$Host {
   readonly perOrderCxPeer: CxPeerBuilder<Order>;
   readonly perUnitCxPeer: CxPeer<UnitContext>;
 
-  private _formation: Formation | null = null;
-  private readonly _unitFormations = new Map<string, Map<string, Formation>>();
-  private readonly _deployments = new Map<string, Unit$Deployment<any>>();
+  readonly #factory: Formation$Factory;
+  #formation?: Formation;
+  readonly #unitFormations = new Map<string, Map<string, Formation>>();
+  readonly #deployments = new Map<string, Unit$Deployment<any>>();
 
-  constructor(private readonly _factory: Formation$Factory) {
+  constructor(factory: Formation$Factory) {
+    this.#factory = factory;
     this.cxBuilder = new CxBuilder(
-        (get, builder) => _factory.createContext(this, get, builder),
+        (get, builder) => factory.createContext(this, get, builder),
     );
     this.context = this.cxBuilder.context;
 
@@ -43,7 +45,7 @@ export class Formation$Host implements Unit$Host {
   }
 
   get formation(): Formation {
-    return this._formation ||= this._factory.getFormation();
+    return this.#formation ||= this.#factory.getFormation();
   }
 
   get log(): Logger {
@@ -52,17 +54,17 @@ export class Formation$Host implements Unit$Host {
 
   unitFormations(unit: Unit): readonly Formation[] {
 
-    const formations = this._unitFormations.get(unit.uid);
+    const formations = this.#unitFormations.get(unit.uid);
 
     return formations ? [...formations.values()] : [];
   }
 
   deploy(formation: Formation, unit: Unit): void {
 
-    let unitFormations = this._unitFormations.get(unit.uid);
+    let unitFormations = this.#unitFormations.get(unit.uid);
 
     if (!unitFormations) {
-      this._unitFormations.set(unit.uid, unitFormations = new Map());
+      this.#unitFormations.set(unit.uid, unitFormations = new Map());
     }
 
     unitFormations.set(formation.uid, formation); // Record the formation the unit is deployed to.
@@ -78,11 +80,11 @@ export class Formation$Host implements Unit$Host {
 
   unitDeployment<TUnit extends Unit>(unit: TUnit): Unit$Deployment<TUnit> {
 
-    let deployment = this._deployments.get(unit.uid);
+    let deployment = this.#deployments.get(unit.uid);
 
     if (!deployment) {
       deployment = new Unit$Deployment(this, unit);
-      this._deployments.set(unit.uid, deployment);
+      this.#deployments.set(unit.uid, deployment);
     }
 
     return deployment;

@@ -1,6 +1,6 @@
 import { CxBuilder, cxConstAsset } from '@proc7ts/context-builder';
 import { Logger, silentLogger } from '@proc7ts/logger';
-import { lazyValue, noop } from '@proc7ts/primitives';
+import { lazyValue } from '@proc7ts/primitives';
 import Order from '@sqdn/order';
 import MockOrder from '@sqdn/order/mock';
 import { Formation, FormationContext } from '../formation';
@@ -87,6 +87,7 @@ export const OrderTest: OrderTest.Static = {
       order: MockOrder,
       formation: MockOrder.get(Formation),
       formationCxBuilder: host.cxBuilder,
+
       evaluate(): Promise<void> {
         if (MockOrder.active) {
           return MockOrder
@@ -97,11 +98,9 @@ export const OrderTest: OrderTest.Static = {
               });
         }
 
-        return host.workbench
-            .workbench
-            .work(host.workbench.executionStage)
-            .run(noop);
+        return host.workbench.evaluate();
       },
+
       reset: OrderTest.reset,
     };
   },

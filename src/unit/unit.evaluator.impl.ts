@@ -10,6 +10,7 @@ import { Unit$Id__symbol } from './unit.id.impl';
 export class Unit$Evaluator<TUnit extends Unit> extends Unit$Backend<TUnit, Order$Evaluator> {
 
   readonly #promulgators: OrderPromulgator<TUnit>[] = [];
+  #deliver = this.#doDeliver;
 
   order(promulgator: OrderPromulgator<TUnit>): void {
     this.#promulgators.push(promulgator);
@@ -54,19 +55,19 @@ export class Unit$Evaluator<TUnit extends Unit> extends Unit$Backend<TUnit, Orde
       }
       this.#promulgators.length = 0;
       this.order = promulgate;
-      this.host.deliver(() => this._deliver());
+      this.host.deliver(() => this.#deliver());
     }
 
     this.supply.whenOff(reason => {
       this.order = Unit$rejectOrder;
-      this._deliver = noop; // Do not deliver withdrawn unit.
+      this.#deliver = noop; // Do not deliver withdrawn unit.
       this.#promulgators.length = 0;
       promulgation = null;
       execute = Unit$doNotStart(reason);
     });
   }
 
-  private _deliver(): void {
+  #doDeliver(): void {
 
     const deployment = this.host.host.unitDeployment(this.unit);
 

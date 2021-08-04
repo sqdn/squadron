@@ -25,25 +25,25 @@ export class Order$Evaluator implements Unit$Host {
     return '[Order:Evaluator]';
   }
 
-  private readonly _workbench = new Order$Workbench();
   readonly host: Formation$Host;
-  private readonly _whenExecuted: Promise<void>;
-  private readonly _units = new Map<string, Unit$Evaluator<any>>();
+  readonly #workbench = new Order$Workbench();
+  readonly #whenExecuted: Promise<void>;
+  readonly #units = new Map<string, Unit$Evaluator<any>>();
 
   constructor(readonly order: Order) {
     this.host = order.get(Formation$Host);
 
     let executed!: () => void;
 
-    this._whenExecuted = new Promise(resolve => executed = resolve);
+    this.#whenExecuted = new Promise(resolve => executed = resolve);
 
     // Ensure all stages executed in order.
-    this._workbench.promulgate(() => {
+    this.#workbench.promulgate(() => {
       this.formation.deploy(this.formation);
     });
-    this._workbench.execute(noop);
-    this._workbench.deliver(noop);
-    this._workbench.finalize(executed);
+    this.#workbench.execute(noop);
+    this.#workbench.deliver(noop);
+    this.#workbench.finalize(executed);
   }
 
   get log(): Logger {
@@ -51,7 +51,7 @@ export class Order$Evaluator implements Unit$Host {
   }
 
   get workbench(): Unit$Workbench {
-    return this.order.active ? this._workbench : this.host.workbench;
+    return this.order.active ? this.#workbench : this.host.workbench;
   }
 
   get formation(): Formation {
@@ -67,24 +67,24 @@ export class Order$Evaluator implements Unit$Host {
   }
 
   executeOrder(): Promise<void> {
-    this._workbench.start();
-    return this._whenExecuted;
+    this.#workbench.start();
+    return this.#whenExecuted;
   }
 
   evalUnit<TUnit extends Unit>(unit: TUnit): Unit$Evaluator<TUnit> {
 
-    let evaluator = this._units.get(unit.uid);
+    let evaluator = this.#units.get(unit.uid);
 
     if (!evaluator) {
       evaluator = new Unit$Evaluator<TUnit>(this, unit);
-      this._units.set(unit.uid, evaluator);
+      this.#units.set(unit.uid, evaluator);
     }
 
     return evaluator;
   }
 
   deliver(task: Workbench.Task<void>): void {
-    this._workbench.deliver(task);
+    this.#workbench.deliver(task);
   }
 
 }
