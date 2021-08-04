@@ -50,15 +50,6 @@ export class Unit implements SupplyPeer {
   }
 
   /**
-   * Unit tag.
-   *
-   * Either the one specified {@link Unit.Init.tag explicitly}, or empty string.
-   */
-  get tag(): string {
-    return this[Unit$Id__symbol].tag;
-  }
-
-  /**
    * Unique identifier of this unit.
    *
    * Unit instances with the same identifier represent the same executive unit.

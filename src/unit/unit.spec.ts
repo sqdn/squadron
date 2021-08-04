@@ -23,15 +23,6 @@ describe('Unit', () => {
     test.reset();
   });
 
-  describe('tag', () => {
-    it('is empty by default', () => {
-      expect(new TestUnit().tag).toBe('');
-    });
-    it('can be specified', () => {
-      expect(new TestUnit({ tag: 'test' }).tag).toBe('test');
-    });
-  });
-
   describe('uid', () => {
     it('is unique to each unit instantiation location', () => {
 
