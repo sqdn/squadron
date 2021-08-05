@@ -1,5 +1,5 @@
 import { MessagePort } from 'worker_threads';
-import { CommPacket } from '../comm-packet';
+import { CommPacket } from '../../communication';
 
 /**
  * A request to start communication by messaging via the given port.

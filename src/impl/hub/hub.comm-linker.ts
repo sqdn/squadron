@@ -7,16 +7,15 @@ import {
   CommChannel,
   CommLink,
   CommLinker,
-  CommMessagingRequest,
   CommProcessor,
   MessageCommChannel,
-  MessageCommLinkRequest,
-  MessageCommLinkResponse,
   ProxyCommChannel,
 } from '../../communication';
 import { Formation, FormationContext } from '../../formation';
 import { FormationCtl, FormationManager } from '../../hub';
 import { Unit } from '../../unit';
+import { CommMessagingRequest } from '../formation';
+import { MessageCommLinkRequest, MessageCommLinkResponse } from './message-comm-link';
 
 /**
  * Communication linker implementation to be used by {@link Hub central hub}.

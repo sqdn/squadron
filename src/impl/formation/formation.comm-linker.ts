@@ -7,7 +7,6 @@ import {
   CommChannel,
   CommLink,
   CommLinker,
-  CommMessagingRequest,
   CommPacket,
   CommProcessor,
   MessageCommChannel,
@@ -18,6 +17,7 @@ import { Hub } from '../../hub';
 import { Unit } from '../../unit';
 import { Formation$Host } from '../formation.host';
 import { Formation$LaunchData } from '../formation.launch-data';
+import { CommMessagingRequest } from './comm-messaging-request';
 
 /**
  * Communication linker implementation to be used by {@link Formation formation}.
