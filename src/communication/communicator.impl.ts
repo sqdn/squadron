@@ -26,11 +26,6 @@ export class Communicator$ implements Communicator {
     }
 
     const at = this.#host.unitFormations(to);
-
-    if (!at.length) {
-      throw new TypeError(`${this.#unit} can not connect to ${to}. The latter is not deployed`);
-    }
-
     const channel = this.#method.connect({
       from: this.#unit,
       to,
