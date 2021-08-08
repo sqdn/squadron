@@ -1,4 +1,5 @@
 import { CxEntry, cxScoped, cxSingle } from '@proc7ts/context-values';
+import { OnEvent } from '@proc7ts/fun-events';
 import { Unit } from '../unit';
 import { FormationContext } from './formation-context';
 import { UnitLocation } from './unit-location';
@@ -13,9 +14,9 @@ export interface UnitLocator {
    *
    * @param unit - Target unit.
    *
-   * @returns Unit location.
+   * @returns `OnEvent` sender of unit location.
    */
-  locateUnit(unit: Unit): UnitLocation;
+  locateUnit(unit: Unit): OnEvent<[UnitLocation]>;
 
 }
 

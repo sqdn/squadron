@@ -7,7 +7,7 @@ import { lazyValue } from '@proc7ts/primitives';
 import { Formation } from '../../formation';
 import { FormationContext$create } from '../../formation/formation-context.impl';
 import { Formation$LaunchData, launchSqdn } from '../../impl';
-import { FormationCommLinker } from '../../impl/formation';
+import { FormationCommLinker, FormationUnitLocator } from '../../impl/formation';
 import { SqdnLauncher } from '../sqdn-launcher';
 
 export default function launchFormation(launcher: SqdnLauncher): void {
@@ -18,6 +18,7 @@ export default function launchFormation(launcher: SqdnLauncher): void {
         createContext(host, get, cxBuilder) {
 
           cxBuilder.provide(cxConstAsset(Formation$LaunchData, launcher.launchData));
+          cxBuilder.provide(FormationUnitLocator);
           cxBuilder.provide(FormationCommLinker);
 
           return FormationContext$create(host, get, cxBuilder);

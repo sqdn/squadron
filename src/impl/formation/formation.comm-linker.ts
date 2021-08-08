@@ -13,11 +13,10 @@ import {
   ProxyCommChannel,
 } from '../../communication';
 import { Formation, FormationContext } from '../../formation';
-import { Hub } from '../../hub';
 import { Unit } from '../../unit';
 import { Formation$Host } from '../formation.host';
-import { Formation$LaunchData } from '../formation.launch-data';
-import { CommMessagingRequest } from './comm-messaging-request';
+import { CommMessagingRequest } from './comm-messaging.request';
+import { FormationToHubCommChannel } from './formation-to-hub.comm-channel';
 
 /**
  * Communication linker implementation to be used by {@link Formation formation}.
@@ -47,18 +46,11 @@ export class FormationCommLinker implements CommLinker {
 
   readonly #context: FormationContext;
   readonly #links = new Map<string, CommLink>();
-  readonly #hubChannel: CommChannel;
+  readonly #hubChannel: FormationToHubCommChannel;
 
   private constructor(target: CxEntry.Target<CommLinker>) {
     this.#context = target.get(FormationContext);
-
-    const launchData = target.get(Formation$LaunchData);
-
-    this.#hubChannel = new MessageCommChannel({
-      to: new Hub({ id: launchData.hubUid }),
-      port: launchData.hubPort,
-      logger: target.get(Logger),
-    });
+    this.#hubChannel = target.get(FormationToHubCommChannel);
   }
 
   link(formation: Formation): CommLink {

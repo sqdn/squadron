@@ -59,6 +59,17 @@ export class Formation$Host implements Unit$Host {
     return formations ? [...formations.values()] : [];
   }
 
+  isUnitDeployedAt(unit: Unit, formation: Formation): boolean {
+
+    const formations = this.#unitFormations.get(unit.uid);
+
+    return !!formations && formations.has(formation.uid);
+  }
+
+  isLocalUnit(unit: Unit): boolean {
+    return this.isUnitDeployedAt(unit, this.formation);
+  }
+
   deploy(formation: Formation, unit: Unit): void {
 
     let unitFormations = this.#unitFormations.get(unit.uid);

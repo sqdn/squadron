@@ -15,7 +15,7 @@ import { Formation, FormationContext } from '../../formation';
 import { FormationCtl, FormationManager } from '../../hub';
 import { Unit } from '../../unit';
 import { CommMessagingRequest } from '../formation';
-import { MessageCommLinkRequest, MessageCommLinkResponse } from './message-comm-link';
+import { MessageCommLinkRequest, MessageCommLinkResponse } from './message-comm-link.request';
 
 /**
  * Communication linker implementation to be used by {@link Hub central hub}.
