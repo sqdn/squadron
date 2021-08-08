@@ -1,10 +1,10 @@
 import { describe, expect, it } from '@jest/globals';
-import { CommMethod } from './comm-method';
+import { UnitLocator } from './unit-locator';
 
-describe('CommMethod', () => {
+describe('UnitLocator', () => {
   describe('toString', () => {
     it('provides string representation', () => {
-      expect(String(CommMethod)).toBe('[CommMethod]');
+      expect(String(UnitLocator)).toBe('[UnitLocator]');
     });
   });
 });

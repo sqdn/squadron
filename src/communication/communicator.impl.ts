@@ -1,20 +1,22 @@
-import { Formation$Host } from '../impl';
+import { UnitLocator } from '../formation';
 import { Unit, UnitContext } from '../unit';
+import { DirectCommChannel } from './channels';
 import { CommChannel } from './comm-channel';
-import { CommMethod } from './comm-method';
+import { CommProcessor } from './comm-processor';
 import { Communicator } from './communicator';
+import { CommLinker } from './linkage';
 
 export class Communicator$ implements Communicator {
 
-  readonly #unit: Unit;
-  readonly #host: Formation$Host;
-  readonly #method: CommMethod;
+  readonly #locator: UnitLocator;
+  readonly #processor: CommProcessor;
+  readonly #linker: CommLinker;
   readonly #channels = new Map<string, CommChannel>();
 
   constructor(context: UnitContext) {
-    this.#unit = context.unit;
-    this.#host = context.get(Formation$Host);
-    this.#method = context.get(CommMethod);
+    this.#locator = context.get(UnitLocator);
+    this.#processor = context.get(CommProcessor);
+    this.#linker = context.get(CommLinker);
   }
 
   connect(to: Unit): CommChannel {
@@ -25,15 +27,23 @@ export class Communicator$ implements Communicator {
       return existing;
     }
 
-    const at = this.#host.unitFormations(to);
-    const channel = this.#method.connect({
-      from: this.#unit,
-      to,
-      at,
-    });
+    const location = this.#locator.locateUnit(to);
+    let channel: CommChannel;
 
-    if (!channel) {
-      throw new TypeError(`${this.#unit} can not connect to ${to}`);
+    if (location.isLocal) {
+      channel = new DirectCommChannel({ to, processor: this.#processor });
+    } else {
+
+      const { formations } = location;
+
+      if (!formations.length) {
+        throw new TypeError(`${to} is not deployed`);
+      }
+
+      const formation = formations[Math.floor(Math.random() * formations.length)];
+      const link = this.#linker.link(formation);
+
+      channel = link.connect(to);
     }
 
     this.#channels.set(to.uid, channel);
