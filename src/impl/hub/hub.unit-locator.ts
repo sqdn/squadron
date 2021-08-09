@@ -7,7 +7,7 @@ import { Unit } from '../../unit';
 import { Formation$Host } from '../formation.host';
 import { UnitLocationRequest, UnitLocationResponse } from './unit-location.request';
 
-export class HubUnitLocator implements UnitLocator {
+export class Hub$UnitLocator implements UnitLocator {
 
   static get entry(): CxEntry<UnitLocator> {
     return UnitLocator;
@@ -15,7 +15,7 @@ export class HubUnitLocator implements UnitLocator {
 
   static setupAsset(target: CxEntry.Target<UnitLocator>): void {
 
-    const locator = new HubUnitLocator(target);
+    const locator = new Hub$UnitLocator(target);
 
     target.provide(cxConstAsset(UnitLocator, locator));
     target.provide(cxConstAsset(
@@ -34,7 +34,7 @@ export class HubUnitLocator implements UnitLocator {
   }
 
   locateUnit(unit: Unit): OnEvent<[UnitLocation]> {
-    return afterThe(new HubUnitLocation(this.#host, unit));
+    return afterThe(new Hub$UnitLocation(this.#host, unit));
   }
 
   #locateUnit({ unit }: UnitLocationRequest): OnEvent<[UnitLocationResponse]> {
@@ -45,7 +45,7 @@ export class HubUnitLocator implements UnitLocator {
 
 }
 
-class HubUnitLocation implements UnitLocation {
+class Hub$UnitLocation implements UnitLocation {
 
   readonly #host: Formation$Host;
   readonly #unit: Unit;

@@ -23,7 +23,7 @@ import { MessageCommLinkRequest, MessageCommLinkResponse } from './message-comm-
  * This class can be used as a formation context asset that provides both link implementation and {@link CommResponder
  * inbound command responder} for {@link MessageCommLinkRequest} request.
  */
-export class HubCommLinker implements CommLinker {
+export class Hub$CommLinker implements CommLinker {
 
   static get entry(): CxEntry<CommLinker> {
     return CommLinker;
@@ -31,7 +31,7 @@ export class HubCommLinker implements CommLinker {
 
   static setupAsset(target: CxEntry.Target<CommLinker>): void {
 
-    const linker = new HubCommLinker(target);
+    const linker = new Hub$CommLinker(target);
 
     target.provide(cxConstAsset(CommLinker, linker));
     target.provide(cxConstAsset(
@@ -57,7 +57,7 @@ export class HubCommLinker implements CommLinker {
     let link = this.#links.get(formation.uid);
 
     if (!link) {
-      link = new HubToFormationCommLink(
+      link = new Hub$CommLink(
           this.#context,
           this.#formationManager.formationCtl(formation),
       );
@@ -93,7 +93,7 @@ export class HubCommLinker implements CommLinker {
 
 }
 
-class HubToFormationCommLink implements CommLink {
+class Hub$CommLink implements CommLink {
 
   readonly #context: FormationContext;
   readonly #ctl: FormationCtl;

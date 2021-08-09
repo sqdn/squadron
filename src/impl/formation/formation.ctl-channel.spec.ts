@@ -1,10 +1,10 @@
 import { describe, expect, it } from '@jest/globals';
-import { FormationToHubCommChannel } from './formation-to-hub.comm-channel';
+import { Formation$CtlChannel } from './formation.ctl-channel';
 
 describe('FormationToHubCommChannel', () => {
   describe('toString', () => {
     it('provides string representation', () => {
-      expect(String(FormationToHubCommChannel)).toBe('[FormationToHubCommChannel]');
+      expect(String(Formation$CtlChannel)).toBe('[Formation:CtlChannel]');
     });
   });
 });

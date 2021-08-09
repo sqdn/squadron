@@ -5,9 +5,9 @@ import { FormationContext } from '../../formation';
 import { Hub } from '../../hub';
 import { Formation$LaunchData } from '../formation.launch-data';
 
-export type FormationToHubCommChannel = CommChannel;
+export type Formation$CtlChannel = CommChannel;
 
-export const FormationToHubCommChannel: CxEntry<FormationToHubCommChannel> = {
+export const Formation$CtlChannel: CxEntry<Formation$CtlChannel> = {
   perContext: (/*#__PURE__*/ cxScoped(
       FormationContext,
       cxSingle({
@@ -23,5 +23,5 @@ export const FormationToHubCommChannel: CxEntry<FormationToHubCommChannel> = {
         },
       }),
   )),
-  toString: () => '[FormationToHubCommChannel]',
+  toString: () => '[Formation:CtlChannel]',
 };

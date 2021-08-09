@@ -16,7 +16,7 @@ import { Formation, FormationContext } from '../../formation';
 import { Unit } from '../../unit';
 import { Formation$Host } from '../formation.host';
 import { CommMessagingRequest } from './comm-messaging.request';
-import { FormationToHubCommChannel } from './formation-to-hub.comm-channel';
+import { Formation$CtlChannel } from './formation.ctl-channel';
 
 /**
  * Communication linker implementation to be used by {@link Formation formation}.
@@ -24,7 +24,7 @@ import { FormationToHubCommChannel } from './formation-to-hub.comm-channel';
  * This class can be used as a formation context asset that provides both link implementation and {@link CommResponder
  * inbound command responder} for {@link CommMessagingRequest} request.
  */
-export class FormationCommLinker implements CommLinker {
+export class Formation$CommLinker implements CommLinker {
 
   static get entry(): CxEntry<CommLinker> {
     return CommLinker;
@@ -32,7 +32,7 @@ export class FormationCommLinker implements CommLinker {
 
   static setupAsset(target: CxEntry.Target<CommLinker>): void {
 
-    const linker = new FormationCommLinker(target);
+    const linker = new Formation$CommLinker(target);
 
     target.provide(cxConstAsset(CommLinker, linker));
     target.provide(cxConstAsset(
@@ -46,11 +46,11 @@ export class FormationCommLinker implements CommLinker {
 
   readonly #context: FormationContext;
   readonly #links = new Map<string, CommLink>();
-  readonly #hubChannel: FormationToHubCommChannel;
+  readonly #ctlChannel: Formation$CtlChannel;
 
   private constructor(target: CxEntry.Target<CommLinker>) {
     this.#context = target.get(FormationContext);
-    this.#hubChannel = target.get(FormationToHubCommChannel);
+    this.#ctlChannel = target.get(Formation$CtlChannel);
   }
 
   link(formation: Formation): CommLink {
@@ -62,7 +62,7 @@ export class FormationCommLinker implements CommLinker {
       const host = this.#context.get(Formation$Host);
       const logger = this.#context.get(Logger);
       const { port1, port2 } = new MessageChannel();
-      const onPortAccepted = this.#hubChannel.request<CommMessagingRequest>(
+      const onPortAccepted = this.#ctlChannel.request<CommMessagingRequest>(
           'message-comm-port',
           {
             meta: { transferList: [port2] },
@@ -80,7 +80,7 @@ export class FormationCommLinker implements CommLinker {
           })),
       );
 
-      link = new FormationToFormationCommLink(
+      link = new Formation$CommLink(
           host,
           formation,
           new ProxyCommChannel({
@@ -115,7 +115,7 @@ export class FormationCommLinker implements CommLinker {
 
 }
 
-class FormationToFormationCommLink implements CommLink {
+class Formation$CommLink implements CommLink {
 
   readonly #host: Formation$Host;
   readonly #to: Formation;

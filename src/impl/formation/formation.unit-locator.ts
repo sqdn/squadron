@@ -3,9 +3,9 @@ import { mapOn_, OnEvent } from '@proc7ts/fun-events';
 import { Formation, UnitLocation, UnitLocator } from '../../formation';
 import { Unit } from '../../unit';
 import { UnitLocationRequest, UnitLocationResponse } from '../hub';
-import { FormationToHubCommChannel } from './formation-to-hub.comm-channel';
+import { Formation$CtlChannel } from './formation.ctl-channel';
 
-export class FormationUnitLocator implements UnitLocator {
+export class Formation$UnitLocator implements UnitLocator {
 
   static get entry(): CxEntry<UnitLocator> {
     return UnitLocator;
@@ -15,31 +15,31 @@ export class FormationUnitLocator implements UnitLocator {
       target: CxEntry.Target<UnitLocator>,
   ): (this: void, collector: CxAsset.Collector<UnitLocator>) => void {
 
-    const locator = new FormationUnitLocator(target);
+    const locator = new Formation$UnitLocator(target);
 
     return collector => collector(locator);
   }
 
   readonly #formation: Formation;
-  readonly #hubChannel: FormationToHubCommChannel;
+  readonly #ctlChannel: Formation$CtlChannel;
 
   private constructor(target: CxEntry.Target<UnitLocator>) {
     this.#formation = target.get(Formation);
-    this.#hubChannel = target.get(FormationToHubCommChannel);
+    this.#ctlChannel = target.get(Formation$CtlChannel);
   }
 
   locateUnit(unit: Unit): OnEvent<[UnitLocation]> {
-    return this.#hubChannel.request<UnitLocationRequest, UnitLocationResponse>(
+    return this.#ctlChannel.request<UnitLocationRequest, UnitLocationResponse>(
         'unit-location',
         { unit: unit.uid },
     ).do(
-        mapOn_(response => new FormationUnitLocation(this.#formation, response)),
+        mapOn_(response => new Formation$UnitLocation(this.#formation, response)),
     );
   }
 
 }
 
-class FormationUnitLocation implements UnitLocation {
+class Formation$UnitLocation implements UnitLocation {
 
   readonly #formations = new Map<string, Formation>();
   readonly #isLocal: boolean;

@@ -6,7 +6,6 @@ import MockOrder from '@sqdn/order/mock';
 import { Formation, FormationContext } from '../formation';
 import { FormationContext$create } from '../formation/formation-context.impl';
 import { Formation$Host, Order$Evaluator } from '../impl';
-import { Unit, UnitTask } from '../unit';
 
 export interface OrderTest {
 
@@ -41,12 +40,6 @@ export namespace OrderTest {
     setup(this: void, init?: OrderTest.Init): OrderTest;
 
   }
-
-  export type UnitsStarter = <TUnit extends Unit>(
-      this: void,
-      unit: TUnit,
-      starter: UnitTask<TUnit>,
-  ) => void | PromiseLike<unknown>;
 
 }
 
