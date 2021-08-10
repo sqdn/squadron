@@ -27,7 +27,7 @@
     "./testing": "./dist/squadron.testing.js"
   },
   "engines": {
-    "node": ">=16"
+    "node": ">=16.6"
   },
   "peerDependencies": {
     "@proc7ts/context-values": "^7.0.0",
