@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it } from '@jest/globals';
-import Order from '@sqdn/order';
 import { Formation, FormationContext } from '../formation';
 import { OrderTest } from '../testing';
 import { Unit } from './unit';
@@ -16,15 +15,15 @@ describe('UnitContext', () => {
 
   it('is available in order', () => {
 
-    const context = Order.get(UnitContext);
+    const context = OrderTest.order.get(UnitContext);
 
     expect(context.formation).toBe(OrderTest.formation);
     expect(context.unit).toBe(OrderTest.formation);
-    expect(context).toBe(Order.get(FormationContext));
+    expect(context).toBe(OrderTest.order.get(FormationContext));
   });
   it('is available during unit execution', async () => {
 
-    const orderFormation = Order.get(Formation);
+    const orderFormation = OrderTest.order.get(Formation);
     const unit = new Unit({ tag: 'test' });
     let context!: UnitContext;
 

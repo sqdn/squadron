@@ -34,6 +34,7 @@ describe('OrderTest', () => {
 
       expect(test.cxBuilder).toBe(OrderTest.cxBuilder);
       expect(test.order).toBe(OrderTest.order);
+      expect(test.order.current).toBe(OrderTest.order);
       expect(test.formation).toBe(OrderTest.formation);
       expect(test.formationCxBuilder).toBe(OrderTest.formationCxBuilder);
       expect(test.evaluate).toBe(OrderTest.evaluate);

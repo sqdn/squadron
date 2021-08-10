@@ -23,6 +23,19 @@ describe('Unit', () => {
     test.reset();
   });
 
+  describe('originOrder', () => {
+    it('equals to original order', () => {
+
+      const unit = new TestUnit();
+
+      expect(unit.originOrder).toBe(test.order);
+      expect(unit.originOrder).toBe(OrderTest.order);
+
+      OrderTest.reset();
+      expect(unit.originOrder).not.toBe(OrderTest.order);
+    });
+  });
+
   describe('uid', () => {
     it('is unique to each unit instantiation location', () => {
 

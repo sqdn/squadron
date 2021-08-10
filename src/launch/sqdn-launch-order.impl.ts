@@ -9,6 +9,10 @@ export class SqdnLaunchOrder implements Order {
     this.#getOrder = getOrder;
   }
 
+  get current(): Order {
+    return this.#getOrder().current;
+  }
+
   get active(): boolean {
     return this.#getOrder().active;
   }

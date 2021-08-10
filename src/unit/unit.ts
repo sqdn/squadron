@@ -16,6 +16,8 @@ import { Unit$Id, Unit$Id__symbol } from './unit.id.impl';
  */
 export class Unit implements SupplyPeer {
 
+  readonly #originOrder: Order;
+
   /**
    * @internal
    */
@@ -32,12 +34,13 @@ export class Unit implements SupplyPeer {
    * @param init - Unit initialization options.
    */
   constructor(init?: Unit.Init) {
+    this.#originOrder = Order.current;
     Error.captureStackTrace(
         this[Unit$Id__symbol] = new Unit$Id(this, init),
         new.target,
     );
 
-    this[Unit$Backend__symbol] = Order.get(Order$Evaluator).evalUnit(this);
+    this[Unit$Backend__symbol] = this.originOrder.get(Order$Evaluator).evalUnit(this);
   }
 
   /**
@@ -47,6 +50,15 @@ export class Unit implements SupplyPeer {
    */
   get origin(): string {
     return this[Unit$Id__symbol].origin;
+  }
+
+  /**
+   * The order this unit originated from.
+   *
+   * This is the order the unit constructor has been called in.
+   */
+  get originOrder(): Order {
+    return this.#originOrder;
   }
 
   /**

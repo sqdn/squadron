@@ -47,11 +47,11 @@ export class Order$Evaluator implements Unit$Host {
   }
 
   get log(): Logger {
-    return this.order.active ? this.order.get(Logger) : this.host.log;
+    return this.order.get(Logger);
   }
 
   get workbench(): Unit$Workbench {
-    return this.order.active ? this.#workbench : this.host.workbench;
+    return this.#workbench;
   }
 
   get formation(): Formation {

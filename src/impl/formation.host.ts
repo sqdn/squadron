@@ -8,6 +8,7 @@ import { Unit$Backend__symbol } from '../unit/unit.backend.impl';
 import { Unit$Deployment } from '../unit/unit.deployment.impl';
 import { Unit$Host } from '../unit/unit.host.impl';
 import { Formation$Factory } from './formation.factory';
+import { Formation$Order } from './formation.order';
 import { Formation$Workbench } from './formation.workbench';
 
 const Formation$Host$perContext: CxEntry.Definer<Formation$Host> = (/*#__PURE__*/ cxSingle());
@@ -105,12 +106,7 @@ export class Formation$Host implements Unit$Host {
     return new CxBuilder<Order>(
         (get, builder) => {
 
-          const order: Order = {
-            entry: Order.entry,
-            active: true,
-            orderId,
-            get,
-          };
+          const order = new Formation$Order(orderId, get);
 
           builder.provide(cxConstAsset(Order.entry, order));
 
@@ -121,3 +117,4 @@ export class Formation$Host implements Unit$Host {
   }
 
 }
+

@@ -1,4 +1,4 @@
-import { CxBuilder, cxConstAsset } from '@proc7ts/context-builder';
+import { cxBuildAsset, CxBuilder, cxConstAsset } from '@proc7ts/context-builder';
 import { Logger, silentLogger } from '@proc7ts/logger';
 import { lazyValue } from '@proc7ts/primitives';
 import Order from '@sqdn/order';
@@ -64,30 +64,31 @@ export const OrderTest: OrderTest.Static = {
       ),
     });
     const cxBuilder = host.newOrderBuilder(orderId || 'mock-order');
+    let order: MockOrder;
 
-    cxBuilder.provide(cxConstAsset(Order.entry, MockOrder));
+    cxBuilder.provide(cxBuildAsset(Order.entry, () => order));
     host.cxBuilder.provide(cxConstAsset(Logger, logger));
 
-    const order = cxBuilder.context;
+    const orderContext = cxBuilder.context;
 
-    MockOrder.mock({
-      orderId: order.orderId,
+    order = MockOrder.mock({
+      orderId: orderContext.orderId,
       peer: cxBuilder,
     });
 
     return OrderTest$instance = {
       cxBuilder,
-      order: MockOrder,
-      formation: MockOrder.get(Formation),
+      order,
+      formation: order.get(Formation),
       formationCxBuilder: host.cxBuilder,
 
       evaluate(): Promise<void> {
-        if (MockOrder.active) {
-          return MockOrder
+        if (order.active) {
+          return order
               .get(Order$Evaluator)
               .executeOrder()
               .then(() => {
-                MockOrder.mockReset();
+                order = MockOrder.mockReset();
               });
         }
 

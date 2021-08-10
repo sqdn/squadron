@@ -11,7 +11,7 @@ export class SqdnLauncher {
 
   readonly #resolve: RequireResolve;
   readonly #cache = new Map<string, SqdnLaunchModule>();
-  #order = Order;
+  #order!: Order;
   #launchData?: Formation$LaunchData | null = null;
   #orderModule?: Promise<Module>;
 
