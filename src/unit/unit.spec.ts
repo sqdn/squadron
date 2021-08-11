@@ -23,12 +23,16 @@ describe('Unit', () => {
     test.reset();
   });
 
-  describe('tag', () => {
-    it('is empty by default', () => {
-      expect(new TestUnit().tag).toBe('');
-    });
-    it('can be specified', () => {
-      expect(new TestUnit({ tag: 'test' }).tag).toBe('test');
+  describe('originOrder', () => {
+    it('equals to original order', () => {
+
+      const unit = new TestUnit();
+
+      expect(unit.originOrder).toBe(test.order);
+      expect(unit.originOrder).toBe(OrderTest.order);
+
+      OrderTest.reset();
+      expect(unit.originOrder).not.toBe(OrderTest.order);
     });
   });
 

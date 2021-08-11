@@ -4,9 +4,11 @@ import { Logger } from '@proc7ts/logger';
 import Order from '@sqdn/order';
 import { Formation, FormationContext } from '../formation';
 import { Unit, UnitContext, UnitTask } from '../unit';
+import { Unit$Backend__symbol } from '../unit/unit.backend.impl';
 import { Unit$Deployment } from '../unit/unit.deployment.impl';
 import { Unit$Host } from '../unit/unit.host.impl';
 import { Formation$Factory } from './formation.factory';
+import { Formation$Order } from './formation.order';
 import { Formation$Workbench } from './formation.workbench';
 
 const Formation$Host$perContext: CxEntry.Definer<Formation$Host> = (/*#__PURE__*/ cxSingle());
@@ -27,12 +29,15 @@ export class Formation$Host implements Unit$Host {
   readonly perOrderCxPeer: CxPeerBuilder<Order>;
   readonly perUnitCxPeer: CxPeer<UnitContext>;
 
-  private _formation: Formation | null = null;
-  private readonly _deployments = new Map<string, Unit$Deployment<any>>();
+  readonly #factory: Formation$Factory;
+  #formation?: Formation;
+  readonly #unitFormations = new Map<string, Map<string, Formation>>();
+  readonly #deployments = new Map<string, Unit$Deployment<any>>();
 
-  constructor(private readonly _factory: Formation$Factory) {
+  constructor(factory: Formation$Factory) {
+    this.#factory = factory;
     this.cxBuilder = new CxBuilder(
-        (get, builder) => _factory.createContext(this, get, builder),
+        (get, builder) => factory.createContext(this, get, builder),
     );
     this.context = this.cxBuilder.context;
 
@@ -41,11 +46,44 @@ export class Formation$Host implements Unit$Host {
   }
 
   get formation(): Formation {
-    return this._formation ||= this._factory.getFormation();
+    return this.#formation ||= this.#factory.getFormation();
   }
 
   get log(): Logger {
     return this.context.get(Logger);
+  }
+
+  unitFormations(unit: Unit): readonly Formation[] {
+
+    const formations = this.#unitFormations.get(unit.uid);
+
+    return formations ? [...formations.values()] : [];
+  }
+
+  isUnitDeployedAt(unit: Unit, formation: Formation): boolean {
+
+    const formations = this.#unitFormations.get(unit.uid);
+
+    return !!formations && formations.has(formation.uid);
+  }
+
+  isLocalUnit(unit: Unit): boolean {
+    return this.isUnitDeployedAt(unit, this.formation);
+  }
+
+  deploy(formation: Formation, unit: Unit): void {
+
+    let unitFormations = this.#unitFormations.get(unit.uid);
+
+    if (!unitFormations) {
+      this.#unitFormations.set(unit.uid, unitFormations = new Map());
+    }
+
+    unitFormations.set(formation.uid, formation); // Record the formation the unit is deployed to.
+
+    if (this.formation.uid === formation.uid) {
+      unit[Unit$Backend__symbol].deployTo(this.formation);
+    }
   }
 
   async executeUnitTask<TUnit extends Unit>(unit: TUnit, task: UnitTask<TUnit>): Promise<void> {
@@ -54,11 +92,11 @@ export class Formation$Host implements Unit$Host {
 
   unitDeployment<TUnit extends Unit>(unit: TUnit): Unit$Deployment<TUnit> {
 
-    let deployment = this._deployments.get(unit.uid);
+    let deployment = this.#deployments.get(unit.uid);
 
     if (!deployment) {
       deployment = new Unit$Deployment(this, unit);
-      this._deployments.set(unit.uid, deployment);
+      this.#deployments.set(unit.uid, deployment);
     }
 
     return deployment;
@@ -68,12 +106,7 @@ export class Formation$Host implements Unit$Host {
     return new CxBuilder<Order>(
         (get, builder) => {
 
-          const order: Order = {
-            entry: Order.entry,
-            active: true,
-            orderId,
-            get,
-          };
+          const order = new Formation$Order(orderId, get);
 
           builder.provide(cxConstAsset(Order.entry, order));
 

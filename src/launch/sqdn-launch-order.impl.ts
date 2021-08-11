@@ -3,23 +3,30 @@ import Order from '@sqdn/order';
 
 export class SqdnLaunchOrder implements Order {
 
-  constructor(readonly $: () => Order) {
+  readonly #getOrder: () => Order;
+
+  constructor(getOrder: () => Order) {
+    this.#getOrder = getOrder;
+  }
+
+  get current(): Order {
+    return this.#getOrder().current;
   }
 
   get active(): boolean {
-    return this.$().active;
+    return this.#getOrder().active;
   }
 
   get entry(): CxEntry<Order> {
-    return this.$().entry;
+    return this.#getOrder().entry;
   }
 
   get orderId(): string {
-    return this.$().orderId;
+    return this.#getOrder().orderId;
   }
 
   get<TValue>(entry: CxEntry<TValue, unknown>, request?: CxRequest<TValue>): TValue | null {
-    return this.$().get(entry, request);
+    return this.#getOrder().get(entry, request);
   }
 
 }

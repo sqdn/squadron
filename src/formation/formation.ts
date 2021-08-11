@@ -36,13 +36,7 @@ export class Formation extends Unit {
    * @returns `this` instance.
    */
   deploy(unit: Unit): this {
-
-    const { host } = this[Unit$Backend__symbol];
-
-    if (host && host.formation.uid === this.uid) {
-      unit[Unit$Backend__symbol].deployTo(this);
-    }
-
+    this[Unit$Backend__symbol].host.deploy(this, unit);
     return this;
   }
 

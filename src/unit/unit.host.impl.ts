@@ -10,6 +10,8 @@ export interface Unit$Host {
   readonly workbench: Unit$Workbench;
   readonly formation: Formation;
 
+  deploy(formation: Formation, unit: Unit): void;
+
   executeUnitTask<TUnit extends Unit>(unit: TUnit, task: UnitTask<TUnit>): Promise<void>;
 
 }

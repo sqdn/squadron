@@ -5,7 +5,7 @@ import { SqdnLauncher } from './sqdn-launcher';
 
 export class SqdnLaunchModule {
 
-  private _getModule: () => Promise<Module>;
+  #getModule: () => Promise<Module>;
   readonly id: string;
 
   constructor(
@@ -13,11 +13,11 @@ export class SqdnLaunchModule {
       readonly sourceURL: URL,
       specifier?: string,
   ) {
-    this._getModule = () => {
+    this.#getModule = () => {
 
-      const promise = this.readSource().then(src => this.createModule(src));
+      const promise = this.#readSource().then(src => this.#createModule(src));
 
-      this._getModule = () => promise;
+      this.#getModule = () => promise;
 
       return promise;
     };
@@ -25,17 +25,17 @@ export class SqdnLaunchModule {
   }
 
   get module(): Promise<Module> {
-    return this._getModule();
+    return this.#getModule();
   }
 
-  private async readSource(): Promise<string> {
+  async #readSource(): Promise<string> {
     return await fs.readFile(
         fileURLToPath(this.sourceURL.href),
         { encoding: 'utf8' },
     );
   }
 
-  private async createModule(source: string): Promise<Module> {
+  async #createModule(source: string): Promise<Module> {
 
     const module = new SourceTextModule(
         source,

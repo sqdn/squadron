@@ -6,14 +6,14 @@ export const Unit$Id__symbol = (/*#__PURE__*/ Symbol('Unit.id'));
 export class Unit$Id {
 
   stack!: string;
-  readonly tag: string;
-  private _origin?: string;
-  private _uid?: string;
+  readonly #tag: string;
+  #origin?: string;
+  #uid?: string;
 
   constructor(readonly unit: Unit, { tag = '', id }: Unit.Init = {}) {
-    this.tag = tag;
+    this.#tag = tag;
     if (id) {
-      this._uid = tag ? `${tag}@${id}` : id;
+      this.#uid = tag ? `${tag}@${id}` : id;
     }
   }
 
@@ -26,19 +26,19 @@ export class Unit$Id {
   }
 
   get origin(): string {
-    if (!this._origin) {
+    if (!this.#origin) {
 
       const origin = Unit$origin(this.stack);
-      const tag = this.tag;
+      const tag = this.#tag;
 
-      this._origin = tag ? `${origin}#${tag}` : origin;
+      this.#origin = tag ? `${origin}#${tag}` : origin;
     }
 
-    return this._origin;
+    return this.#origin;
   }
 
   get uid(): string {
-    if (!this._uid) {
+    if (!this.#uid) {
 
       const hash = createHash('sha256');
 
@@ -46,10 +46,10 @@ export class Unit$Id {
 
       const stackHash = hash.digest('hex');
 
-      this._uid = this.tag ? `${this.tag}@${stackHash}` : stackHash;
+      this.#uid = this.#tag ? `${this.#tag}@${stackHash}` : stackHash;
     }
 
-    return this._uid;
+    return this.#uid;
   }
 
 }

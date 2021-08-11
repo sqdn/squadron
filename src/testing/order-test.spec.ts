@@ -23,7 +23,6 @@ describe('OrderTest', () => {
 
   describe('formation', () => {
     it('sets up the test automatically', () => {
-      expect(OrderTest.formation.tag).toBe('test');
       expect(OrderTest.formation).toBe(OrderTest.order.get(Formation));
     });
   });
@@ -35,6 +34,7 @@ describe('OrderTest', () => {
 
       expect(test.cxBuilder).toBe(OrderTest.cxBuilder);
       expect(test.order).toBe(OrderTest.order);
+      expect(test.order.current).toBe(OrderTest.order);
       expect(test.formation).toBe(OrderTest.formation);
       expect(test.formationCxBuilder).toBe(OrderTest.formationCxBuilder);
       expect(test.evaluate).toBe(OrderTest.evaluate);
