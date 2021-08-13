@@ -4,7 +4,7 @@ import { lazyValue } from '@proc7ts/primitives';
 import Order from '@sqdn/order';
 import MockOrder from '@sqdn/order/mock';
 import { Formation, FormationContext } from '../formation';
-import { FormationContext$create } from '../formation/formation-context.impl';
+import { Formation$Context } from '../formation/formation.context.impl';
 import { Formation$Host, Order$Evaluator } from '../impl';
 
 export interface OrderTest {
@@ -57,7 +57,7 @@ export const OrderTest: OrderTest.Static = {
 
     const host = new Formation$Host({
       getFormation,
-      createContext: (host, get, builder) => FormationContext$create(
+      createContext: (host, get, builder) => new Formation$Context(
           host,
           get,
           builder,
