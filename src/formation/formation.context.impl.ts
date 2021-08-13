@@ -1,5 +1,5 @@
 import { cxBuildAsset, CxBuilder, cxConstAsset } from '@proc7ts/context-builder';
-import { CxAccessor, CxGlobals } from '@proc7ts/context-values';
+import { CxAccessor, CxEntry, CxGlobals, CxRequest } from '@proc7ts/context-values';
 import { Formation$Host } from '../impl';
 import { UnitContext__entry } from '../unit/unit.entries.impl';
 import { Formation } from './formation';
@@ -33,8 +33,8 @@ export class Formation$Context implements FormationContext {
     return this.formation;
   }
 
-  get get(): CxAccessor {
-    return this.#get;
+  get<TValue>(entry: CxEntry<TValue, unknown>, request?: CxRequest<TValue>): TValue | null {
+    return this.#get(entry, request);
   }
 
 }
