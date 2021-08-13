@@ -28,11 +28,11 @@ describe('Unit', () => {
 
       const unit = new TestUnit();
 
-      expect(unit.originOrder).toBe(test.order);
-      expect(unit.originOrder).toBe(OrderTest.order);
+      expect(unit.order).toBe(test.order);
+      expect(unit.order).toBe(OrderTest.order);
 
       OrderTest.reset();
-      expect(unit.originOrder).not.toBe(OrderTest.order);
+      expect(unit.order).not.toBe(OrderTest.order);
     });
   });
 
