@@ -23,7 +23,7 @@ describe('Unit', () => {
     test.reset();
   });
 
-  describe('originOrder', () => {
+  describe('order', () => {
     it('equals to original order', () => {
 
       const unit = new TestUnit();
