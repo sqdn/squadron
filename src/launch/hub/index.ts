@@ -10,10 +10,14 @@ import { Hub$createAssets } from '../../impl/hub';
 import { SqdnLauncher } from '../sqdn-launcher';
 
 export default function launchHub(launcher: SqdnLauncher): void {
+
+  const getHub = lazyValue(() => new Hub());
+
   launchSqdn(
       launcher,
       {
-        getFormation: lazyValue(() => new Hub()),
+        getHub,
+        getFormation: getHub,
         createContext(host, get, cxBuilder) {
           cxBuilder.provide(Hub$createAssets());
           return new Formation$Context(host, get, cxBuilder);

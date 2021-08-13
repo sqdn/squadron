@@ -1,10 +1,10 @@
 import { cxBuildAsset, CxBuilder, cxConstAsset } from '@proc7ts/context-builder';
 import { Logger, silentLogger } from '@proc7ts/logger';
-import { lazyValue } from '@proc7ts/primitives';
 import Order from '@sqdn/order';
 import MockOrder from '@sqdn/order/mock';
 import { Formation, FormationContext } from '../formation';
 import { Formation$Context } from '../formation/formation.context.impl';
+import { Hub } from '../hub';
 import { Formation$Host, Order$Evaluator } from '../impl';
 
 export interface OrderTest {
@@ -12,6 +12,8 @@ export interface OrderTest {
   readonly cxBuilder: CxBuilder<Order>;
 
   readonly order: MockOrder;
+
+  readonly hub: Hub;
 
   readonly formation: Formation;
 
@@ -30,6 +32,8 @@ export namespace OrderTest {
     readonly orderId?: string;
 
     readonly logger?: Logger;
+
+    getHub?(this: void): Hub;
 
     getFormation?(this: void): Formation;
 
@@ -51,11 +55,13 @@ export const OrderTest: OrderTest.Static = {
 
     const {
       orderId,
-      getFormation = lazyValue(() => new Formation({ tag: 'test' })),
+      getHub = () => new Hub({ tag: 'test' }),
+      getFormation = () => new Formation({ tag: 'test' }),
       logger = silentLogger,
     } = init;
 
     const host = new Formation$Host({
+      getHub,
       getFormation,
       createContext: (host, get, builder) => new Formation$Context(
           host,
@@ -79,6 +85,7 @@ export const OrderTest: OrderTest.Static = {
     return OrderTest$instance = {
       cxBuilder,
       order,
+      hub: host.hub,
       formation: order.get(Formation),
       formationCxBuilder: host.cxBuilder,
 
@@ -105,6 +112,10 @@ export const OrderTest: OrderTest.Static = {
 
   get order(): MockOrder {
     return OrderTest$get().order;
+  },
+
+  get hub(): Hub {
+    return OrderTest$get().hub;
   },
 
   get formation(): Formation {

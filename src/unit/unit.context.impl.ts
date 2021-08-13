@@ -1,6 +1,7 @@
 import { CxBuilder, cxConstAsset } from '@proc7ts/context-builder';
 import { CxAccessor, CxEntry, CxRequest } from '@proc7ts/context-values';
 import { Formation } from '../formation';
+import { Hub } from '../hub';
 import { Formation$Host } from '../impl';
 import { Unit } from './unit';
 import { UnitContext } from './unit-context';
@@ -30,6 +31,10 @@ class Unit$Context<TUnit extends Unit> implements UnitContext<TUnit> {
     this.#unit = unit;
     this.#get = get;
     builder.provide(cxConstAsset(UnitContext__entry, this));
+  }
+
+  get hub(): Hub {
+    return this.#host.hub;
   }
 
   get formation(): Formation {

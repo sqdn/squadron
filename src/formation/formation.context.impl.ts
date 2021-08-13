@@ -1,5 +1,6 @@
 import { cxBuildAsset, CxBuilder, cxConstAsset } from '@proc7ts/context-builder';
 import { CxAccessor, CxEntry, CxGlobals, CxRequest } from '@proc7ts/context-values';
+import { Hub } from '../hub';
 import { Formation$Host } from '../impl';
 import { UnitContext__entry } from '../unit/unit.entries.impl';
 import { Formation } from './formation';
@@ -23,6 +24,10 @@ export class Formation$Context implements FormationContext {
     cxBuilder.provide(cxBuildAsset(Formation__entry, _target => host.formation));
     cxBuilder.provide(cxConstAsset(FormationContext__entry, this));
     cxBuilder.provide(cxConstAsset(UnitContext__entry, this));
+  }
+
+  get hub(): Hub {
+    return this.#host.hub;
   }
 
   get formation(): Formation {

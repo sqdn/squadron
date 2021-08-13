@@ -4,6 +4,7 @@ import { noop } from '@proc7ts/primitives';
 import { Workbench } from '@proc7ts/workbench';
 import Order from '@sqdn/order';
 import { Formation } from '../formation';
+import { Hub } from '../hub';
 import { OrderTask } from '../order';
 import { Unit } from '../unit';
 import { Unit$Evaluator } from '../unit/unit.evaluator.impl';
@@ -53,6 +54,10 @@ export class Order$Evaluator implements Unit$Host {
 
   get workbench(): Unit$Workbench {
     return this.#workbench;
+  }
+
+  get hub(): Hub {
+    return this.host.hub;
   }
 
   get formation(): Formation {
