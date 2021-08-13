@@ -13,7 +13,7 @@ import {
 } from '../../communication';
 import { Formation, FormationContext } from '../../formation';
 import { FormationCtl, FormationManager } from '../../hub';
-import { Unit } from '../../unit';
+import { OrderUnits, Unit } from '../../unit';
 import { CommMessagingRequest } from '../formation';
 import { MessageCommLinkRequest, MessageCommLinkResponse } from './message-comm-link.request';
 
@@ -44,11 +44,13 @@ export class Hub$CommLinker implements CommLinker {
   }
 
   readonly #context: FormationContext;
+  readonly #orderUnits: OrderUnits;
   readonly #formationManager: FormationManager;
   readonly #links = new Map<string, CommLink>();
 
   private constructor(target: CxEntry.Target<CommLinker>) {
     this.#context = target.get(FormationContext);
+    this.#orderUnits = this.#context.formation.order.get(OrderUnits);
     this.#formationManager = target.get(FormationManager);
   }
 
@@ -72,7 +74,7 @@ export class Hub$CommLinker implements CommLinker {
         .do(
             digOn_(({ toFormation }) => {
 
-              const ctl = this.#formationManager.formationCtl(new Formation({ id: toFormation }));
+              const ctl = this.#formationManager.formationCtl(this.#orderUnits.unitByUid(toFormation, Formation));
               const { port1, port2 } = new MessageChannel();
 
               return ctl.channel.request<CommMessagingRequest>(

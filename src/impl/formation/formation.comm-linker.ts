@@ -13,7 +13,7 @@ import {
   ProxyCommChannel,
 } from '../../communication';
 import { Formation, FormationContext } from '../../formation';
-import { Unit } from '../../unit';
+import { OrderUnits, Unit } from '../../unit';
 import { Formation$Host } from '../formation.host';
 import { CommMessagingRequest } from './comm-messaging.request';
 import { Formation$CtlChannel } from './formation.ctl-channel';
@@ -45,11 +45,13 @@ export class Formation$CommLinker implements CommLinker {
   }
 
   readonly #context: FormationContext;
+  readonly #orderUnits: OrderUnits;
   readonly #links = new Map<string, CommLink>();
   readonly #ctlChannel: Formation$CtlChannel;
 
   private constructor(target: CxEntry.Target<CommLinker>) {
     this.#context = target.get(FormationContext);
+    this.#orderUnits = this.#context.formation.order.get(OrderUnits);
     this.#ctlChannel = target.get(Formation$CtlChannel);
   }
 
@@ -102,7 +104,7 @@ export class Formation$CommLinker implements CommLinker {
 
           // Process inbound commands.
           new MessageCommChannel({
-            to: new Formation({ id: fromFormation }),
+            to: this.#orderUnits.unitByUid(fromFormation, Formation),
             port,
             processor: this.#context.get(CommProcessor),
             logger: this.#context.get(Logger),

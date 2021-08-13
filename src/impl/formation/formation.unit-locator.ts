@@ -1,7 +1,7 @@
 import { CxAsset, CxEntry } from '@proc7ts/context-values';
 import { mapOn_, OnEvent } from '@proc7ts/fun-events';
 import { Formation, UnitLocation, UnitLocator } from '../../formation';
-import { Unit } from '../../unit';
+import { OrderUnits, Unit } from '../../unit';
 import { UnitLocationRequest, UnitLocationResponse } from '../hub';
 import { Formation$CtlChannel } from './formation.ctl-channel';
 
@@ -44,9 +44,15 @@ class Formation$UnitLocation implements UnitLocation {
   readonly #formations = new Map<string, Formation>();
   readonly #isLocal: boolean;
 
-  constructor(formation: Formation, { formations }: UnitLocationResponse) {
-    for (const id of formations) {
-      this.#formations.set(id, new Formation({ id }));
+  constructor(
+      formation: Formation,
+      { formations }: UnitLocationResponse,
+  ) {
+
+    const orderUnits = formation.order.get(OrderUnits);
+
+    for (const uid of formations) {
+      this.#formations.set(uid, orderUnits.unitByUid(uid, Formation));
     }
 
     this.#isLocal = this.#formations.has(formation.uid);

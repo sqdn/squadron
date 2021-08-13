@@ -4,17 +4,17 @@ import { Unit$Workbench } from '../unit/unit.workbench.impl';
 
 export class Formation$Workbench extends Unit$Workbench {
 
-  readonly #promulgationStage: WorkStage;
+  readonly #acceptanceStage: WorkStage;
   readonly #executionStage: WorkStage;
 
   constructor() {
     super();
-    this.#promulgationStage = new WorkStage('promulgation');
-    this.#executionStage = new WorkStage('execution', { after: this.#promulgationStage });
+    this.#acceptanceStage = new WorkStage('acceptance');
+    this.#executionStage = new WorkStage('execution', { after: this.#acceptanceStage });
   }
 
-  promulgate(task: Workbench.Task<void>): void {
-    this._run(this.#promulgationStage, task);
+  accept(task: Workbench.Task<void>): void {
+    this._run(this.#acceptanceStage, task);
   }
 
   execute(task: Workbench.Task<void>): void {

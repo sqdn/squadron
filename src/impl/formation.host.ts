@@ -3,7 +3,9 @@ import { CxEntry, cxSingle } from '@proc7ts/context-values';
 import { Logger } from '@proc7ts/logger';
 import Order from '@sqdn/order';
 import { Formation, FormationContext } from '../formation';
-import { Unit, UnitContext, UnitTask } from '../unit';
+import { Hub } from '../hub';
+import { OrderTask } from '../order';
+import { Unit, UnitContext } from '../unit';
 import { Unit$Backend__symbol } from '../unit/unit.backend.impl';
 import { Unit$Deployment } from '../unit/unit.deployment.impl';
 import { Unit$Host } from '../unit/unit.host.impl';
@@ -30,6 +32,7 @@ export class Formation$Host implements Unit$Host {
   readonly perUnitCxPeer: CxPeer<UnitContext>;
 
   readonly #factory: Formation$Factory;
+  #hub?: Hub;
   #formation?: Formation;
   readonly #unitFormations = new Map<string, Map<string, Formation>>();
   readonly #deployments = new Map<string, Unit$Deployment<any>>();
@@ -43,6 +46,10 @@ export class Formation$Host implements Unit$Host {
 
     this.perOrderCxPeer = new CxPeerBuilder<Order>(this.cxBuilder.boundPeer);
     this.perUnitCxPeer = new CxPeerBuilder<UnitContext>(this.cxBuilder.boundPeer);
+  }
+
+  get hub(): Hub {
+    return this.#hub ||= this.#factory.getHub();
   }
 
   get formation(): Formation {
@@ -86,7 +93,7 @@ export class Formation$Host implements Unit$Host {
     }
   }
 
-  async executeUnitTask<TUnit extends Unit>(unit: TUnit, task: UnitTask<TUnit>): Promise<void> {
+  async executeTask<TUnit extends Unit>(unit: TUnit, task: OrderTask<TUnit>): Promise<void> {
     await task(this.unitDeployment(unit).context());
   }
 

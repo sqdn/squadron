@@ -1,50 +1,30 @@
 import { lazyValue } from '@proc7ts/primitives';
-import { Supply } from '@proc7ts/supply';
 import { Formation } from '../formation';
 import { Formation$Host } from '../impl';
-import { OrderPromulgation, OrderPromulgator } from '../order';
+import { OrderInstruction, OrderSubject } from '../order';
 import { Unit } from './unit';
 import { UnitContext } from './unit-context';
-import { UnitContext$create } from './unit-context.impl';
-import { UnitTask } from './unit-task';
-import { Unit$Backend, Unit$doNotStart } from './unit.backend.impl';
+import { Unit$Backend } from './unit.backend.impl';
+import { Unit$Backend$OrderSubject } from './unit.backend.order-subject.impl';
+import { UnitContext$create } from './unit.context.impl';
 
 export class Unit$Deployment<TUnit extends Unit> extends Unit$Backend<TUnit, Formation$Host> {
 
   readonly context: () => UnitContext = lazyValue(() => UnitContext$create(this.host, this.unit));
 
-  order(promulgator: OrderPromulgator<TUnit>): void {
+  instruct(instruction: OrderInstruction<TUnit>): void {
 
-    const { host, unit } = this;
-    const { formation, workbench, log } = host;
-    const supply = new Supply().needs(this.supply);
-    let execute = (task: UnitTask<TUnit>): void => workbench.execute(async () => {
-      try {
-        await host.executeUnitTask(this.unit, task);
-      } catch (error) {
-        log.error(`Failed to execute ${this.unit}`, error);
-        supply.off(error);
-      }
-    });
-    let promulgation: OrderPromulgation<TUnit> | null = {
-      formation,
-      unit,
-      supply,
-      execute: task => execute(task),
-    };
+    let subject: OrderSubject<TUnit> | null = new Unit$Backend$OrderSubject(this, this.supply.derive());
 
-    supply.whenOff(reason => {
-      promulgation = null;
-      execute = Unit$doNotStart(reason);
-    });
+    subject.supply.whenOff(_ => subject = null);
 
-    workbench.promulgate(async () => {
-      if (promulgation) {
+    this.host.workbench.accept(async () => {
+      if (subject) {
         try {
-          await promulgator(promulgation);
+          await instruction(subject);
         } catch (error) {
-          log.error(`Failed to promulgate the orders for ${unit}`, error);
-          supply.off(error);
+          this.host.log.error(`Instructions for ${this.unit} rejected`, error);
+          subject.supply.off(error);
         }
       }
     });

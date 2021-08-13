@@ -17,6 +17,7 @@ describe('FormationContext', () => {
 
     const context = OrderTest.order.get(FormationContext);
 
+    expect(context.hub).toBe(OrderTest.hub);
     expect(context.formation).toBe(OrderTest.formation);
     expect(context.unit).toBe(OrderTest.formation);
   });
@@ -26,12 +27,13 @@ describe('FormationContext', () => {
     const orderFormation = OrderTest.order.get(Formation);
     let context!: FormationContext;
 
-    formation.order(({ execute }) => execute(ctx => {
+    formation.instruct(({ execute }) => execute(ctx => {
       context = ctx;
     }));
 
     await OrderTest.evaluate();
 
+    expect(context.hub).toBe(OrderTest.hub);
     expect(context.formation).toBe(orderFormation);
     expect(context.unit).toBe(context.formation);
     expect(context).toBe(context.get(FormationContext));

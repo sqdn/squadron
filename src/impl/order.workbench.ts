@@ -3,7 +3,7 @@ import { Unit$Workbench } from '../unit/unit.workbench.impl';
 
 export class Order$Workbench extends Unit$Workbench {
 
-  readonly #promulgationStage: WorkStage;
+  readonly #acceptanceStage: WorkStage;
   readonly #executionStage: WorkStage;
   readonly #deliveryStage: WorkStage;
   readonly #finalStage: WorkStage;
@@ -15,14 +15,14 @@ export class Order$Workbench extends Unit$Workbench {
 
     const canExec = new Promise<void>(resolve => this.start = resolve);
 
-    this.#promulgationStage = new WorkStage('order promulgation', { start: (_work: WorkStage.Work) => canExec });
-    this.#executionStage = new WorkStage('order execution', { after: this.#promulgationStage });
-    this.#deliveryStage = new WorkStage('unit delivery', { after: this.#executionStage });
-    this.#finalStage = new WorkStage('order done', { after: this.#deliveryStage });
+    this.#acceptanceStage = new WorkStage('acceptance', { start: (_work: WorkStage.Work) => canExec });
+    this.#executionStage = new WorkStage('execution', { after: this.#acceptanceStage });
+    this.#deliveryStage = new WorkStage('delivery', { after: this.#executionStage });
+    this.#finalStage = new WorkStage('final', { after: this.#deliveryStage });
   }
 
-  promulgate(task: Workbench.Task<void>): void {
-    this._run(this.#promulgationStage, task);
+  accept(task: Workbench.Task<void>): void {
+    this._run(this.#acceptanceStage, task);
   }
 
   execute(task: Workbench.Task<void>): void {

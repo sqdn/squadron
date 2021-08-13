@@ -1,7 +1,7 @@
 import { Logger } from '@proc7ts/logger';
 import { Formation } from '../formation';
+import { OrderTask } from '../order';
 import { Unit } from './unit';
-import { UnitTask } from './unit-task';
 import { Unit$Workbench } from './unit.workbench.impl';
 
 export interface Unit$Host {
@@ -12,6 +12,6 @@ export interface Unit$Host {
 
   deploy(formation: Formation, unit: Unit): void;
 
-  executeUnitTask<TUnit extends Unit>(unit: TUnit, task: UnitTask<TUnit>): Promise<void>;
+  executeTask<TUnit extends Unit>(unit: TUnit, task: OrderTask<TUnit>): Promise<void>;
 
 }

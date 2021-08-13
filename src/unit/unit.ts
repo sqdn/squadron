@@ -1,7 +1,7 @@
 import { Supply, SupplyPeer } from '@proc7ts/supply';
 import Order from '@sqdn/order';
 import { Order$Evaluator } from '../impl';
-import { OrderPromulgator } from '../order';
+import { OrderInstruction } from '../order';
 import { Unit$Backend, Unit$Backend__symbol } from './unit.backend.impl';
 import { Unit$Id, Unit$Id__symbol } from './unit.id.impl';
 
@@ -16,7 +16,7 @@ import { Unit$Id, Unit$Id__symbol } from './unit.id.impl';
  */
 export class Unit implements SupplyPeer {
 
-  readonly #originOrder: Order;
+  readonly #order: Order;
 
   /**
    * @internal
@@ -33,14 +33,17 @@ export class Unit implements SupplyPeer {
    *
    * @param init - Unit initialization options.
    */
-  constructor(init?: Unit.Init) {
-    this.#originOrder = Order.current;
+  constructor(init: Unit.Init = {}) {
+
+    const { order = Order.current } = init;
+
+    this.#order = order;
     Error.captureStackTrace(
         this[Unit$Id__symbol] = new Unit$Id(this, init),
         new.target,
     );
 
-    this[Unit$Backend__symbol] = this.originOrder.get(Order$Evaluator).evalUnit(this);
+    this[Unit$Backend__symbol] = this.order.get(Order$Evaluator).evalUnit(this);
   }
 
   /**
@@ -57,8 +60,8 @@ export class Unit implements SupplyPeer {
    *
    * This is the order the unit constructor has been called in.
    */
-  get originOrder(): Order {
-    return this.#originOrder;
+  get order(): Order {
+    return this.#order;
   }
 
   /**
@@ -84,17 +87,17 @@ export class Unit implements SupplyPeer {
   }
 
   /**
-   * Records an order for this unit to execute later.
+   * Records an instruction for this unit to execute later.
    *
-   * The recorder order will be first promulgated and then executed within the formation(s) this unit
+   * The recorded instruction will be first accepted and then executed within the formation(s) this unit
    * {@link Formation.deploy deployed} to.
    *
-   * @param promulgator - An order promulgator to record.
+   * @param instruction - An instruction to record.
    *
    * @returns `this` instance.
    */
-  order(promulgator: OrderPromulgator<this>): this {
-    this[Unit$Backend__symbol].order(promulgator);
+  instruct(instruction: OrderInstruction<this>): this {
+    this[Unit$Backend__symbol].instruct(instruction);
     return this;
   }
 
@@ -121,6 +124,13 @@ export namespace Unit {
    * Executive order initialization options.
    */
   export interface Init {
+
+    /**
+     * The order the unit created in.
+     *
+     * Defaults to current order.
+     */
+    readonly order?: Order | undefined;
 
     /**
      * Unit tag to add to its identifier.
