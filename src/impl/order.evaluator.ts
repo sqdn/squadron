@@ -92,7 +92,7 @@ export class Order$Evaluator implements Unit$Host {
 
     if (!unit) {
 
-      const newUnit = new unitType({ id });
+      const newUnit = new unitType({ id, order: this.order });
 
       this.#units.set(id, newUnit);
 
