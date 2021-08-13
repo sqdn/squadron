@@ -26,7 +26,7 @@ describe('FormationContext', () => {
     const orderFormation = OrderTest.order.get(Formation);
     let context!: FormationContext;
 
-    formation.order(({ execute }) => execute(ctx => {
+    formation.instruct(({ execute }) => execute(ctx => {
       context = ctx;
     }));
 

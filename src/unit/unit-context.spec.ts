@@ -27,7 +27,7 @@ describe('UnitContext', () => {
     const unit = new Unit({ tag: 'test' });
     let context!: UnitContext;
 
-    unit.order(({ execute }) => execute(ctx => {
+    unit.instruct(({ execute }) => execute(ctx => {
       context = ctx;
     }));
 

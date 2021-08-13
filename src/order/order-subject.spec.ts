@@ -5,10 +5,11 @@ import { asis } from '@proc7ts/primitives';
 import { Supply } from '@proc7ts/supply';
 import { Mock } from 'jest-mock';
 import { OrderTest } from '../testing';
-import { Unit, UnitContext, UnitTask } from '../unit';
-import { OrderPromulgation } from './order-promulgation';
+import { Unit, UnitContext } from '../unit';
+import { OrderSubject } from './order-subject';
+import { OrderTask } from './order-task';
 
-describe('OrderPromulgation', () => {
+describe('OrderSubject', () => {
 
   let test: OrderTest;
 
@@ -22,10 +23,10 @@ describe('OrderPromulgation', () => {
   describe('execute', () => {
     it('executes the task', async () => {
 
-      const task: UnitTask<Unit> = jest.fn();
+      const task: OrderTask<Unit> = jest.fn();
       const unit = new Unit();
 
-      unit.order(({ execute }) => {
+      unit.instruct(({ execute }) => {
         execute(task);
       });
       test.formation.deploy(unit);
@@ -36,7 +37,7 @@ describe('OrderPromulgation', () => {
       expect(unit.supply.isOff).toBe(false);
     });
 
-    it('executes the task promulgated after order evaluation', async () => {
+    it('executes the task added after order evaluation', async () => {
 
       const unit = new Unit();
 
@@ -47,7 +48,7 @@ describe('OrderPromulgation', () => {
       const task: Mock<void, [UnitContext<Unit>]> = jest.fn();
 
       await new Promise<void>(resolve => {
-        unit.order(({ execute }) => {
+        unit.instruct(({ execute }) => {
           execute(task.mockImplementation(() => resolve()));
         });
       });
@@ -64,12 +65,12 @@ describe('OrderPromulgation', () => {
       test.formationCxBuilder.provide(cxConstAsset(Logger, logger));
 
       const error = new Error('test');
-      const task: UnitTask<Unit> = jest.fn(() => {
+      const task: OrderTask<Unit> = jest.fn(() => {
         throw error;
       });
       const unit = new Unit();
 
-      unit.order(({ execute }) => {
+      unit.instruct(({ execute }) => {
         execute(task);
       });
       test.formation.deploy(unit);
@@ -79,16 +80,16 @@ describe('OrderPromulgation', () => {
       expect(task).toHaveBeenCalledTimes(1);
       expect(unit.supply.isOff).toBe(true);
       expect(await unit.supply.whenDone().catch(asis)).toBe(error);
-      expect(logger.error).toHaveBeenCalledWith(`Failed to start ${unit}`, error);
+      expect(logger.error).toHaveBeenCalledWith(`Failed to execute ${unit} task`, error);
     });
 
     describe('after order evaluation', () => {
       it('executes the task after order evaluation', async () => {
 
         const unit = new Unit();
-        let exec!: OrderPromulgation<Unit>['execute'];
+        let exec!: OrderSubject<Unit>['execute'];
 
-        unit.order(({ execute }) => {
+        unit.instruct(({ execute }) => {
           exec = execute;
         });
         test.formation.deploy(unit);
@@ -112,12 +113,12 @@ describe('OrderPromulgation', () => {
         test.formationCxBuilder.provide(cxConstAsset(Logger, logger));
 
         const unit = new Unit();
-        let exec!: OrderPromulgation<Unit>['execute'];
-        let promulgationSupply!: Supply;
+        let exec!: OrderSubject<Unit>['execute'];
+        let subjectSupply!: Supply;
 
-        unit.order(({ execute, supply }) => {
+        unit.instruct(({ execute, supply }) => {
           exec = execute;
-          promulgationSupply = supply;
+          subjectSupply = supply;
         });
         test.formation.deploy(unit);
         await test.evaluate();
@@ -133,9 +134,9 @@ describe('OrderPromulgation', () => {
         expect(task).toHaveBeenCalledTimes(1);
         expect(unit.supply.isOff).toBe(false);
 
-        expect(logger.error).toHaveBeenCalledWith(`Failed to start ${unit}`, error);
-        expect(promulgationSupply.isOff).toBe(true);
-        expect(await promulgationSupply.whenDone().catch(asis)).toBe(error);
+        expect(logger.error).toHaveBeenCalledWith(`Failed to execute ${unit} task`, error);
+        expect(subjectSupply.isOff).toBe(true);
+        expect(await subjectSupply.whenDone().catch(asis)).toBe(error);
       });
     });
   });
@@ -152,7 +153,7 @@ describe('OrderPromulgation', () => {
       const task: Mock<void, [UnitContext<Unit>]> = jest.fn();
 
       await new Promise<void>(resolve => {
-        unit.order(({ execute }) => {
+        unit.instruct(({ execute }) => {
           execute(task.mockImplementation(() => resolve()));
         });
       });
@@ -178,10 +179,10 @@ describe('OrderPromulgation', () => {
       const task = jest.fn<void, [UnitContext<Unit>]>(() => {
         throw error;
       });
-      let promulgationSupply!: Supply;
+      let subjectSupply!: Supply;
 
-      unit.order(({ execute, supply }) => {
-        promulgationSupply = supply;
+      unit.instruct(({ execute, supply }) => {
+        subjectSupply = supply;
         execute(task);
       });
 
@@ -190,9 +191,9 @@ describe('OrderPromulgation', () => {
       expect(task).toHaveBeenCalledTimes(1);
       expect(unit.supply.isOff).toBe(false);
 
-      expect(logger.error).toHaveBeenCalledWith(`Failed to execute ${unit}`, error);
-      expect(promulgationSupply.isOff).toBe(true);
-      expect(await promulgationSupply.whenDone().catch(asis)).toBe(error);
+      expect(logger.error).toHaveBeenCalledWith(`Failed to execute ${unit} task`, error);
+      expect(subjectSupply.isOff).toBe(true);
+      expect(await subjectSupply.whenDone().catch(asis)).toBe(error);
     });
   });
 });

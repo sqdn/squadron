@@ -3,7 +3,8 @@ import { CxEntry, cxSingle } from '@proc7ts/context-values';
 import { Logger } from '@proc7ts/logger';
 import Order from '@sqdn/order';
 import { Formation, FormationContext } from '../formation';
-import { Unit, UnitContext, UnitTask } from '../unit';
+import { OrderTask } from '../order';
+import { Unit, UnitContext } from '../unit';
 import { Unit$Backend__symbol } from '../unit/unit.backend.impl';
 import { Unit$Deployment } from '../unit/unit.deployment.impl';
 import { Unit$Host } from '../unit/unit.host.impl';
@@ -86,7 +87,7 @@ export class Formation$Host implements Unit$Host {
     }
   }
 
-  async executeUnitTask<TUnit extends Unit>(unit: TUnit, task: UnitTask<TUnit>): Promise<void> {
+  async executeTask<TUnit extends Unit>(unit: TUnit, task: OrderTask<TUnit>): Promise<void> {
     await task(this.unitDeployment(unit).context());
   }
 

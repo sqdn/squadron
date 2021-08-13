@@ -5,7 +5,7 @@ export abstract class Unit$Workbench {
 
   readonly workbench = new Workbench();
 
-  abstract promulgate(task: Workbench.Task<void>): void;
+  abstract accept(task: Workbench.Task<void>): void;
 
   abstract execute(task: Workbench.Task<void>): void;
 

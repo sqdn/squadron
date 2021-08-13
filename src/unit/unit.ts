@@ -1,7 +1,7 @@
 import { Supply, SupplyPeer } from '@proc7ts/supply';
 import Order from '@sqdn/order';
 import { Order$Evaluator } from '../impl';
-import { OrderPromulgator } from '../order';
+import { OrderInstruction } from '../order';
 import { Unit$Backend, Unit$Backend__symbol } from './unit.backend.impl';
 import { Unit$Id, Unit$Id__symbol } from './unit.id.impl';
 
@@ -84,17 +84,17 @@ export class Unit implements SupplyPeer {
   }
 
   /**
-   * Records an order for this unit to execute later.
+   * Records an instruction for this unit to execute later.
    *
-   * The recorder order will be first promulgated and then executed within the formation(s) this unit
+   * The recorded instruction will be first accepted and then executed within the formation(s) this unit
    * {@link Formation.deploy deployed} to.
    *
-   * @param promulgator - An order promulgator to record.
+   * @param instruction - An instruction to record.
    *
    * @returns `this` instance.
    */
-  order(promulgator: OrderPromulgator<this>): this {
-    this[Unit$Backend__symbol].order(promulgator);
+  instruct(instruction: OrderInstruction<this>): this {
+    this[Unit$Backend__symbol].instruct(instruction);
     return this;
   }
 

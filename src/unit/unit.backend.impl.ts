@@ -1,6 +1,6 @@
 import { Supply, SupplyPeer } from '@proc7ts/supply';
 import { Formation } from '../formation';
-import { OrderPromulgator } from '../order';
+import { OrderInstruction } from '../order';
 import { Unit } from './unit';
 import { Unit$Host } from './unit.host.impl';
 
@@ -13,16 +13,12 @@ export abstract class Unit$Backend<TUnit extends Unit, THost extends Unit$Host =
   constructor(readonly host: THost, readonly unit: TUnit) {
   }
 
-  abstract order(promulgator: OrderPromulgator<TUnit>): void;
+  abstract instruct(instruction: OrderInstruction<TUnit>): void;
 
   abstract deployTo(formation: Formation): void;
 
 }
 
-export function Unit$rejectOrder<TUnit extends Unit>(_promulgator: OrderPromulgator<TUnit>): void {
+export function Unit$rejectOrder<TUnit extends Unit>(_instruction: OrderInstruction<TUnit>): void {
   // Reject order
-}
-
-export function Unit$doNotStart(error: unknown): () => Promise<void> {
-  return () => Promise.reject(error);
 }

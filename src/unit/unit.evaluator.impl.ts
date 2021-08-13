@@ -1,19 +1,19 @@
 import { noop } from '@proc7ts/primitives';
 import { Formation } from '../formation';
 import { Order$Evaluator } from '../impl';
-import { OrderPromulgation, OrderPromulgator } from '../order';
+import { OrderInstruction, OrderSubject } from '../order';
 import { Unit } from './unit';
-import { UnitTask } from './unit-task';
-import { Unit$Backend, Unit$Backend__symbol, Unit$doNotStart, Unit$rejectOrder } from './unit.backend.impl';
+import { Unit$Backend, Unit$Backend__symbol, Unit$rejectOrder } from './unit.backend.impl';
+import { Unit$Backend$OrderSubject } from './unit.backend.order-subject.impl';
 import { Unit$Id__symbol } from './unit.id.impl';
 
 export class Unit$Evaluator<TUnit extends Unit> extends Unit$Backend<TUnit, Order$Evaluator> {
 
-  readonly #promulgators: OrderPromulgator<TUnit>[] = [];
+  readonly #instructions: OrderInstruction<TUnit>[] = [];
   #deliver = this.#doDeliver;
 
-  order(promulgator: OrderPromulgator<TUnit>): void {
-    this.#promulgators.push(promulgator);
+  instruct(instruction: OrderInstruction<TUnit>): void {
+    this.#instructions.push(instruction);
   }
 
   deployTo(formation: Formation): void {
@@ -21,49 +21,35 @@ export class Unit$Evaluator<TUnit extends Unit> extends Unit$Backend<TUnit, Orde
 
     const { host } = this;
 
-    let execute = (task: UnitTask<TUnit>): void => host.workbench.execute(async () => {
-      try {
-        await host.executeUnitTask(this.unit, task);
-      } catch (error) {
-        host.log.error(`Failed to start ${this.unit}`, error);
-        this.supply.off(error);
-      }
-    });
-    let promulgation: OrderPromulgation<TUnit> | null = {
-      formation,
-      unit: this.unit,
-      supply: this.supply,
-      execute: task => execute(task),
-    };
+    let subject: OrderSubject<TUnit> | null = new Unit$Backend$OrderSubject(this, this.supply);
 
-    const promulgate = (promulgator: OrderPromulgator<TUnit>): void => {
-      host.workbench.promulgate(async () => {
-        if (promulgation) {
+    const instruct = (instruction: OrderInstruction<TUnit>): void => {
+      host.workbench.accept(async () => {
+        if (subject) {
           try {
-            await promulgator(promulgation);
+            await instruction(subject);
           } catch (error) {
             this.supply.off(error);
-            host.log.error(`Failed to promulgate the orders for ${this.unit}`, error);
+            host.log.error(`Instructions for ${this.unit} rejected`, error);
           }
         }
       });
     };
 
     if (!this.supply.isOff) {
-      for (const promulgator of this.#promulgators) {
-        promulgate(promulgator);
+      for (const instruction of this.#instructions) {
+        instruct(instruction);
       }
-      this.#promulgators.length = 0;
-      this.order = promulgate;
+      this.#instructions.length = 0;
+      this.instruct = instruct;
       this.host.deliver(() => this.#deliver());
     }
 
-    this.supply.whenOff(reason => {
-      this.order = Unit$rejectOrder;
+    this.supply.whenOff(() => {
+      this.instruct = Unit$rejectOrder;
       this.#deliver = noop; // Do not deliver withdrawn unit.
-      this.#promulgators.length = 0;
-      promulgation = null;
-      execute = Unit$doNotStart(reason);
+      this.#instructions.length = 0;
+      subject = null;
     });
   }
 
