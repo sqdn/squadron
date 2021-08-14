@@ -1,7 +1,8 @@
 import { CxAsset, CxEntry } from '@proc7ts/context-values';
 import { trackValue } from '@proc7ts/fun-events';
 import { Logger } from '@proc7ts/logger';
-import { CommChannel, CommProcessor, ProxyCommChannel } from '../../communication';
+import { lazyValue } from '@proc7ts/primitives';
+import { CommChannel, CommProcessor, ProxyCommChannel, proxyCommProcessor } from '../../communication';
 import { Formation, FormationContext } from '../../formation';
 import { FormationCtl, FormationManager, FormationStarter } from '../../hub';
 
@@ -61,7 +62,7 @@ class Hub$FormationCtl implements FormationCtl {
 
       const starter = this.#context.get(FormationStarter);
       const target = trackValue<CommChannel>();
-      const processor = this.#context.get(CommProcessor);
+      const processor = proxyCommProcessor(lazyValue(() => this.#context.get(CommProcessor)));
 
       this.#channel = new ProxyCommChannel({
         to: this.formation,
@@ -69,7 +70,7 @@ class Hub$FormationCtl implements FormationCtl {
         logger: this.#context.get(Logger),
       });
 
-      starter.startFormation(this.formation, { processor });
+      target.it = starter.startFormation(this.formation, { processor });
     }
 
     return this.#channel;
