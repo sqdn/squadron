@@ -90,19 +90,20 @@ export class Order$Evaluator implements Unit$Host {
 
     const unit = this.#units.get(id);
 
-    if (!unit) {
-
-      const newUnit = new unitType({ id, order: this.order });
-
-      this.#units.set(id, newUnit);
-
-      return newUnit;
-    }
-    if (!(unit instanceof unitType)) {
-      throw new TypeError(`${unit} is not a ${unitType.name}`);
+    if (unit) {
+      if (unit instanceof unitType) {
+        return unit;
+      }
+      if (!(unitType.prototype instanceof unit.constructor)) {
+        throw new TypeError(`${unit} is not a ${unitType.name}`);
+      }
     }
 
-    return unit;
+    const newUnit = new unitType({ id, order: this.order });
+
+    this.#units.set(id, newUnit);
+
+    return newUnit;
   }
 
   deliver(task: Workbench.Task<void>): void {

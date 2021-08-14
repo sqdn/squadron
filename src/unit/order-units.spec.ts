@@ -21,12 +21,25 @@ describe('OrderUnits', () => {
 
       expect(orderUnits.unitByUid(unit.uid, Unit)).toBe(unit);
     });
-    it('fails if existing unit is not of requested type', () => {
+    it('upgrades compatible existing unit', () => {
 
-      const unit = new Unit();
+      class TestUnit1 extends Unit {}
+      class TestUnit2 extends TestUnit1 {}
+
+      const unit = new TestUnit1();
       const orderUnits = OrderTest.order.get(OrderUnits);
 
-      expect(() => orderUnits.unitByUid(unit.uid, Formation)).toThrow(`${unit} is not a Formation`);
+      expect(orderUnits.unitByUid(unit.uid, TestUnit2)).toBeInstanceOf(TestUnit2);
+    });
+    it('fails if existing unit is not of requested type', () => {
+
+      class TestUnit1 extends Unit {}
+      class TestUnit2 extends Unit {}
+
+      const unit = new TestUnit1();
+      const orderUnits = OrderTest.order.get(OrderUnits);
+
+      expect(() => orderUnits.unitByUid(unit.uid, TestUnit2)).toThrow(`${unit} is not a TestUnit2`);
     });
     it('constructs missing unit of requested type', () => {
 
