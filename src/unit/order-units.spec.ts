@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from '@jest/globals';
+import { noop } from '@proc7ts/primitives';
 import { Formation } from '../formation';
 import { OrderTest } from '../testing';
 import { OrderUnits } from './order-units';
@@ -14,36 +15,61 @@ describe('OrderUnits', () => {
   });
 
   describe('unitByUid', () => {
+
+    let orderUnits: OrderUnits;
+
+    beforeEach(() => {
+      orderUnits = OrderTest.order.get(OrderUnits);
+    });
+
     it('returns existing unit', () => {
 
       const unit = new Unit();
-      const orderUnits = OrderTest.order.get(OrderUnits);
 
       expect(orderUnits.unitByUid(unit.uid, Unit)).toBe(unit);
     });
-    it('upgrades compatible existing unit', () => {
-
-      class TestUnit1 extends Unit {}
-      class TestUnit2 extends TestUnit1 {}
-
-      const unit = new TestUnit1();
-      const orderUnits = OrderTest.order.get(OrderUnits);
-
-      expect(orderUnits.unitByUid(unit.uid, TestUnit2)).toBeInstanceOf(TestUnit2);
-    });
-    it('fails if existing unit is not of requested type', () => {
+    it('fails if existing unit is not compatible', () => {
 
       class TestUnit1 extends Unit {}
       class TestUnit2 extends Unit {}
 
       const unit = new TestUnit1();
-      const orderUnits = OrderTest.order.get(OrderUnits);
 
-      expect(() => orderUnits.unitByUid(unit.uid, TestUnit2)).toThrow(`${unit} is not a TestUnit2`);
+      expect(() => orderUnits.unitByUid(unit.uid, TestUnit2)).toThrow(new TypeError(`${unit} is not a TestUnit2`));
+    });
+    it('upgrades compatible reference-only unit', () => {
+
+      class TestUnit1 extends Unit {}
+      class TestUnit2 extends TestUnit1 {}
+
+      const unit = new TestUnit1();
+
+      expect(orderUnits.unitByUid(unit.uid, TestUnit2)).toBeInstanceOf(TestUnit2);
+    });
+    it('does not upgrade compatible unit with instructions', () => {
+
+      class TestUnit1 extends Unit {}
+      class TestUnit2 extends TestUnit1 {}
+
+      const unit = new TestUnit1();
+
+      unit.instruct(noop);
+
+      expect(() => orderUnits.unitByUid(unit.uid, TestUnit2)).toThrow(new TypeError(`${unit} is not a TestUnit2`));
+    });
+    it('does not upgrade compatible deployed unit', () => {
+
+      class TestUnit1 extends Unit {}
+      class TestUnit2 extends TestUnit1 {}
+
+      const unit = new TestUnit1();
+
+      OrderTest.formation.deploy(unit);
+
+      expect(() => orderUnits.unitByUid(unit.uid, TestUnit2)).toThrow(new TypeError(`${unit} is not a TestUnit2`));
     });
     it('constructs missing unit of requested type', () => {
 
-      const orderUnits = OrderTest.order.get(OrderUnits);
       const unit = orderUnits.unitByUid('test', Formation);
 
       expect(unit).toBeInstanceOf(Formation);

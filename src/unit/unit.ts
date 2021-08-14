@@ -23,10 +23,7 @@ export class Unit implements SupplyPeer {
    */
   [Unit$Id__symbol]: Unit$Id;
 
-  /**
-   * @internal
-   */
-  [Unit$Backend__symbol]: Unit$Backend<this>;
+  #backend: Unit$Backend<this> | undefined;
 
   /**
    * Constructs executive unit representation.
@@ -42,8 +39,21 @@ export class Unit implements SupplyPeer {
         this[Unit$Id__symbol] = new Unit$Id(this, init),
         new.target,
     );
+    this.order.get(Order$Evaluator).addUnit(this);
+  }
 
-    this[Unit$Backend__symbol] = this.order.get(Order$Evaluator).evalUnit(this);
+  /**
+   * @internal
+   */
+  get [Unit$Backend__symbol](): Unit$Backend<this> {
+    return this.#backend ||= this.order.get(Order$Evaluator).evalUnit(this);
+  }
+
+  /**
+   * @internal
+   */
+  set [Unit$Backend__symbol](value: Unit$Backend<this>) {
+    this.#backend = value;
   }
 
   /**
@@ -71,6 +81,15 @@ export class Unit implements SupplyPeer {
    */
   get uid(): string {
     return this[Unit$Id__symbol].uid;
+  }
+
+  /**
+   * Checks whether this unit received any instructions.
+   *
+   * The unit instance can be used purely as a reference until it receives any instructions.
+   */
+  get hasInstructions(): boolean {
+    return !!this.#backend;
   }
 
   /**
@@ -105,7 +124,7 @@ export class Unit implements SupplyPeer {
    * Withdraws the unit.
    */
   off(): this {
-    this[Unit$Backend__symbol].supply.off();
+    this.supply.off();
     return this;
   }
 

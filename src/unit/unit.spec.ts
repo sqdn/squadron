@@ -36,6 +36,16 @@ describe('Unit', () => {
     });
   });
 
+  describe('supply', () => {
+    it('is the same for units with the same UID', () => {
+
+      const unit1 = new TestUnit();
+      const unit2 = new TestUnit({ id: unit1.uid });
+
+      expect(unit1.supply).toBe(unit2.supply);
+    });
+  });
+
   describe('uid', () => {
     it('is unique to each unit instantiation location', () => {
 

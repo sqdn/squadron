@@ -73,6 +73,12 @@ export class Order$Evaluator implements Unit$Host {
     return this.#whenExecuted;
   }
 
+  addUnit(unit: Unit): void {
+    if (!this.#units.has(unit.uid)) {
+      this.#units.set(unit.uid, unit);
+    }
+  }
+
   evalUnit<TUnit extends Unit>(unit: TUnit): Unit$Evaluator<TUnit> {
 
     let evaluator = this.#evaluators.get(unit.uid);
@@ -94,7 +100,7 @@ export class Order$Evaluator implements Unit$Host {
       if (unit instanceof unitType) {
         return unit;
       }
-      if (!(unitType.prototype instanceof unit.constructor)) {
+      if (unit.hasInstructions || !(unitType.prototype instanceof unit.constructor)) {
         throw new TypeError(`${unit} is not a ${unitType.name}`);
       }
     }
