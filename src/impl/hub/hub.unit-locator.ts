@@ -5,7 +5,7 @@ import { CommProcessor } from '../../communication';
 import { Formation, UnitLocation, UnitLocator } from '../../formation';
 import { OrderUnits, Unit } from '../../unit';
 import { Formation$Host } from '../formation.host';
-import { UnitLocationRequest, UnitLocationResponse } from './unit-location.request';
+import { UnitLocationCommRequest, UnitLocationCommResponse } from '../packets';
 
 export class Hub$UnitLocator implements UnitLocator {
 
@@ -21,8 +21,8 @@ export class Hub$UnitLocator implements UnitLocator {
     target.provide(cxConstAsset(
         CommProcessor,
         {
-          name: 'unit-location',
-          respond: (request: UnitLocationRequest) => locator.#locateUnit(request),
+          name: UnitLocationCommRequest,
+          respond: (request: UnitLocationCommRequest) => locator.#locateUnit(request),
         },
     ));
   }
@@ -39,7 +39,7 @@ export class Hub$UnitLocator implements UnitLocator {
     return afterThe(new Hub$UnitLocation(this.#host, unit));
   }
 
-  #locateUnit({ unit }: UnitLocationRequest): OnEvent<[UnitLocationResponse]> {
+  #locateUnit({ unit }: UnitLocationCommRequest): OnEvent<[UnitLocationCommResponse]> {
     return onEventBy(() => ({
       formations: this.#host.unitFormations(this.#orderUnits.unitByUid(unit, Unit)).map(({ uid }) => uid),
     }));

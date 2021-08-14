@@ -2,7 +2,7 @@ import { CxAsset, CxEntry } from '@proc7ts/context-values';
 import { mapOn_, OnEvent } from '@proc7ts/fun-events';
 import { Formation, UnitLocation, UnitLocator } from '../../formation';
 import { OrderUnits, Unit } from '../../unit';
-import { UnitLocationRequest, UnitLocationResponse } from '../hub';
+import { UnitLocationCommRequest, UnitLocationCommResponse } from '../packets';
 import { Formation$CtlChannel } from './formation.ctl-channel';
 
 export class Formation$UnitLocator implements UnitLocator {
@@ -29,8 +29,8 @@ export class Formation$UnitLocator implements UnitLocator {
   }
 
   locateUnit(unit: Unit): OnEvent<[UnitLocation]> {
-    return this.#ctlChannel.request<UnitLocationRequest, UnitLocationResponse>(
-        'unit-location',
+    return this.#ctlChannel.request<UnitLocationCommRequest, UnitLocationCommResponse>(
+        UnitLocationCommRequest,
         { unit: unit.uid },
     ).do(
         mapOn_(response => new Formation$UnitLocation(this.#formation, response)),
@@ -46,7 +46,7 @@ class Formation$UnitLocation implements UnitLocation {
 
   constructor(
       formation: Formation,
-      { formations }: UnitLocationResponse,
+      { formations }: UnitLocationCommResponse,
   ) {
 
     const orderUnits = formation.order.get(OrderUnits);

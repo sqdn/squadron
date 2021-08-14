@@ -1,12 +1,14 @@
 import { MessagePort } from 'worker_threads';
 import { CommPacket } from '../../communication';
 
+export const LinkMessagePortCommRequest = 'link-message-port';
+
 /**
  * A request for message port to use by {@link CommLink communication link}.
  *
- * Responded with {@link MessageCommLinkResponse}.
+ * Responded with {@link LinkMessagePortCommResponse}.
  */
-export interface MessageCommLinkRequest extends CommPacket {
+export interface LinkMessagePortCommRequest extends CommPacket {
 
   /**
    * Identifier of formation that opens link.
@@ -21,9 +23,9 @@ export interface MessageCommLinkRequest extends CommPacket {
 }
 
 /**
- * Response on {@link MessageCommLinkRequest} containing communication port to use.
+ * Response on {@link LinkMessagePortCommRequest} containing communication port to use.
  */
-export interface MessageCommLinkResponse extends CommPacket {
+export interface LinkMessagePortCommResponse extends CommPacket {
 
   /**
    * Message port to use by established communication link.

@@ -15,14 +15,14 @@ import {
 import { Formation, FormationContext } from '../../formation';
 import { OrderUnits, Unit } from '../../unit';
 import { Formation$Host } from '../formation.host';
-import { CommMessagingRequest } from './comm-messaging.request';
+import { UseMessagePortCommRequest } from '../packets';
 import { Formation$CtlChannel } from './formation.ctl-channel';
 
 /**
  * Communication linker implementation to be used by {@link Formation formation}.
  *
  * This class can be used as a formation context asset that provides both link implementation and {@link CommResponder
- * inbound command responder} for {@link CommMessagingRequest} request.
+ * inbound command responder} for {@link UseMessagePortCommRequest} request.
  */
 export class Formation$CommLinker implements CommLinker {
 
@@ -38,8 +38,8 @@ export class Formation$CommLinker implements CommLinker {
     target.provide(cxConstAsset(
         CommProcessor,
         {
-          name: 'message-comm-port',
-          respond: (request: CommMessagingRequest) => linker.#acceptPort(request),
+          name: UseMessagePortCommRequest,
+          respond: (request: UseMessagePortCommRequest) => linker.#acceptPort(request),
         },
     ));
   }
@@ -64,8 +64,8 @@ export class Formation$CommLinker implements CommLinker {
       const host = this.#context.get(Formation$Host);
       const logger = this.#context.get(Logger);
       const { port1, port2 } = new MessageChannel();
-      const onPortAccepted = this.#ctlChannel.request<CommMessagingRequest>(
-          'message-comm-port',
+      const onPortAccepted = this.#ctlChannel.request<UseMessagePortCommRequest>(
+          UseMessagePortCommRequest,
           {
             meta: { transferList: [port2] },
             fromFormation: this.#context.formation.uid,
@@ -98,7 +98,7 @@ export class Formation$CommLinker implements CommLinker {
     return link;
   }
 
-  #acceptPort(request: CommMessagingRequest): OnEvent<[CommPacket]> {
+  #acceptPort(request: UseMessagePortCommRequest): OnEvent<[CommPacket]> {
     return afterThe(request).do(
         mapOn_(({ fromFormation, port }) => {
 
@@ -143,8 +143,8 @@ class Formation$CommLink implements CommLink {
     const context = deployment.context();
     const logger = context.get(Logger);
     const { port1, port2 } = new MessageChannel();
-    const onPortAccepted = this.#channel.request<CommMessagingRequest>(
-        'message-comm-port',
+    const onPortAccepted = this.#channel.request<UseMessagePortCommRequest>(
+        UseMessagePortCommRequest,
         {
           meta: { transferList: [port2] },
           fromFormation: this.#host.formation.uid,

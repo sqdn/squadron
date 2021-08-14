@@ -1,6 +1,8 @@
 import { MessagePort } from 'worker_threads';
 import { CommPacket } from '../../communication';
 
+export const UseMessagePortCommRequest = 'use-message-port';
+
 /**
  * A request to start communication by messaging via the given port.
  *
@@ -8,7 +10,7 @@ import { CommPacket } from '../../communication';
  *
  * Responded with empty packet confirming the port accepted.
  */
-export interface CommMessagingRequest extends CommPacket {
+export interface UseMessagePortCommRequest extends CommPacket {
 
   /**
    * Unique identifier of formation that establishes communication.
