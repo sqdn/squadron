@@ -3,7 +3,7 @@ import { CxEntry } from '@proc7ts/context-values';
 import { afterThe, OnEvent, onEventBy } from '@proc7ts/fun-events';
 import { CommProcessor } from '../../communication';
 import { Formation, UnitLocation, UnitLocator } from '../../formation';
-import { Unit } from '../../unit';
+import { OrderUnits, Unit } from '../../unit';
 import { Formation$Host } from '../formation.host';
 import { UnitLocationRequest, UnitLocationResponse } from './unit-location.request';
 
@@ -28,9 +28,11 @@ export class Hub$UnitLocator implements UnitLocator {
   }
 
   readonly #host: Formation$Host;
+  readonly #orderUnits: OrderUnits;
 
   private constructor(target: CxEntry.Target<UnitLocator>) {
     this.#host = target.get(Formation$Host);
+    this.#orderUnits = this.#host.formation.order.get(OrderUnits);
   }
 
   locateUnit(unit: Unit): OnEvent<[UnitLocation]> {
@@ -39,7 +41,7 @@ export class Hub$UnitLocator implements UnitLocator {
 
   #locateUnit({ unit }: UnitLocationRequest): OnEvent<[UnitLocationResponse]> {
     return onEventBy(() => ({
-      formations: this.#host.unitFormations(new Unit({ id: unit })).map(({ uid }) => uid),
+      formations: this.#host.unitFormations(this.#orderUnits.unitByUid(unit, Unit)).map(({ uid }) => uid),
     }));
   }
 
