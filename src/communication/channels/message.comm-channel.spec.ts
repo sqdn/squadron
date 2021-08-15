@@ -10,7 +10,7 @@ import { Unit } from '../../unit';
 import { CommHandler, CommReceiver, CommResponder } from '../comm-handler';
 import { CommPacket } from '../comm-packet';
 import { CommProcessor } from '../comm-processor';
-import { createCommProcessor, ProxyCommProcessor } from '../handlers';
+import { HandlerCommProcessor, ProxyCommProcessor } from '../handlers';
 import { MessageCommChannel } from './message.comm-channel';
 
 interface TestPacket extends CommPacket {
@@ -54,7 +54,7 @@ describe('MessageCommChannel', () => {
       port: port1,
     });
 
-    remoteProcessor = createCommProcessor();
+    remoteProcessor = new HandlerCommProcessor();
     remoteChannel = new MessageCommChannel({
       to: unit1,
       port: port2,
@@ -92,7 +92,7 @@ describe('MessageCommChannel', () => {
         receive: jest.fn(() => resolver.resolve()),
       };
 
-      remoteProcessor = createCommProcessor(handler);
+      remoteProcessor = new HandlerCommProcessor(handler);
 
       channel.signal<TestPacket>('ping', { payload: 'test' });
       await resolver.promise();
@@ -107,7 +107,7 @@ describe('MessageCommChannel', () => {
         receive: jest.fn(() => resolver.resolve()),
       };
 
-      remoteProcessor = createCommProcessor(handler);
+      remoteProcessor = new HandlerCommProcessor(handler);
 
       const payload = new Int8Array([1, 2, 3, 99]).buffer;
 
@@ -126,7 +126,7 @@ describe('MessageCommChannel', () => {
         respond: jest.fn(request => onPromise({ ...request, payload: { re: request.payload } })),
       };
 
-      remoteProcessor = createCommProcessor(handler);
+      remoteProcessor = new HandlerCommProcessor(handler);
 
       expect(await channel.request<TestPacket, TestPacket>('ping', { payload: 'test' }))
           .toMatchObject({ payload: { re: 'test' } });
@@ -141,7 +141,7 @@ describe('MessageCommChannel', () => {
         }),
       };
 
-      remoteProcessor = createCommProcessor(handler);
+      remoteProcessor = new HandlerCommProcessor(handler);
 
       const supply = channel.request<TestPacket, TestPacket>('ping', { payload: 'test' })(noop);
       const remoteSupply = await remoteSupplyResolver.promise();
@@ -161,7 +161,7 @@ describe('MessageCommChannel', () => {
         }),
       };
 
-      remoteProcessor = createCommProcessor(handler);
+      remoteProcessor = new HandlerCommProcessor(handler);
 
       const supply = channel.request<TestPacket, TestPacket>('ping', { payload: 'test' })(noop);
 
@@ -235,7 +235,7 @@ describe('MessageCommChannel', () => {
         receive: () => resolver.resolve(),
       };
 
-      remoteProcessor = createCommProcessor(handler);
+      remoteProcessor = new HandlerCommProcessor(handler);
 
       port1.postMessage(message);
       channel.signal('test', {});

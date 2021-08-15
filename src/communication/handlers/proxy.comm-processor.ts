@@ -4,7 +4,7 @@ import { CommPacket } from '../comm-packet';
 import { CommProcessor } from '../comm-processor';
 
 /**
- * Creates inbound communication processor that proxies commands to another one.
+ * Inbound communication processor that proxies commands to another one.
  */
 export class ProxyCommProcessor implements CommProcessor {
 

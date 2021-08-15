@@ -7,7 +7,7 @@ import { CommError } from '../comm-error';
 import { CommReceiver, CommResponder } from '../comm-handler';
 import { CommPacket } from '../comm-packet';
 import { CommProcessor } from '../comm-processor';
-import { createCommProcessor, ProxyCommProcessor } from '../handlers';
+import { HandlerCommProcessor, ProxyCommProcessor } from '../handlers';
 import { DirectCommChannel } from './direct.comm-channel';
 
 interface TestPacket extends CommPacket {
@@ -49,7 +49,7 @@ describe('DirectCommChannel', () => {
         receive: jest.fn(),
       };
 
-      processor = createCommProcessor(handler);
+      processor = new HandlerCommProcessor(handler);
 
       const signal: TestPacket = { payload: 'test' };
 
@@ -78,7 +78,7 @@ describe('DirectCommChannel', () => {
         respond: jest.fn(request => onPromise({ ...request, payload: { re: request.payload } })),
       };
 
-      processor = createCommProcessor(handler);
+      processor = new HandlerCommProcessor(handler);
 
       expect(await channel.request<TestPacket, TestPacket>('ping', { payload: 'test' }))
           .toEqual({ payload: { re: 'test' } });

@@ -12,7 +12,7 @@ import { CommError } from '../comm-error';
 import { CommReceiver, CommResponder } from '../comm-handler';
 import { CommPacket } from '../comm-packet';
 import { CommProcessor } from '../comm-processor';
-import { createCommProcessor, ProxyCommProcessor } from '../handlers';
+import { HandlerCommProcessor, ProxyCommProcessor } from '../handlers';
 import { DirectCommChannel } from './direct.comm-channel';
 import { ProxyCommChannel } from './proxy.comm-channel';
 
@@ -72,7 +72,7 @@ describe('ProxyCommChannel', () => {
           payload: 'test payload',
         };
 
-        processor = createCommProcessor(handler);
+        processor = new HandlerCommProcessor(handler);
 
         channel.signal<TestPacket>('test', signal);
         expect(handler.receive).toHaveBeenCalledWith(signal, target);
@@ -90,7 +90,7 @@ describe('ProxyCommChannel', () => {
           payload: 'test payload',
         };
 
-        processor = createCommProcessor(handler);
+        processor = new HandlerCommProcessor(handler);
 
         expect(await channel.request('test', request)).toEqual({ payload: { re: request.payload } });
       });
@@ -127,8 +127,8 @@ describe('ProxyCommChannel', () => {
 
     it('closes target channel when switches to another one', () => {
 
-      const target1 = new DirectCommChannel({ to: unit, processor: createCommProcessor() });
-      const target2 = new DirectCommChannel({ to: unit, processor: createCommProcessor() });
+      const target1 = new DirectCommChannel({ to: unit, processor: new HandlerCommProcessor() });
+      const target2 = new DirectCommChannel({ to: unit, processor: new HandlerCommProcessor() });
 
       targets.send(target1);
       targets.send(target2);
@@ -160,7 +160,7 @@ describe('ProxyCommChannel', () => {
 
         channel.signal('test', signal);
 
-        const target = new DirectCommChannel({ to: unit, processor: createCommProcessor(handler) });
+        const target = new DirectCommChannel({ to: unit, processor: new HandlerCommProcessor(handler) });
 
         targets.send(target);
         expect(handler.receive).toHaveBeenCalledWith(signal, target);
@@ -168,7 +168,7 @@ describe('ProxyCommChannel', () => {
       it('warns when buffered signal can not be sent', () => {
         channel.signal('test', {});
 
-        const target = new DirectCommChannel({ to: unit, processor: createCommProcessor() });
+        const target = new DirectCommChannel({ to: unit, processor: new HandlerCommProcessor() });
 
         targets.send(target);
         expect(errorSpy).toHaveBeenCalledWith(
@@ -227,7 +227,7 @@ describe('ProxyCommChannel', () => {
 
         const onResponse = channel.request('test', request);
 
-        const target = new DirectCommChannel({ to: unit, processor: createCommProcessor(handler) });
+        const target = new DirectCommChannel({ to: unit, processor: new HandlerCommProcessor(handler) });
 
         targets.send(target);
         expect(await onResponse).toEqual({ payload: { re: request.payload } });
@@ -235,7 +235,7 @@ describe('ProxyCommChannel', () => {
       it('aborts response when buffered request errors', async () => {
 
         const onResponse = channel.request('test', {})(noop);
-        const target = new DirectCommChannel({ to: unit, processor: createCommProcessor() });
+        const target = new DirectCommChannel({ to: unit, processor: new HandlerCommProcessor() });
 
         targets.send(target);
 
@@ -244,7 +244,7 @@ describe('ProxyCommChannel', () => {
       it('aborts response when buffered request can not be sent', async () => {
 
         const whenResponded = channel.request('test', {})(noop);
-        const target = new DirectCommChannel({ to: unit, processor: createCommProcessor() });
+        const target = new DirectCommChannel({ to: unit, processor: new HandlerCommProcessor() });
         const error = new Error('Test');
 
         spyOn(target, 'request').mockImplementation(() => { throw error; });
@@ -275,7 +275,7 @@ describe('ProxyCommChannel', () => {
     describe('supply', () => {
       it('closes target channel', async () => {
 
-        const target = new DirectCommChannel({ to: unit, processor: createCommProcessor() });
+        const target = new DirectCommChannel({ to: unit, processor: new HandlerCommProcessor() });
 
         targets.send(target);
 
@@ -289,7 +289,7 @@ describe('ProxyCommChannel', () => {
       it('does not close target channel when `{ closeTarget: false }`', () => {
         channel = new ProxyCommChannel({ to: unit, target: targets.on, closeTarget: false });
 
-        const target = new DirectCommChannel({ to: unit, processor: createCommProcessor() });
+        const target = new DirectCommChannel({ to: unit, processor: new HandlerCommProcessor() });
 
         targets.send(target);
         channel.supply.off();
@@ -316,7 +316,7 @@ describe('ProxyCommChannel', () => {
           name: 'test',
           receive: jest.fn(),
         };
-        processor = createCommProcessor(handler);
+        processor = new HandlerCommProcessor(handler);
       });
 
       let signal1: TestPacket;
@@ -334,7 +334,11 @@ describe('ProxyCommChannel', () => {
       it('starts buffering when closed target received', () => {
         channel.signal('test', signal1);
 
-        const target1 = new DirectCommChannel({ to: unit, supply: neverSupply(), processor: createCommProcessor() });
+        const target1 = new DirectCommChannel({
+          to: unit,
+          supply: neverSupply(),
+          processor: new HandlerCommProcessor(),
+        });
 
         targets.send(target1);
 
@@ -349,7 +353,7 @@ describe('ProxyCommChannel', () => {
       });
       it('starts buffering when `undefined` target received', () => {
 
-        const target1 = new DirectCommChannel({ to: unit, processor: createCommProcessor() });
+        const target1 = new DirectCommChannel({ to: unit, processor: new HandlerCommProcessor() });
 
         targets.send(target1);
         targets.send();
@@ -374,7 +378,11 @@ describe('ProxyCommChannel', () => {
             supply1.off();
           },
         };
-        const target1 = new DirectCommChannel({ to: unit, supply: supply1, processor: createCommProcessor(handler1) });
+        const target1 = new DirectCommChannel({
+          to: unit,
+          supply: supply1,
+          processor: new HandlerCommProcessor(handler1),
+        });
 
         targets.send(target1);
         expect(target1.supply.isOff).toBe(true);

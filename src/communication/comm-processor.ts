@@ -4,14 +4,14 @@ import { UnitContext } from '../unit';
 import { CommChannel } from './comm-channel';
 import { CommHandler } from './comm-handler';
 import { CommPacket } from './comm-packet';
-import { createCommProcessor, ProxyCommProcessor } from './handlers';
+import { HandlerCommProcessor, ProxyCommProcessor } from './handlers';
 
 /**
  * Inbound communication processor.
  *
  * Unit {@link Communicator} handles inbound commands with command processor provided for unit context.
  *
- * Can be constructed out of {@link CommHandler command handlers} by {@link createCommProcessor} function.
+ * Can be constructed out of {@link CommHandler command handlers} as {@link HandlerCommProcessor}.
  */
 export interface CommProcessor {
 
@@ -45,7 +45,7 @@ export const CommProcessor: CxEntry<CommProcessor, CommHandler> = {
       UnitContext,
       (/*#__PURE__*/ cxDynamic({
         create(handlers: CommHandler[], _target: CxEntry.Target<CommProcessor, CommHandler>): CommProcessor {
-          return createCommProcessor(...handlers);
+          return new HandlerCommProcessor(...handlers);
         },
         assign({ get, to }) {
 

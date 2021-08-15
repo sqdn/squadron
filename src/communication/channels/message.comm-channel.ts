@@ -7,7 +7,7 @@ import { Unit } from '../../unit';
 import { CommChannel } from '../comm-channel';
 import { CommPacket } from '../comm-packet';
 import { CommProcessor } from '../comm-processor';
-import { createCommProcessor } from '../handlers';
+import { HandlerCommProcessor } from '../handlers';
 
 const enum MessageComm$Type {
   Signal,
@@ -42,7 +42,7 @@ export class MessageCommChannel implements CommChannel {
       {
         to,
         port,
-        processor = createCommProcessor(),
+        processor = new HandlerCommProcessor(),
         logger = consoleLogger,
       }: {
         to: Unit;
