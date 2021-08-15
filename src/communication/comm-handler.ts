@@ -7,15 +7,11 @@ import { CommPacket } from './comm-packet';
  *
  * Either a signal receiver, or a request responder.
  *
- * A {@link Communicator} processes incoming commands by available handlers. Available handlers provided in unit context
- * available via {@link CommProcessor}.
- *
- * @typeParam TIn - Input packet type.
- * @typeParam TOut - Output packet type.
+ * A {@link Communicator} processes incoming commands by handlers available in unit context as {@link CommProcessor}.
  */
-export type CommHandler<TIn extends CommPacket = CommPacket, TOut extends CommPacket | void = CommPacket> =
-    | CommReceiver<TIn>
-    | (TOut extends CommPacket ? CommResponder<TIn, TOut> : never);
+export type CommHandler =
+    | CommReceiver
+    | CommResponder;
 
 /**
  * Inbound {@link CommChannel.signal signal} receiver.
