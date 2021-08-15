@@ -7,7 +7,7 @@ import { SpyInstance, spyOn } from 'jest-mock';
 import { MessageChannel, MessagePort } from 'worker_threads';
 import { OrderTest } from '../../testing';
 import { Unit } from '../../unit';
-import { CommHandler, CommReceiver, CommResponder } from '../comm-handler';
+import { CommReceiver, CommResponder } from '../comm-handler';
 import { CommPacket } from '../comm-packet';
 import { CommProcessor } from '../comm-processor';
 import { HandlerCommProcessor, ProxyCommProcessor } from '../handlers';
@@ -87,34 +87,34 @@ describe('MessageCommChannel', () => {
     it('sends signal', async () => {
 
       const resolver = newPromiseResolver();
-      const handler: CommHandler<TestPacket, void> = {
+      const receiver: CommReceiver<TestPacket> = {
         name: 'ping',
-        receive: jest.fn(() => resolver.resolve()),
+        receive: jest.fn(() => { resolver.resolve(); return true; }),
       };
 
-      remoteProcessor = new HandlerCommProcessor(handler);
+      remoteProcessor = new HandlerCommProcessor(receiver);
 
       channel.signal<TestPacket>('ping', { payload: 'test' });
       await resolver.promise();
 
-      expect(handler.receive).toHaveBeenCalledWith(expect.objectContaining({ payload: 'test' }), remoteChannel);
+      expect(receiver.receive).toHaveBeenCalledWith(expect.objectContaining({ payload: 'test' }));
     });
     it('transfers objects', async () => {
 
       const resolver = newPromiseResolver();
-      const handler: CommHandler<TestPacket, void> = {
+      const receiver: CommReceiver<TestPacket> = {
         name: 'ping',
-        receive: jest.fn(() => resolver.resolve()),
+        receive: jest.fn(() => { resolver.resolve(); return true; }),
       };
 
-      remoteProcessor = new HandlerCommProcessor(handler);
+      remoteProcessor = new HandlerCommProcessor(receiver);
 
       const payload = new Int8Array([1, 2, 3, 99]).buffer;
 
       channel.signal<TestPacket>('ping', { meta: { transferList: [payload] }, payload });
       await resolver.promise();
 
-      expect(handler.receive).toHaveBeenCalledWith({ meta: {}, payload }, remoteChannel);
+      expect(receiver.receive).toHaveBeenCalledWith({ meta: {}, payload });
     });
   });
 
@@ -232,7 +232,7 @@ describe('MessageCommChannel', () => {
 
       const handler: CommReceiver = {
         name: 'test',
-        receive: () => resolver.resolve(),
+        receive: () => { resolver.resolve(); return true; },
       };
 
       remoteProcessor = new HandlerCommProcessor(handler);

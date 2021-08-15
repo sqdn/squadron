@@ -1,15 +1,11 @@
-import { cxDynamic, CxEntry, cxScoped } from '@proc7ts/context-values';
 import { OnEvent } from '@proc7ts/fun-events';
-import { UnitContext } from '../unit';
-import { CommChannel } from './comm-channel';
-import { CommHandler } from './comm-handler';
+import { CommReceiver, CommResponder } from './comm-handler';
 import { CommPacket } from './comm-packet';
-import { HandlerCommProcessor, ProxyCommProcessor } from './handlers';
+import { HandlerCommProcessor, NoopCommProcessor } from './handlers';
+import { isCommProcessor } from './handlers/comm-handler.impl';
 
 /**
  * Inbound communication processor.
- *
- * Unit {@link Communicator} handles inbound commands with command processor provided for unit context.
  *
  * Can be constructed out of {@link CommHandler command handlers} as {@link HandlerCommProcessor}.
  */
@@ -18,42 +14,44 @@ export interface CommProcessor {
   /**
    * Handles received signal.
    *
+   * May skip signal processing. In this case a `false` value should be returned. The next receiver in processing chain
+   * will receive the signal then.
+   *
    * @param name - Received signal name.
    * @param signal - Received signal data packet.
-   * @param channel - Communication channel the signal received from.
+   *
+   * @returns Either `true` if the signal processed, or `false` if unknown signal received.
    */
-  receive(name: string, signal: CommPacket, channel: CommChannel): void;
+  receive(name: string, signal: CommPacket): boolean;
 
   /**
    * Responds to request received.
    *
+   * May skip request processing. In this case a `false`, `null`, or `undefined` value should be returned. The next
+   * responder in processing chain will receive the request then.
+   *
    * @param name - Received request name.
    * @param request - Received request data packet.
-   * @param channel - Communication channel the request received from.
    *
-   * @returns `OnEvent` sender of response data packets.
+   * @returns Either `OnEvent` sender of response data packets, or falsy value if unknown request received.
    */
-  respond(name: string, request: CommPacket, channel: CommChannel): OnEvent<[CommPacket]>;
+  respond(name: string, request: CommPacket): OnEvent<[CommPacket]> | false | null | undefined;
 
 }
 
 /**
- * Unit context entry containing inbound communication processor used by default.
+ * Converts inbound command handler to processor.
+ *
+ * @param handler - Handler to convert.
+ *
+ * @returns Communication processor.
  */
-export const CommProcessor: CxEntry<CommProcessor, CommHandler> = {
-  perContext: (/*#__PURE__*/ cxScoped(
-      UnitContext,
-      (/*#__PURE__*/ cxDynamic({
-        create(handlers: CommHandler[], _target: CxEntry.Target<CommProcessor, CommHandler>): CommProcessor {
-          return new HandlerCommProcessor(...handlers);
-        },
-        assign({ get, to }) {
-
-          const processor = new ProxyCommProcessor(get);
-
-          return receiver => to((_, by) => receiver(processor, by));
-        },
-      })),
-  )),
-  toString: () => '[CommProcessor]',
-};
+export function commProcessorBy(handler?: CommReceiver | CommResponder | CommProcessor): CommProcessor {
+  if (!handler) {
+    return NoopCommProcessor;
+  }
+  if (isCommProcessor(handler)) {
+    return handler;
+  }
+  return new HandlerCommProcessor(handler);
+}

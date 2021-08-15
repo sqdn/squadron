@@ -66,7 +66,7 @@ describe('ProxyCommChannel', () => {
 
         const handler: CommReceiver<TestPacket> = {
           name: 'test',
-          receive: jest.fn(),
+          receive: jest.fn(() => true),
         };
         const signal: TestPacket = {
           payload: 'test payload',
@@ -75,7 +75,7 @@ describe('ProxyCommChannel', () => {
         processor = new HandlerCommProcessor(handler);
 
         channel.signal<TestPacket>('test', signal);
-        expect(handler.receive).toHaveBeenCalledWith(signal, target);
+        expect(handler.receive).toHaveBeenCalledWith(signal);
       });
     });
 
@@ -163,7 +163,7 @@ describe('ProxyCommChannel', () => {
         const target = new DirectCommChannel({ to: unit, processor: new HandlerCommProcessor(handler) });
 
         targets.send(target);
-        expect(handler.receive).toHaveBeenCalledWith(signal, target);
+        expect(handler.receive).toHaveBeenCalledWith(signal);
       });
       it('warns when buffered signal can not be sent', () => {
         channel.signal('test', {});
@@ -347,8 +347,8 @@ describe('ProxyCommChannel', () => {
         const target2 = new DirectCommChannel({ to: unit, processor });
 
         targets.send(target2);
-        expect(handler.receive).toHaveBeenCalledWith(signal1, target2);
-        expect(handler.receive).toHaveBeenCalledWith(signal2, target2);
+        expect(handler.receive).toHaveBeenCalledWith(signal1);
+        expect(handler.receive).toHaveBeenCalledWith(signal2);
         expect(handler.receive).toHaveBeenCalledTimes(2);
       });
       it('starts buffering when `undefined` target received', () => {
@@ -363,8 +363,8 @@ describe('ProxyCommChannel', () => {
         const target2 = new DirectCommChannel({ to: unit, processor });
 
         targets.send(target2);
-        expect(handler.receive).toHaveBeenCalledWith(signal1, target2);
-        expect(handler.receive).toHaveBeenCalledWith(signal2, target2);
+        expect(handler.receive).toHaveBeenCalledWith(signal1);
+        expect(handler.receive).toHaveBeenCalledWith(signal2);
         expect(handler.receive).toHaveBeenCalledTimes(2);
       });
       it('handles closing target while draining buffer', () => {
@@ -376,6 +376,7 @@ describe('ProxyCommChannel', () => {
           name: 'test',
           receive() {
             supply1.off();
+            return true;
           },
         };
         const target1 = new DirectCommChannel({
@@ -390,7 +391,7 @@ describe('ProxyCommChannel', () => {
         const target2 = new DirectCommChannel({ to: unit, processor });
 
         targets.send(target2);
-        expect(handler.receive).toHaveBeenCalledWith(signal2, target2);
+        expect(handler.receive).toHaveBeenCalledWith(signal2);
         expect(handler.receive).toHaveBeenCalledTimes(1);
       });
     });

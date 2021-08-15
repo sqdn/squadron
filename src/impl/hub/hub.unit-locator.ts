@@ -1,7 +1,7 @@
 import { cxConstAsset } from '@proc7ts/context-builder';
 import { CxEntry } from '@proc7ts/context-values';
 import { afterThe, OnEvent, onEventBy } from '@proc7ts/fun-events';
-import { CommProcessor } from '../../communication';
+import { CommProtocol } from '../../communication';
 import { Formation, UnitLocation, UnitLocator } from '../../formation';
 import { OrderUnits, Unit } from '../../unit';
 import { Formation$Host } from '../formation.host';
@@ -19,7 +19,7 @@ export class Hub$UnitLocator implements UnitLocator {
 
     target.provide(cxConstAsset(UnitLocator, locator));
     target.provide(cxConstAsset(
-        CommProcessor,
+        CommProtocol,
         {
           name: UnitLocationCommRequest,
           respond: (request: UnitLocationCommRequest) => locator.#locateUnit(request),

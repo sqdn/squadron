@@ -4,7 +4,7 @@ import { onEventBy, onPromise } from '@proc7ts/fun-events';
 import { Logger } from '@proc7ts/logger';
 import { Supply } from '@proc7ts/supply';
 import { MessageChannel } from 'worker_threads';
-import { CommPacket, CommProcessor, CommResponder, MessageCommChannel } from '../communication';
+import { CommPacket, CommProtocol, CommResponder, MessageCommChannel } from '../communication';
 import { Formation, FormationContext } from '../formation';
 import { Formation$createAssets } from '../impl/formation';
 import { Hub$createAssets } from '../impl/hub';
@@ -130,7 +130,7 @@ describe('FormationManager', () => {
             },
           };
 
-          fmnTest.formationBuilder.provide(cxConstAsset(CommProcessor, responder));
+          fmnTest.formationBuilder.provide(cxConstAsset(CommProtocol, responder));
         });
 
         const ctl = formationManager.formationCtl(testFmn);

@@ -4,21 +4,22 @@ import { UnitLocator } from '../formation';
 import { Unit, UnitContext } from '../unit';
 import { DirectCommChannel, ProxyCommChannel } from './channels';
 import { CommChannel } from './comm-channel';
-import { CommProcessor } from './comm-processor';
+import { commProcessorBy } from './comm-processor';
+import { CommProtocol } from './comm-protocol';
 import { Communicator } from './communicator';
 import { CommLinker } from './linkage';
 
 export class Communicator$ implements Communicator {
 
   readonly #locator: UnitLocator;
-  readonly #processor: CommProcessor;
+  readonly #protocol: CommProtocol;
   readonly #linker: CommLinker;
   readonly #logger: Logger;
   readonly #channels = new Map<string, CommChannel>();
 
   constructor(context: UnitContext) {
     this.#locator = context.get(UnitLocator);
-    this.#processor = context.get(CommProcessor);
+    this.#protocol = context.get(CommProtocol);
     this.#linker = context.get(CommLinker);
     this.#logger = context.get(Logger);
   }
@@ -35,7 +36,10 @@ export class Communicator$ implements Communicator {
     const target: OnEvent<[CommChannel]> = onLocation.do(
         mapOn_(location => {
           if (location.isLocal) {
-            return new DirectCommChannel({ to, processor: this.#processor });
+            return new DirectCommChannel({
+              to,
+              processor: commProcessorBy(this.#protocol.channelProcessor(to)),
+            });
           }
 
           const { formations } = location;

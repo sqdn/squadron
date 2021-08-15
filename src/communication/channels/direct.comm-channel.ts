@@ -4,6 +4,7 @@ import { Unit } from '../../unit';
 import { CommChannel } from '../comm-channel';
 import { CommPacket } from '../comm-packet';
 import { CommProcessor } from '../comm-processor';
+import { FinalCommProcessor } from '../handlers';
 import { ClosedCommChannel } from './closed.comm-channel';
 
 /**
@@ -37,16 +38,16 @@ export class DirectCommChannel implements CommChannel {
   ) {
     this.#to = to;
     this.#supply = supply;
-    this.#processor = processor;
+    this.#processor = new FinalCommProcessor(processor);
     this.supply.whenOff(reason => {
 
       const closed = new ClosedCommChannel(this.to, reason);
 
       this.#processor = {
-        receive(name, signal, _channel) {
-          closed.signal(name, signal);
+        receive(name, signal) {
+          return closed.signal(name, signal);
         },
-        respond(name, request, _channel) {
+        respond(name, request) {
           return closed.request(name, request);
         },
       };
@@ -62,12 +63,12 @@ export class DirectCommChannel implements CommChannel {
   }
 
   signal<TSignal extends CommPacket>(name: string, signal: TSignal): void {
-    this.#processor.receive(name, signal, this);
+    this.#processor.receive(name, signal);
   }
 
   request<TRequest extends CommPacket, TResponse = CommPacket>(name: string, request: TRequest): OnEvent<[TResponse]> {
 
-    const onResponse = this.#processor.respond(name, request, this) as OnEvent<[TResponse]>;
+    const onResponse = this.#processor.respond(name, request) as OnEvent<[TResponse]>;
 
     return this.supply.isOff
         ? onResponse
