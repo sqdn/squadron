@@ -62,7 +62,7 @@ describe('OrderSubject', () => {
         error: jest.fn<void, any[]>(),
       } as Partial<Logger> as Logger;
 
-      test.formationCxBuilder.provide(cxConstAsset(Logger, logger));
+      test.formationBuilder.provide(cxConstAsset(Logger, logger));
 
       const error = new Error('test');
       const task: OrderTask<Unit> = jest.fn(() => {
@@ -110,7 +110,7 @@ describe('OrderSubject', () => {
           error: jest.fn<void, any[]>(),
         } as Partial<Logger> as Logger;
 
-        test.formationCxBuilder.provide(cxConstAsset(Logger, logger));
+        test.formationBuilder.provide(cxConstAsset(Logger, logger));
 
         const unit = new Unit();
         let exec!: OrderSubject<Unit>['execute'];
@@ -167,7 +167,7 @@ describe('OrderSubject', () => {
         error: jest.fn<void, any[]>(),
       } as Partial<Logger> as Logger;
 
-      test.formationCxBuilder.provide(cxConstAsset(Logger, logger));
+      test.formationBuilder.provide(cxConstAsset(Logger, logger));
 
       const unit = new Unit();
 

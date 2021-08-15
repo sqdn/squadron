@@ -20,6 +20,7 @@ describe('FormationContext', () => {
     expect(context.hub).toBe(OrderTest.hub);
     expect(context.formation).toBe(OrderTest.formation);
     expect(context.unit).toBe(OrderTest.formation);
+    expect(Object.is(context.unit.order, OrderTest.order)).toBe(true);
   });
   it('is available during formation execution', async () => {
 

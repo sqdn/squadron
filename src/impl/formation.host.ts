@@ -5,7 +5,7 @@ import Order from '@sqdn/order';
 import { Formation, FormationContext } from '../formation';
 import { Hub } from '../hub';
 import { OrderTask } from '../order';
-import { Unit, UnitContext } from '../unit';
+import { Unit, UnitContext, UnitOrigin } from '../unit';
 import { Unit$Backend__symbol } from '../unit/unit.backend.impl';
 import { Unit$Deployment } from '../unit/unit.deployment.impl';
 import { Unit$Host } from '../unit/unit.host.impl';
@@ -26,34 +26,64 @@ export class Formation$Host implements Unit$Host {
   }
 
   readonly workbench = new Formation$Workbench();
-  readonly cxBuilder: CxBuilder<FormationContext>;
+  readonly formationBuilder: CxBuilder<FormationContext>;
   readonly context: FormationContext;
   readonly perOrderCxPeer: CxPeerBuilder<Order>;
   readonly perUnitCxPeer: CxPeer<UnitContext>;
 
   readonly #factory: Formation$Factory;
-  #hub?: Hub;
-  #formation?: Formation;
+  #order?: Order;
+  #orderBuilder?: CxBuilder<Order>;
+  #_origin?: UnitOrigin;
   readonly #unitFormations = new Map<string, Map<string, Formation>>();
   readonly #deployments = new Map<string, Unit$Deployment<any>>();
 
   constructor(factory: Formation$Factory) {
     this.#factory = factory;
-    this.cxBuilder = new CxBuilder(
+    this.formationBuilder = new CxBuilder(
         (get, builder) => factory.createContext(this, get, builder),
     );
-    this.context = this.cxBuilder.context;
+    this.context = this.formationBuilder.context;
 
-    this.perOrderCxPeer = new CxPeerBuilder<Order>(this.cxBuilder.boundPeer);
-    this.perUnitCxPeer = new CxPeerBuilder<UnitContext>(this.cxBuilder.boundPeer);
+    this.perOrderCxPeer = new CxPeerBuilder<Order>(this.formationBuilder.boundPeer);
+    this.perUnitCxPeer = new CxPeerBuilder<UnitContext>(this.formationBuilder.boundPeer);
+  }
+
+  get order(): Order {
+    return this.#order ||= this.orderBuilder.context;
+  }
+
+  get orderBuilder(): CxBuilder<Order> {
+    return this.#orderBuilder ||= this.#newOrderBuilder();
+  }
+
+  #newOrderBuilder(): CxBuilder<Order> {
+    return new CxBuilder<Order>(
+        (get, builder) => {
+
+          const { createOrder } = this.#factory;
+          const order = createOrder
+              ? createOrder(get, builder)
+              : new Formation$Order(this.#factory.orderId, get);
+
+          builder.provide(cxConstAsset(Order.entry, order));
+
+          return order;
+        },
+        this.perOrderCxPeer,
+    );
   }
 
   get hub(): Hub {
-    return this.#hub ||= this.#factory.getHub();
+    return this.#origin.hub;
   }
 
   get formation(): Formation {
-    return this.#formation ||= this.#factory.getFormation();
+    return this.#origin.formation;
+  }
+
+  get #origin(): UnitOrigin {
+    return this.#_origin ||= this.#factory.createOrigin(this.order, this.orderBuilder);
   }
 
   get log(): Logger {
@@ -107,20 +137,6 @@ export class Formation$Host implements Unit$Host {
     }
 
     return deployment;
-  }
-
-  newOrderBuilder(orderId: string): CxBuilder<Order> {
-    return new CxBuilder<Order>(
-        (get, builder) => {
-
-          const order = new Formation$Order(orderId, get);
-
-          builder.provide(cxConstAsset(Order.entry, order));
-
-          return order;
-        },
-        this.perOrderCxPeer,
-    );
   }
 
 }

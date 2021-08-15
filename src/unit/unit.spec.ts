@@ -211,7 +211,7 @@ describe('Unit', () => {
         error: jest.fn<void, any[]>(),
       } as Partial<Logger> as Logger;
 
-      test.formationCxBuilder.provide(cxConstAsset(Logger, logger));
+      test.formationBuilder.provide(cxConstAsset(Logger, logger));
 
       const error = new Error('test');
       const instruction: OrderInstruction<TestUnit> = jest.fn(() => {
@@ -235,7 +235,7 @@ describe('Unit', () => {
           error: jest.fn<void, any[]>(),
         } as Partial<Logger> as Logger;
 
-        test.formationCxBuilder.provide(cxConstAsset(Logger, logger));
+        test.formationBuilder.provide(cxConstAsset(Logger, logger));
 
         const error = new Error('test');
         const unit = new TestUnit();
@@ -299,7 +299,7 @@ describe('Unit', () => {
           warn: jest.fn<void, any[]>(),
         } as Partial<Logger> as Logger;
 
-        test.formationCxBuilder.provide(cxConstAsset(Logger, logger));
+        test.formationBuilder.provide(cxConstAsset(Logger, logger));
 
         const unit = new Unit();
 

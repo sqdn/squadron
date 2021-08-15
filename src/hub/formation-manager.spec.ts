@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it } from '@jest/globals';
 import { cxConstAsset } from '@proc7ts/context-builder';
 import { onEventBy, onPromise } from '@proc7ts/fun-events';
 import { Logger } from '@proc7ts/logger';
-import { lazyValue } from '@proc7ts/primitives';
 import { Supply } from '@proc7ts/supply';
 import { MessageChannel } from 'worker_threads';
 import { CommPacket, CommProcessor, CommResponder, MessageCommChannel } from '../communication';
@@ -34,29 +33,40 @@ describe('FormationManager', () => {
     perFormation = new Map();
 
     const { port1, port2 } = new MessageChannel();
-    const getHub = lazyValue(() => new Hub({ tag: 'test' }));
 
     testSupply.whenOff(() => {
       port1.close();
       port2.close();
     });
 
-    hubTest = OrderTest.setup({ getHub, getFormation: getHub });
-    hubTest.formationCxBuilder.provide(Hub$createAssets());
-    hubTest.formationCxBuilder.provide(cxConstAsset(
+    hubTest = OrderTest.setup({
+      createOrigin(order) {
+
+        const hub = new Hub({ tag: 'test', order });
+
+        return {
+          hub,
+          formation: hub,
+        };
+      },
+    });
+    hubTest.formationBuilder.provide(Hub$createAssets());
+    hubTest.formationBuilder.provide(cxConstAsset(
         FormationStarter,
         {
           startFormation(formation, { processor }) {
 
             const fmnTest = OrderTest.setup({
-              getHub,
-              getFormation: () => formation,
+              createOrigin: order => ({
+                hub: new Hub({ id: hubTest.hub.uid, order }),
+                formation: new Formation({ id: formation.uid, order }),
+              }),
             });
 
             fmnTests.set(formation.uid, fmnTest);
-            fmnTest.formationCxBuilder.provide(Formation$createAssets({
-              uid: formation.uid,
-              hubUid: getHub().uid,
+            fmnTest.formationBuilder.provide(Formation$createAssets({
+              uid: fmnTest.formation.uid,
+              hubUid: fmnTest.hub.uid,
               hubPort: port2,
             }));
             perFormation.get(formation.uid)?.(fmnTest);
@@ -120,11 +130,13 @@ describe('FormationManager', () => {
             },
           };
 
-          fmnTest.formationCxBuilder.provide(cxConstAsset(CommProcessor, responder));
+          fmnTest.formationBuilder.provide(cxConstAsset(CommProcessor, responder));
         });
 
-        const channel = formationManager.formationCtl(testFmn).channel;
+        const ctl = formationManager.formationCtl(testFmn);
+        const channel = ctl.channel;
 
+        expect(ctl.channel).toBe(channel);
         expect(await channel.request<TestPacket, TestPacket>('test', { payload: 'test payload' }))
             .toMatchObject({ payload: { re: 'test payload' } });
       });
