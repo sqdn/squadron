@@ -1,4 +1,4 @@
-import { cxBuildAsset, CxBuilder, cxConstAsset } from '@proc7ts/context-builder';
+import { CxBuilder, cxConstAsset } from '@proc7ts/context-builder';
 import { Logger, silentLogger } from '@proc7ts/logger';
 import Order from '@sqdn/order';
 import MockOrder from '@sqdn/order/mock';
@@ -6,10 +6,11 @@ import { Formation, FormationContext } from '../formation';
 import { Formation$Context } from '../formation/formation.context.impl';
 import { Hub } from '../hub';
 import { Formation$Host, Order$Evaluator } from '../impl';
+import { UnitOrigin } from '../unit';
 
 export interface OrderTest {
 
-  readonly cxBuilder: CxBuilder<Order>;
+  readonly orderBuilder: CxBuilder<Order>;
 
   readonly order: MockOrder;
 
@@ -17,7 +18,7 @@ export interface OrderTest {
 
   readonly formation: Formation;
 
-  readonly formationCxBuilder: CxBuilder<FormationContext>;
+  readonly formationBuilder: CxBuilder<FormationContext>;
 
   evaluate(this: void): Promise<void>;
 
@@ -33,9 +34,7 @@ export namespace OrderTest {
 
     readonly logger?: Logger;
 
-    getHub?(this: void): Hub;
-
-    getFormation?(this: void): Formation;
+    createOrigin?: ((this: void, order: Order, orderBuilder: CxBuilder<Order>) => UnitOrigin) | undefined;
 
   }
 
@@ -54,40 +53,39 @@ export const OrderTest: OrderTest.Static = {
   setup(this: void, init: OrderTest.Init = {}): OrderTest {
 
     const {
-      orderId,
-      getHub = () => new Hub({ tag: 'test' }),
-      getFormation = () => new Formation({ tag: 'test' }),
+      orderId = 'mock-order',
+      createOrigin = order => ({
+        hub: new Hub({ tag: 'test', order }),
+        formation: new Formation({ tag: 'test', order }),
+      }),
       logger = silentLogger,
     } = init;
 
+    let order!: MockOrder;
+
     const host = new Formation$Host({
-      getHub,
-      getFormation,
-      createContext: (host, get, builder) => new Formation$Context(
-          host,
-          get,
-          builder,
-      ),
+      orderId,
+      createOrigin,
+      createContext(host, get, builder) {
+        builder.provide(cxConstAsset(Logger, logger));
+        return new Formation$Context(host, get, builder);
+      },
+      createOrder(_get, orderBuilder) {
+        return order = MockOrder.mock({
+          orderId,
+          peer: orderBuilder,
+        });
+      },
     });
-    const cxBuilder = host.newOrderBuilder(orderId || 'mock-order');
-    let order: MockOrder;
 
-    cxBuilder.provide(cxBuildAsset(Order.entry, () => order));
-    host.cxBuilder.provide(cxConstAsset(Logger, logger));
-
-    const orderContext = cxBuilder.context;
-
-    order = MockOrder.mock({
-      orderId: orderContext.orderId,
-      peer: cxBuilder,
-    });
+    const { orderBuilder, hub, formation, formationBuilder } = host;
 
     return OrderTest$instance = {
-      cxBuilder,
+      orderBuilder,
       order,
-      hub: host.hub,
-      formation: order.get(Formation),
-      formationCxBuilder: host.cxBuilder,
+      hub,
+      formation,
+      formationBuilder,
 
       evaluate(): Promise<void> {
         if (order.active) {
@@ -106,8 +104,8 @@ export const OrderTest: OrderTest.Static = {
     };
   },
 
-  get cxBuilder(): CxBuilder<Order> {
-    return OrderTest$get().cxBuilder;
+  get orderBuilder(): CxBuilder<Order> {
+    return OrderTest$get().orderBuilder;
   },
 
   get order(): MockOrder {
@@ -122,8 +120,8 @@ export const OrderTest: OrderTest.Static = {
     return OrderTest$get().formation;
   },
 
-  get formationCxBuilder(): CxBuilder<FormationContext> {
-    return OrderTest$get().formationCxBuilder;
+  get formationBuilder(): CxBuilder<FormationContext> {
+    return OrderTest$get().formationBuilder;
   },
 
   get evaluate() {

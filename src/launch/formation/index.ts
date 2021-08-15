@@ -13,8 +13,11 @@ export default function launchFormation(launcher: SqdnLauncher): void {
   launchSqdn(
       launcher,
       {
-        getHub: () => new Hub({ id: launcher.launchData!.hubUid }),
-        getFormation: () => new Formation({ id: launcher.launchData!.uid }),
+        orderId: launcher.rootURL,
+        createOrigin: order => ({
+          hub: new Hub({ id: launcher.launchData!.hubUid, order }),
+          formation: new Formation({ id: launcher.launchData!.uid, order }),
+        }),
         createContext(host, get, cxBuilder) {
           cxBuilder.provide(Formation$createAssets(launcher.launchData!));
           return new Formation$Context(host, get, cxBuilder);
