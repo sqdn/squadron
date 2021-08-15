@@ -7,7 +7,8 @@ import {
   CommChannel,
   CommLink,
   CommLinker,
-  CommProcessor,
+  commProcessorBy,
+  CommProtocol,
   MessageCommChannel,
   ProxyCommChannel,
 } from '../../communication';
@@ -34,7 +35,7 @@ export class Hub$CommLinker implements CommLinker {
 
     target.provide(cxConstAsset(CommLinker, linker));
     target.provide(cxConstAsset(
-        CommProcessor,
+        CommProtocol,
         {
           name: LinkMessagePortCommRequest,
           respond: (request: LinkMessagePortCommRequest) => linker.#link(request),
@@ -128,7 +129,7 @@ class Hub$CommLink implements CommLink {
           mapOn_(() => new MessageCommChannel({
             to,
             port: port1,
-            processor: this.#context.get(CommProcessor),
+            processor: commProcessorBy(this.#context.get(CommProtocol).channelProcessor(to)),
             logger,
           })),
       ),

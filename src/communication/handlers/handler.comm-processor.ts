@@ -1,7 +1,8 @@
 import { OnEvent } from '@proc7ts/fun-events';
-import { CommHandler, CommReceiver } from '../comm-handler';
+import { CommReceiver, CommResponder } from '../comm-handler';
 import { CommPacket } from '../comm-packet';
 import { CommProcessor } from '../comm-processor';
+import { isCommProcessor, isCommResponder } from './comm-handler.impl';
 
 /**
  * Communication processor that handles inbound commands with matching handlers.
@@ -17,14 +18,14 @@ export class HandlerCommProcessor implements CommProcessor {
    *
    * @param handlers - Communication handlers to process inbound commands with.
    */
-  constructor(...handlers: CommHandler[]) {
+  constructor(...handlers: (CommReceiver | CommResponder | CommProcessor)[]) {
     for (const handler of handlers) {
       if (isCommProcessor(handler)) {
         this.#addProcessor(handler);
-      } else if (isCommReceiver(handler)) {
-        this.#receiversOf(handler.name).push((_name, signal) => handler.receive(signal));
-      } else {
+      } else if (isCommResponder(handler)) {
         this.#respondersOf(handler.name).push((_name, request) => handler.respond(request));
+      } else {
+        this.#receiversOf(handler.name).push((_name, signal) => handler.receive(signal));
       }
     }
   }
@@ -81,12 +82,4 @@ export class HandlerCommProcessor implements CommProcessor {
     return response;
   }
 
-}
-
-function isCommProcessor(handler: CommHandler): handler is CommProcessor {
-  return typeof (handler as Partial<CommReceiver>).name === 'undefined';
-}
-
-function isCommReceiver(handler: CommHandler): handler is CommReceiver {
-  return typeof (handler as Partial<CommReceiver>).receive === 'function';
 }
