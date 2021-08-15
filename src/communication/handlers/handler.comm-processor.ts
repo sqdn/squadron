@@ -1,6 +1,6 @@
 import { OnEvent } from '@proc7ts/fun-events';
 import { CommChannel } from '../comm-channel';
-import { CommHandler, CommReceiver, CommResponder } from '../comm-handler';
+import { CommHandler, CommReceiver } from '../comm-handler';
 import { CommPacket } from '../comm-packet';
 import { CommProcessor } from '../comm-processor';
 
@@ -9,8 +9,9 @@ import { CommProcessor } from '../comm-processor';
  */
 export class HandlerCommProcessor implements CommProcessor {
 
-  readonly #receivers = new Map<string, CommReceiver[]>();
-  readonly #responders = new Map<string, CommResponder[]>();
+  readonly #processors: CommProcessor[] = [];
+  readonly #receivers = new Map<string, CommProcessor['receive'][]>();
+  readonly #responders = new Map<string, CommProcessor['respond'][]>();
 
   /**
    * Constructs handler communication processor.
@@ -19,60 +20,72 @@ export class HandlerCommProcessor implements CommProcessor {
    */
   constructor(...handlers: CommHandler[]) {
     for (const handler of handlers) {
-      if (isCommReceiver(handler)) {
-        this.#addReceiver(handler);
+      if (isCommProcessor(handler)) {
+        this.#addProcessor(handler);
+      } else if (isCommReceiver(handler)) {
+        this.#receiversOf(handler.name).push((_name, signal, channel) => handler.receive(signal, channel));
       } else {
-        this.#addResponder(handler);
+        this.#respondersOf(handler.name).push((_name, request, channel) => handler.respond(request, channel));
       }
     }
   }
 
-  #addReceiver(handler: CommReceiver): void {
-
-    const receivers = this.#receivers.get(handler.name);
-
-    if (receivers) {
-      receivers.push(handler);
-    } else {
-      this.#receivers.set(handler.name, [handler]);
+  #addProcessor(processor: CommProcessor): void {
+    for (const name of this.#receivers.keys()) {
+      this.#receiversOf(name).push(processor.receive.bind(processor));
     }
+    for (const name of this.#responders.keys()) {
+      this.#respondersOf(name).push(processor.respond.bind(processor));
+    }
+    this.#processors.push(processor);
   }
 
-  #addResponder(responder: CommResponder): void {
+  #receiversOf(name: string): CommProcessor['receive'][] {
 
-    const responders = this.#responders.get(responder.name);
+    let receivers = this.#receivers.get(name);
 
-    if (responders) {
-      responders.push(responder);
-    } else {
-      this.#responders.set(responder.name, [responder]);
+    if (!receivers) {
+      receivers = this.#processors.map(processor => processor.receive.bind(processor));
+      this.#receivers.set(name, receivers);
     }
+
+    return receivers;
+  }
+
+  #respondersOf(name: string): CommProcessor['respond'][] {
+
+    let responders = this.#responders.get(name);
+
+    if (!responders) {
+      responders = this.#processors.map(processor => processor.respond.bind(processor));
+      this.#responders.set(name, responders);
+    }
+
+    return responders;
   }
 
   receive(name: string, signal: CommPacket, channel: CommChannel): boolean {
-
-    const receivers = this.#receivers.get(name);
-
-    return !!receivers && receivers.some(receiver => receiver.receive(signal, channel));
+    return this.#receiversOf(name).some(receiver => receiver(name, signal, channel));
   }
 
   respond(name: string, request: CommPacket, channel: CommChannel): OnEvent<[CommPacket]> | false | null | undefined {
 
     let response: OnEvent<[CommPacket]> | false | null | undefined;
-    const responders = this.#responders.get(name);
 
-    if (responders) {
-      for (const responder of responders) {
-        response = responder.respond(request, channel);
-        if (response) {
-          break;
-        }
+    for (const responder of this.#respondersOf(name)) {
+      response = responder(name, request, channel);
+      if (response) {
+        break;
       }
     }
 
     return response;
   }
 
+}
+
+function isCommProcessor(handler: CommHandler): handler is CommProcessor {
+  return typeof (handler as Partial<CommReceiver>).name === 'undefined';
 }
 
 function isCommReceiver(handler: CommHandler): handler is CommReceiver {

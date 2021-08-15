@@ -1,20 +1,23 @@
 import { OnEvent } from '@proc7ts/fun-events';
 import { CommChannel } from './comm-channel';
 import { CommPacket } from './comm-packet';
+import { CommProcessor } from './comm-processor';
 
 /**
  * Inbound command handler.
  *
  * One of:
  *
- * - signal {@link CommReceiver receiver}, or
- * - request {@link CommResponder responder}.
+ * - signal {@link CommReceiver receiver},
+ * - request {@link CommResponder responder},
+ * - or command {@link CommProcessor processor}.
  *
  * A {@link Communicator} processes incoming commands by handlers available in unit context as {@link CommProcessor}.
  */
 export type CommHandler =
     | CommReceiver
-    | CommResponder;
+    | CommResponder
+    | CommProcessor;
 
 /**
  * Inbound {@link CommChannel.signal signal} receiver.
