@@ -20,11 +20,11 @@ export class ProxyCommProcessor implements CommProcessor {
     this.#get = getProcessor;
   }
 
-  receive(name: string, signal: CommPacket, channel: CommChannel): void {
-    this.#get().receive(name, signal, channel);
+  receive(name: string, signal: CommPacket, channel: CommChannel): boolean {
+    return this.#get().receive(name, signal, channel);
   }
 
-  respond(name: string, request: CommPacket, channel: CommChannel): OnEvent<[CommPacket]> {
+  respond(name: string, request: CommPacket, channel: CommChannel): OnEvent<[CommPacket]> | false | null | undefined {
     return this.#get().respond(name, request, channel);
   }
 

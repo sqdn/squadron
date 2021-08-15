@@ -35,7 +35,7 @@ export class ClosedCommChannel implements CommChannel {
     return new Supply(noop).off(this.#reason);
   }
 
-  signal<TSignal extends CommPacket>(name: string, _signal: TSignal): void {
+  signal<TSignal extends CommPacket>(name: string, _signal: TSignal): never {
     throw new CommError(
         this.to,
         `Can not send signal "${name}" to ${this.#to} over closed channel`,

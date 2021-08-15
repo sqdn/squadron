@@ -1,4 +1,4 @@
-import { OnEvent, onEventBy } from '@proc7ts/fun-events';
+import { OnEvent } from '@proc7ts/fun-events';
 import { CommChannel } from '../comm-channel';
 import { CommHandler, CommReceiver, CommResponder } from '../comm-handler';
 import { CommPacket } from '../comm-packet';
@@ -9,8 +9,8 @@ import { CommProcessor } from '../comm-processor';
  */
 export class HandlerCommProcessor implements CommProcessor {
 
-  readonly #receivers = new Map<string, CommReceiver>();
-  readonly #responders = new Map<string, CommResponder>();
+  readonly #receivers = new Map<string, CommReceiver[]>();
+  readonly #responders = new Map<string, CommResponder[]>();
 
   /**
    * Constructs handler communication processor.
@@ -20,35 +20,57 @@ export class HandlerCommProcessor implements CommProcessor {
   constructor(...handlers: CommHandler[]) {
     for (const handler of handlers) {
       if (isCommReceiver(handler)) {
-        this.#receivers.set(handler.name, handler);
+        this.#addReceiver(handler);
       } else {
-        this.#responders.set(handler.name, handler);
+        this.#addResponder(handler);
       }
     }
   }
 
-  receive(name: string, signal: CommPacket, channel: CommChannel): void {
+  #addReceiver(handler: CommReceiver): void {
 
-    const receiver = this.#receivers.get(name);
+    const receivers = this.#receivers.get(handler.name);
 
-    if (!receiver) {
-      throw new TypeError(`Unknown signal received: "${name}"`);
+    if (receivers) {
+      receivers.push(handler);
+    } else {
+      this.#receivers.set(handler.name, [handler]);
     }
-
-    receiver.receive(signal, channel);
   }
 
-  respond(name: string, request: CommPacket, channel: CommChannel): OnEvent<[CommPacket]> {
+  #addResponder(responder: CommResponder): void {
 
-    const responder = this.#responders.get(name);
+    const responders = this.#responders.get(responder.name);
 
-    if (!responder) {
-      return onEventBy(({ supply }) => {
-        supply.off(new TypeError(`Unknown request received: "${name}"`));
-      });
+    if (responders) {
+      responders.push(responder);
+    } else {
+      this.#responders.set(responder.name, [responder]);
+    }
+  }
+
+  receive(name: string, signal: CommPacket, channel: CommChannel): boolean {
+
+    const receivers = this.#receivers.get(name);
+
+    return !!receivers && receivers.some(receiver => receiver.receive(signal, channel));
+  }
+
+  respond(name: string, request: CommPacket, channel: CommChannel): OnEvent<[CommPacket]> | false | null | undefined {
+
+    let response: OnEvent<[CommPacket]> | false | null | undefined;
+    const responders = this.#responders.get(name);
+
+    if (responders) {
+      for (const responder of responders) {
+        response = responder.respond(request, channel);
+        if (response) {
+          break;
+        }
+      }
     }
 
-    return responder.respond(request, channel);
+    return response;
   }
 
 }

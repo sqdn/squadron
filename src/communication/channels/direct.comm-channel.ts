@@ -4,6 +4,7 @@ import { Unit } from '../../unit';
 import { CommChannel } from '../comm-channel';
 import { CommPacket } from '../comm-packet';
 import { CommProcessor } from '../comm-processor';
+import { FinalCommProcessor } from '../handlers';
 import { ClosedCommChannel } from './closed.comm-channel';
 
 /**
@@ -37,14 +38,14 @@ export class DirectCommChannel implements CommChannel {
   ) {
     this.#to = to;
     this.#supply = supply;
-    this.#processor = processor;
+    this.#processor = new FinalCommProcessor(processor);
     this.supply.whenOff(reason => {
 
       const closed = new ClosedCommChannel(this.to, reason);
 
       this.#processor = {
         receive(name, signal, _channel) {
-          closed.signal(name, signal);
+          return closed.signal(name, signal);
         },
         respond(name, request, _channel) {
           return closed.request(name, request);

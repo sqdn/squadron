@@ -5,7 +5,10 @@ import { CommPacket } from './comm-packet';
 /**
  * Inbound command handler.
  *
- * Either a signal receiver, or a request responder.
+ * One of:
+ *
+ * - signal {@link CommReceiver receiver}, or
+ * - request {@link CommResponder responder}.
  *
  * A {@link Communicator} processes incoming commands by handlers available in unit context as {@link CommProcessor}.
  */
@@ -28,10 +31,15 @@ export interface CommReceiver<TSignal extends CommPacket = CommPacket> {
   /**
    * Handles received signal.
    *
+   * May skip signal processing. In this case a `false` value should be returned. The next receiver in processing chain
+   * will receive the signal then.
+   *
    * @param signal - Received signal data packet.
    * @param channel - Communication channel the signal received from.
+   *
+   * @returns Either `true` if the signal processed, or `false` otherwise.
    */
-  receive(signal: TSignal, channel: CommChannel): void;
+  receive(signal: TSignal, channel: CommChannel): boolean;
 
 }
 
@@ -51,11 +59,14 @@ export interface CommResponder<TRequest extends CommPacket = CommPacket, TRespon
   /**
    * Responds to request received.
    *
+   * May skip request processing. In this case a `false`, `null`, or `undefined` value should be returned. The next
+   * responder in processing chain will receive the request then.
+   *
    * @param request - Received request data packet.
    * @param channel - Communication channel the request received from.
    *
-   * @returns `OnEvent` sender of response data packets.
+   * @returns Either `OnEvent` sender of response data packets, or falsy value if the request can not be responded.
    */
-  respond(request: TRequest, channel: CommChannel): OnEvent<[TResponse]>;
+  respond(request: TRequest, channel: CommChannel): OnEvent<[TResponse]> | false | null | undefined;
 
 }

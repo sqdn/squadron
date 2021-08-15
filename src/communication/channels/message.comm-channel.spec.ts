@@ -89,7 +89,7 @@ describe('MessageCommChannel', () => {
       const resolver = newPromiseResolver();
       const receiver: CommReceiver<TestPacket> = {
         name: 'ping',
-        receive: jest.fn(() => resolver.resolve()),
+        receive: jest.fn(() => { resolver.resolve(); return true; }),
       };
 
       remoteProcessor = new HandlerCommProcessor(receiver);
@@ -104,7 +104,7 @@ describe('MessageCommChannel', () => {
       const resolver = newPromiseResolver();
       const receiver: CommReceiver<TestPacket> = {
         name: 'ping',
-        receive: jest.fn(() => resolver.resolve()),
+        receive: jest.fn(() => { resolver.resolve(); return true; }),
       };
 
       remoteProcessor = new HandlerCommProcessor(receiver);
@@ -232,7 +232,7 @@ describe('MessageCommChannel', () => {
 
       const handler: CommReceiver = {
         name: 'test',
-        receive: () => resolver.resolve(),
+        receive: () => { resolver.resolve(); return true; },
       };
 
       remoteProcessor = new HandlerCommProcessor(handler);

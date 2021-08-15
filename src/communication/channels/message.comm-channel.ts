@@ -7,7 +7,7 @@ import { Unit } from '../../unit';
 import { CommChannel } from '../comm-channel';
 import { CommPacket } from '../comm-packet';
 import { CommProcessor } from '../comm-processor';
-import { HandlerCommProcessor } from '../handlers';
+import { FinalCommProcessor, HandlerCommProcessor } from '../handlers';
 
 const enum MessageComm$Type {
   Signal,
@@ -26,7 +26,7 @@ export class MessageCommChannel implements CommChannel {
   readonly #to: Unit;
   readonly #supply: Supply;
   readonly #port: MessagePort;
-  readonly #processor: CommProcessor;
+  readonly #processor: FinalCommProcessor;
   readonly #logger: Logger;
   readonly #streams = new Map<string, EventEmitter<[CommPacket]>>();
 
@@ -59,7 +59,7 @@ export class MessageCommChannel implements CommChannel {
       this.supply.off();
     });
     this.#port = port;
-    this.#processor = processor;
+    this.#processor = new FinalCommProcessor(processor);
     this.#logger = logger;
     port.on('message', (wrapper: MessageComm$Wrapper) => this.#onCommand(wrapper));
   }
@@ -152,7 +152,7 @@ export class MessageCommChannel implements CommChannel {
     this.#port.postMessage(endRequestWrapper);
   }
 
-  #onCommand(wrapper: MessageComm$Wrapper): void {
+  #onCommand(wrapper: MessageComm$Wrapper): void | boolean {
 
     const { sqdn } = wrapper;
 

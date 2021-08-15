@@ -66,7 +66,7 @@ describe('ProxyCommChannel', () => {
 
         const handler: CommReceiver<TestPacket> = {
           name: 'test',
-          receive: jest.fn(),
+          receive: jest.fn(() => true),
         };
         const signal: TestPacket = {
           payload: 'test payload',
@@ -376,6 +376,7 @@ describe('ProxyCommChannel', () => {
           name: 'test',
           receive() {
             supply1.off();
+            return true;
           },
         };
         const target1 = new DirectCommChannel({

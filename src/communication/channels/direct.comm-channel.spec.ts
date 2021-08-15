@@ -44,17 +44,36 @@ describe('DirectCommChannel', () => {
   describe('signal', () => {
     it('processes signal', () => {
 
-      const handler: CommReceiver<TestPacket> = {
+      const receiver: CommReceiver<TestPacket> = {
         name: 'ping',
-        receive: jest.fn(),
+        receive: jest.fn(() => true),
       };
 
-      processor = new HandlerCommProcessor(handler);
+      processor = new HandlerCommProcessor(receiver);
 
       const signal: TestPacket = { payload: 'test' };
 
       channel.signal('ping', signal);
-      expect(handler.receive).toHaveBeenCalledWith(signal, channel);
+      expect(receiver.receive).toHaveBeenCalledWith(signal, channel);
+    });
+    it('processes signal with fallback handler', () => {
+
+      const receiver1: CommReceiver<TestPacket> = {
+        name: 'ping',
+        receive: jest.fn(),
+      };
+      const receiver2: CommReceiver<TestPacket> = {
+        name: 'ping',
+        receive: jest.fn(() => true),
+      };
+
+      processor = new HandlerCommProcessor(receiver1, receiver2);
+
+      const signal: TestPacket = { payload: 'test' };
+
+      channel.signal('ping', signal);
+      expect(receiver1.receive).toHaveBeenCalledWith(signal, channel);
+      expect(receiver2.receive).toHaveBeenCalledWith(signal, channel);
     });
     it('does not send signal when channel closed', () => {
 
@@ -71,14 +90,30 @@ describe('DirectCommChannel', () => {
   });
 
   describe('request', () => {
-    it('processes request', async () => {
+    it('responds to request', async () => {
 
-      const handler: CommResponder<TestPacket, TestPacket> = {
+      const responder: CommResponder<TestPacket, TestPacket> = {
         name: 'ping',
         respond: jest.fn(request => onPromise({ ...request, payload: { re: request.payload } })),
       };
 
-      processor = new HandlerCommProcessor(handler);
+      processor = new HandlerCommProcessor(responder);
+
+      expect(await channel.request<TestPacket, TestPacket>('ping', { payload: 'test' }))
+          .toEqual({ payload: { re: 'test' } });
+    });
+    it('responds to request with fallback responder', async () => {
+
+      const responder1: CommResponder<TestPacket, TestPacket> = {
+        name: 'ping',
+        respond: noop,
+      };
+      const responder2: CommResponder<TestPacket, TestPacket> = {
+        name: 'ping',
+        respond: request => onPromise({ ...request, payload: { re: request.payload } }),
+      };
+
+      processor = new HandlerCommProcessor(responder1, responder2);
 
       expect(await channel.request<TestPacket, TestPacket>('ping', { payload: 'test' }))
           .toEqual({ payload: { re: 'test' } });
