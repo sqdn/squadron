@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { CommBuffer } from '../comm-buffer';
-import { fifoCommBuffer } from './fifo.comm-buffer';
+import { FIFOCommBuffer } from './fifo.comm-buffer';
 
-describe('fifoCommBuffer', () => {
+describe('FIFOCommBuffer', () => {
   it('evicts commands on overflow', () => {
 
     const onEvict = jest.fn();
-    const buffer = fifoCommBuffer<number>(2);
+    const buffer = new FIFOCommBuffer<number>(2);
 
     buffer.onEvict(onEvict);
 
@@ -29,7 +29,7 @@ describe('fifoCommBuffer', () => {
   it('evicts commands from one-element buffer on overflow', () => {
 
     const onEvict = jest.fn();
-    const buffer = fifoCommBuffer<number>(0);
+    const buffer = new FIFOCommBuffer<number>(0);
 
     buffer.onEvict(onEvict);
 
@@ -52,7 +52,7 @@ describe('fifoCommBuffer', () => {
   it('has `256` commands capacity by default', () => {
 
     const onEvict = jest.fn();
-    const buffer = fifoCommBuffer<number>();
+    const buffer = new FIFOCommBuffer<number>();
 
     buffer.onEvict(onEvict);
 
@@ -68,7 +68,7 @@ describe('fifoCommBuffer', () => {
     let buffer: CommBuffer;
 
     beforeEach(() => {
-      buffer = fifoCommBuffer();
+      buffer = new FIFOCommBuffer();
     });
 
     it('returns `undefined` initially', () => {

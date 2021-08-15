@@ -3,7 +3,7 @@ import { consoleLogger, Logger, logline } from '@proc7ts/logger';
 import { asis, noop } from '@proc7ts/primitives';
 import { Supply } from '@proc7ts/supply';
 import { Unit } from '../../unit';
-import { fifoCommBuffer } from '../buffers';
+import { FIFOCommBuffer } from '../buffers';
 import { CommBuffer } from '../comm-buffer';
 import { CommChannel } from '../comm-channel';
 import { CommError } from '../comm-error';
@@ -37,7 +37,7 @@ export class ProxyCommChannel implements CommChannel {
    * the commands are buffered until next channel supplied.
    * @param closeTarget - Whether to close target channel when it is no longer in use. `true` by default.
    * @param buffer - Commands buffer or buffer capacity. The commands added to this buffer while there is no target
-   * channel. If nothing or buffer capacity specified, a new {@link fifoCommBuffer FIFO command buffer} created and
+   * channel. If nothing or buffer capacity specified, a new {@link FIFOCommBuffer FIFO command buffer} created and
    * used.
    * @param logger - Logger to report buffered commands send failures.
    */
@@ -237,7 +237,7 @@ export class ProxyCommChannel implements CommChannel {
 function ProxyComm$buffer(buffer?: CommBuffer | number): CommBuffer<ProxyComm$Command> {
   return buffer && typeof buffer !== 'number'
       ? buffer as CommBuffer<ProxyComm$Command>
-      : fifoCommBuffer(buffer);
+      : new FIFOCommBuffer(buffer);
 }
 
 interface ProxyComm$Target {

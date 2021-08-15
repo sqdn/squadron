@@ -6,7 +6,7 @@ import { neverSupply, Supply } from '@proc7ts/supply';
 import { SpyInstance, spyOn } from 'jest-mock';
 import { OrderTest } from '../../testing';
 import { Unit } from '../../unit';
-import { fifoCommBuffer } from '../buffers';
+import { FIFOCommBuffer } from '../buffers';
 import { CommChannel } from '../comm-channel';
 import { CommError } from '../comm-error';
 import { CommReceiver, CommResponder } from '../comm-handler';
@@ -143,7 +143,7 @@ describe('ProxyCommChannel', () => {
         channel = new ProxyCommChannel({
           to: unit,
           target: targets.on,
-          buffer: fifoCommBuffer(1),
+          buffer: new FIFOCommBuffer(1),
           logger: processingLogger(consoleLogger),
         });
       });
@@ -208,7 +208,7 @@ describe('ProxyCommChannel', () => {
         channel = new ProxyCommChannel({
           to: unit,
           target: targets.on,
-          buffer: fifoCommBuffer(1),
+          buffer: new FIFOCommBuffer(1),
           logger: processingLogger(consoleLogger),
         });
       });
