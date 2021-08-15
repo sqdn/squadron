@@ -10,7 +10,7 @@ import { Unit } from '../../unit';
 import { CommHandler, CommReceiver, CommResponder } from '../comm-handler';
 import { CommPacket } from '../comm-packet';
 import { CommProcessor } from '../comm-processor';
-import { createCommProcessor, proxyCommProcessor } from '../handlers';
+import { createCommProcessor, ProxyCommProcessor } from '../handlers';
 import { MessageCommChannel } from './message.comm-channel';
 
 interface TestPacket extends CommPacket {
@@ -58,7 +58,7 @@ describe('MessageCommChannel', () => {
     remoteChannel = new MessageCommChannel({
       to: unit1,
       port: port2,
-      processor: proxyCommProcessor(() => remoteProcessor),
+      processor: new ProxyCommProcessor(() => remoteProcessor),
     });
   });
   afterEach(() => {

@@ -7,7 +7,7 @@ import { CommError } from '../comm-error';
 import { CommReceiver, CommResponder } from '../comm-handler';
 import { CommPacket } from '../comm-packet';
 import { CommProcessor } from '../comm-processor';
-import { createCommProcessor, proxyCommProcessor } from '../handlers';
+import { createCommProcessor, ProxyCommProcessor } from '../handlers';
 import { DirectCommChannel } from './direct.comm-channel';
 
 interface TestPacket extends CommPacket {
@@ -37,7 +37,7 @@ describe('DirectCommChannel', () => {
   beforeEach(() => {
     channel = new DirectCommChannel({
       to: unit,
-      processor: proxyCommProcessor(() => processor),
+      processor: new ProxyCommProcessor(() => processor),
     });
   });
 

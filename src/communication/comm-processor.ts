@@ -4,7 +4,7 @@ import { UnitContext } from '../unit';
 import { CommChannel } from './comm-channel';
 import { CommHandler } from './comm-handler';
 import { CommPacket } from './comm-packet';
-import { createCommProcessor, proxyCommProcessor } from './handlers';
+import { createCommProcessor, ProxyCommProcessor } from './handlers';
 
 /**
  * Inbound communication processor.
@@ -49,7 +49,7 @@ export const CommProcessor: CxEntry<CommProcessor, CommHandler> = {
         },
         assign({ get, to }) {
 
-          const processor = proxyCommProcessor(get);
+          const processor = new ProxyCommProcessor(get);
 
           return receiver => to((_, by) => receiver(processor, by));
         },

@@ -12,7 +12,7 @@ import { CommError } from '../comm-error';
 import { CommReceiver, CommResponder } from '../comm-handler';
 import { CommPacket } from '../comm-packet';
 import { CommProcessor } from '../comm-processor';
-import { createCommProcessor, proxyCommProcessor } from '../handlers';
+import { createCommProcessor, ProxyCommProcessor } from '../handlers';
 import { DirectCommChannel } from './direct.comm-channel';
 import { ProxyCommChannel } from './proxy.comm-channel';
 
@@ -51,7 +51,7 @@ describe('ProxyCommChannel', () => {
     let channel: ProxyCommChannel;
 
     beforeEach(() => {
-      target = new DirectCommChannel({ to: unit, processor: proxyCommProcessor(() => processor) });
+      target = new DirectCommChannel({ to: unit, processor: new ProxyCommProcessor(() => processor) });
       channel = new ProxyCommChannel({ to: unit, target });
     });
 

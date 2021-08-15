@@ -1,7 +1,7 @@
 import { CxEntry, cxScoped, cxSingle } from '@proc7ts/context-values';
 import { Logger } from '@proc7ts/logger';
 import { lazyValue } from '@proc7ts/primitives';
-import { CommChannel, CommProcessor, MessageCommChannel, proxyCommProcessor } from '../../communication';
+import { CommChannel, CommProcessor, MessageCommChannel, ProxyCommProcessor } from '../../communication';
 import { FormationContext } from '../../formation';
 import { Formation$LaunchData } from '../formation.launch-data';
 
@@ -20,7 +20,7 @@ export const Formation$CtlChannel: CxEntry<Formation$CtlChannel> = {
             to: context.hub,
             port: launchData.hubPort,
             logger: target.get(Logger),
-            processor: proxyCommProcessor(lazyValue(() => target.get(CommProcessor))),
+            processor: new ProxyCommProcessor(lazyValue(() => target.get(CommProcessor))),
           });
         },
       }),
