@@ -54,7 +54,7 @@ describe('DirectCommChannel', () => {
       const signal: TestPacket = { payload: 'test' };
 
       channel.signal('ping', signal);
-      expect(receiver.receive).toHaveBeenCalledWith(signal, channel);
+      expect(receiver.receive).toHaveBeenCalledWith(signal);
     });
     it('processes signal with command processor', () => {
 
@@ -68,7 +68,7 @@ describe('DirectCommChannel', () => {
       const signal: TestPacket = { payload: 'test' };
 
       channel.signal('ping', signal);
-      expect(handler.receive).toHaveBeenCalledWith(signal, channel);
+      expect(handler.receive).toHaveBeenCalledWith(signal);
     });
     it('processes signal with fallback handler', () => {
 
@@ -86,8 +86,8 @@ describe('DirectCommChannel', () => {
       const signal: TestPacket = { payload: 'test' };
 
       channel.signal('ping', signal);
-      expect(receiver1.receive).toHaveBeenCalledWith(signal, channel);
-      expect(receiver2.receive).toHaveBeenCalledWith(signal, channel);
+      expect(receiver1.receive).toHaveBeenCalledWith(signal);
+      expect(receiver2.receive).toHaveBeenCalledWith(signal);
     });
     it('processes signal with fallback processor', () => {
 
@@ -105,8 +105,8 @@ describe('DirectCommChannel', () => {
       const signal: TestPacket = { payload: 'test' };
 
       channel.signal('ping', signal);
-      expect(receiver1.receive).toHaveBeenCalledWith(signal, channel);
-      expect(receiver2.receive).toHaveBeenCalledWith(signal, channel);
+      expect(receiver1.receive).toHaveBeenCalledWith(signal);
+      expect(receiver2.receive).toHaveBeenCalledWith(signal);
     });
     it('does not send signal when channel closed', () => {
 

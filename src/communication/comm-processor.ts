@@ -1,7 +1,6 @@
 import { cxDynamic, CxEntry, cxScoped } from '@proc7ts/context-values';
 import { OnEvent } from '@proc7ts/fun-events';
 import { UnitContext } from '../unit';
-import { CommChannel } from './comm-channel';
 import { CommHandler } from './comm-handler';
 import { CommPacket } from './comm-packet';
 import { HandlerCommProcessor, ProxyCommProcessor } from './handlers';
@@ -23,11 +22,10 @@ export interface CommProcessor {
    *
    * @param name - Received signal name.
    * @param signal - Received signal data packet.
-   * @param channel - Communication channel the signal received from.
    *
    * @returns Either `true` if the signal processed, or `false` if unknown signal received.
    */
-  receive(name: string, signal: CommPacket, channel: CommChannel): boolean;
+  receive(name: string, signal: CommPacket): boolean;
 
   /**
    * Responds to request received.
@@ -37,11 +35,10 @@ export interface CommProcessor {
    *
    * @param name - Received request name.
    * @param request - Received request data packet.
-   * @param channel - Communication channel the request received from.
    *
    * @returns Either `OnEvent` sender of response data packets, or falsy value if unknown request received.
    */
-  respond(name: string, request: CommPacket, channel: CommChannel): OnEvent<[CommPacket]> | false | null | undefined;
+  respond(name: string, request: CommPacket): OnEvent<[CommPacket]> | false | null | undefined;
 
 }
 

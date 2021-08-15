@@ -1,6 +1,4 @@
 import { OnEvent, onEventBy } from '@proc7ts/fun-events';
-import { CommChannel } from '../comm-channel';
-import { CommError } from '../comm-error';
 import { CommPacket } from '../comm-packet';
 import { CommProcessor } from '../comm-processor';
 
@@ -29,14 +27,13 @@ export class FinalCommProcessor implements CommProcessor {
    *
    * @param name - Received signal name.
    * @param signal - Received signal data packet.
-   * @param channel - Communication channel the signal received from.
    *
    * @returns Either `true`.
-   * @throws CommError  If unknown signal received.
+   * @throws TypeError  If unknown signal received.
    */
-  receive(name: string, signal: CommPacket, channel: CommChannel): true {
-    if (!this.#processor.receive(name, signal, channel)) {
-      throw new CommError(channel.to, `Unknown signal received: "${name}"`);
+  receive(name: string, signal: CommPacket): true {
+    if (!this.#processor.receive(name, signal)) {
+      throw new TypeError(`Unknown signal received: "${name}"`);
     }
     return true;
   }
@@ -48,14 +45,13 @@ export class FinalCommProcessor implements CommProcessor {
    *
    * @param name - Received request name.
    * @param request - Received request data packet.
-   * @param channel - Communication channel the request received from.
    *
    * @returns `OnEvent` sender of response data packets. If unknown request received, the response supply wil be cut off
-   * with `CommError` as its reason.
+   * with `TypeError` as its reason.
    */
-  respond(name: string, request: CommPacket, channel: CommChannel): OnEvent<[CommPacket]> {
-    return this.#processor.respond(name, request, channel) || onEventBy(({ supply }) => {
-      supply.off(new CommError(channel.to, `Unknown request received: "${name}"`));
+  respond(name: string, request: CommPacket): OnEvent<[CommPacket]> {
+    return this.#processor.respond(name, request) || onEventBy(({ supply }) => {
+      supply.off(new TypeError(`Unknown request received: "${name}"`));
     });
   }
 

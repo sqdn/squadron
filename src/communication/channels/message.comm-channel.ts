@@ -163,7 +163,7 @@ export class MessageCommChannel implements CommChannel {
       if (typeof body === 'object' && body) {
         switch (type) {
         case MessageComm$Type.Signal:
-          return this.#processor.receive(name, body, this);
+          return this.#processor.receive(name, body);
         case MessageComm$Type.Request:
           return this.#onRequest(name, body);
         case MessageComm$Type.Response:
@@ -187,7 +187,7 @@ export class MessageCommChannel implements CommChannel {
     }
 
     const stream = this.#openStream(streamId);
-    const onResponse = this.#processor.respond(name, request, this);
+    const onResponse = this.#processor.respond(name, request);
 
     onResponse({
       supply: stream.supply.derive().whenOff(reason => this.#closeStream(name, streamId, reason)),

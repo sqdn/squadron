@@ -44,10 +44,10 @@ export class DirectCommChannel implements CommChannel {
       const closed = new ClosedCommChannel(this.to, reason);
 
       this.#processor = {
-        receive(name, signal, _channel) {
+        receive(name, signal) {
           return closed.signal(name, signal);
         },
-        respond(name, request, _channel) {
+        respond(name, request) {
           return closed.request(name, request);
         },
       };
@@ -63,12 +63,12 @@ export class DirectCommChannel implements CommChannel {
   }
 
   signal<TSignal extends CommPacket>(name: string, signal: TSignal): void {
-    this.#processor.receive(name, signal, this);
+    this.#processor.receive(name, signal);
   }
 
   request<TRequest extends CommPacket, TResponse = CommPacket>(name: string, request: TRequest): OnEvent<[TResponse]> {
 
-    const onResponse = this.#processor.respond(name, request, this) as OnEvent<[TResponse]>;
+    const onResponse = this.#processor.respond(name, request) as OnEvent<[TResponse]>;
 
     return this.supply.isOff
         ? onResponse

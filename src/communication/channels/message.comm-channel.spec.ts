@@ -97,7 +97,7 @@ describe('MessageCommChannel', () => {
       channel.signal<TestPacket>('ping', { payload: 'test' });
       await resolver.promise();
 
-      expect(receiver.receive).toHaveBeenCalledWith(expect.objectContaining({ payload: 'test' }), remoteChannel);
+      expect(receiver.receive).toHaveBeenCalledWith(expect.objectContaining({ payload: 'test' }));
     });
     it('transfers objects', async () => {
 
@@ -114,7 +114,7 @@ describe('MessageCommChannel', () => {
       channel.signal<TestPacket>('ping', { meta: { transferList: [payload] }, payload });
       await resolver.promise();
 
-      expect(receiver.receive).toHaveBeenCalledWith({ meta: {}, payload }, remoteChannel);
+      expect(receiver.receive).toHaveBeenCalledWith({ meta: {}, payload });
     });
   });
 

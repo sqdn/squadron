@@ -1,5 +1,4 @@
 import { OnEvent } from '@proc7ts/fun-events';
-import { CommChannel } from '../comm-channel';
 import { CommHandler, CommReceiver } from '../comm-handler';
 import { CommPacket } from '../comm-packet';
 import { CommProcessor } from '../comm-processor';
@@ -23,9 +22,9 @@ export class HandlerCommProcessor implements CommProcessor {
       if (isCommProcessor(handler)) {
         this.#addProcessor(handler);
       } else if (isCommReceiver(handler)) {
-        this.#receiversOf(handler.name).push((_name, signal, channel) => handler.receive(signal, channel));
+        this.#receiversOf(handler.name).push((_name, signal) => handler.receive(signal));
       } else {
-        this.#respondersOf(handler.name).push((_name, request, channel) => handler.respond(request, channel));
+        this.#respondersOf(handler.name).push((_name, request) => handler.respond(request));
       }
     }
   }
@@ -64,16 +63,16 @@ export class HandlerCommProcessor implements CommProcessor {
     return responders;
   }
 
-  receive(name: string, signal: CommPacket, channel: CommChannel): boolean {
-    return this.#receiversOf(name).some(receiver => receiver(name, signal, channel));
+  receive(name: string, signal: CommPacket): boolean {
+    return this.#receiversOf(name).some(receiver => receiver(name, signal));
   }
 
-  respond(name: string, request: CommPacket, channel: CommChannel): OnEvent<[CommPacket]> | false | null | undefined {
+  respond(name: string, request: CommPacket): OnEvent<[CommPacket]> | false | null | undefined {
 
     let response: OnEvent<[CommPacket]> | false | null | undefined;
 
     for (const responder of this.#respondersOf(name)) {
-      response = responder(name, request, channel);
+      response = responder(name, request);
       if (response) {
         break;
       }

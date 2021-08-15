@@ -1,5 +1,4 @@
 import { OnEvent } from '@proc7ts/fun-events';
-import { CommChannel } from './comm-channel';
 import { CommPacket } from './comm-packet';
 import { CommProcessor } from './comm-processor';
 
@@ -38,11 +37,10 @@ export interface CommReceiver<TSignal extends CommPacket = CommPacket> {
    * will receive the signal then.
    *
    * @param signal - Received signal data packet.
-   * @param channel - Communication channel the signal received from.
    *
    * @returns Either `true` if the signal processed, or `false` otherwise.
    */
-  receive(signal: TSignal, channel: CommChannel): boolean;
+  receive(signal: TSignal): boolean;
 
 }
 
@@ -66,10 +64,9 @@ export interface CommResponder<TRequest extends CommPacket = CommPacket, TRespon
    * responder in processing chain will receive the request then.
    *
    * @param request - Received request data packet.
-   * @param channel - Communication channel the request received from.
    *
    * @returns Either `OnEvent` sender of response data packets, or falsy value if the request can not be responded.
    */
-  respond(request: TRequest, channel: CommChannel): OnEvent<[TResponse]> | false | null | undefined;
+  respond(request: TRequest): OnEvent<[TResponse]> | false | null | undefined;
 
 }
