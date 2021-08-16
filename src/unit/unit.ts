@@ -1,6 +1,6 @@
 import { Supply, SupplyPeer } from '@proc7ts/supply';
 import Order from '@sqdn/order';
-import { Order$Evaluator } from '../impl';
+import { Formation$Host, Order$Evaluator } from '../impl';
 import { OrderInstruction } from '../order';
 import { Unit$Backend, Unit$Backend__symbol } from './unit.backend.impl';
 import { Unit$Id, Unit$Id__symbol } from './unit.id.impl';
@@ -39,7 +39,7 @@ export class Unit implements SupplyPeer {
         this[Unit$Id__symbol] = new Unit$Id(this, init),
         new.target,
     );
-    this.order.get(Order$Evaluator).addUnit(this);
+    this.order.get(Formation$Host).addUnit(this);
   }
 
   /**

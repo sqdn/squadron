@@ -35,6 +35,7 @@ export class Formation$Host implements Unit$Host {
   #order?: Order;
   #orderBuilder?: CxBuilder<Order>;
   #_origin?: UnitOrigin;
+  readonly #units = new Map<string, Unit>();
   readonly #unitFormations = new Map<string, Map<string, Formation>>();
   readonly #deployments = new Map<string, Unit$Deployment<any>>();
 
@@ -88,6 +89,36 @@ export class Formation$Host implements Unit$Host {
 
   get log(): Logger {
     return this.context.get(Logger);
+  }
+
+  addUnit(unit: Unit): void {
+    if (!this.#units.has(unit.uid)) {
+      this.putUnit(unit);
+    }
+  }
+
+  putUnit(unit: Unit): void {
+    this.#units.set(unit.uid, unit);
+  }
+
+  unitByUid<TUnit extends Unit>(order: Order, id: string, unitType: new (init?: Unit.Init) => TUnit): TUnit {
+
+    const unit = this.#units.get(id);
+
+    if (unit) {
+      if (unit instanceof unitType) {
+        return unit;
+      }
+      if (unit.hasInstructions || !(unitType.prototype instanceof unit.constructor)) {
+        throw new TypeError(`${unit} is not a ${unitType.name}`);
+      }
+    }
+
+    const newUnit = new unitType({ id, order: order });
+
+    this.#units.set(id, newUnit);
+
+    return newUnit;
   }
 
   unitFormations(unit: Unit): readonly Formation[] {

@@ -28,7 +28,7 @@ class Order$Units implements OrderUnits {
   }
 
   unitByUid<TUnit extends Unit>(uid: string, unitType: new (init?: Unit.Init) => TUnit): TUnit {
-    return this.#evaluator.unitByUid(uid, unitType);
+    return this.#evaluator.host.unitByUid(this.#evaluator.order, uid, unitType);
   }
 
 }

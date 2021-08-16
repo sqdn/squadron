@@ -30,7 +30,6 @@ export class Order$Evaluator implements Unit$Host {
   readonly #workbench = new Order$Workbench();
   readonly #whenExecuted: Promise<void>;
   readonly #evaluators = new Map<string, Unit$Evaluator<any>>();
-  readonly #units = new Map<string, Unit>();
 
   constructor(readonly order: Order) {
     this.host = order.get(Formation$Host);
@@ -73,12 +72,6 @@ export class Order$Evaluator implements Unit$Host {
     return this.#whenExecuted;
   }
 
-  addUnit(unit: Unit): void {
-    if (!this.#units.has(unit.uid)) {
-      this.#units.set(unit.uid, unit);
-    }
-  }
-
   evalUnit<TUnit extends Unit>(unit: TUnit): Unit$Evaluator<TUnit> {
 
     let evaluator = this.#evaluators.get(unit.uid);
@@ -86,30 +79,10 @@ export class Order$Evaluator implements Unit$Host {
     if (!evaluator) {
       evaluator = new Unit$Evaluator<TUnit>(this, unit);
       this.#evaluators.set(unit.uid, evaluator);
-      this.#units.set(unit.uid, unit);
+      this.host.putUnit(unit);
     }
 
     return evaluator;
-  }
-
-  unitByUid<TUnit extends Unit>(id: string, unitType: new (init?: Unit.Init) => TUnit): TUnit {
-
-    const unit = this.#units.get(id);
-
-    if (unit) {
-      if (unit instanceof unitType) {
-        return unit;
-      }
-      if (unit.hasInstructions || !(unitType.prototype instanceof unit.constructor)) {
-        throw new TypeError(`${unit} is not a ${unitType.name}`);
-      }
-    }
-
-    const newUnit = new unitType({ id, order: this.order });
-
-    this.#units.set(id, newUnit);
-
-    return newUnit;
   }
 
   deliver(task: Workbench.Task<void>): void {
