@@ -17,7 +17,7 @@ describe('OrderSubject', () => {
     test = OrderTest.setup();
   });
   afterEach(() => {
-    test.reset();
+    OrderTest.reset();
   });
 
   describe('execute', () => {
@@ -29,9 +29,9 @@ describe('OrderSubject', () => {
       unit.instruct(({ execute }) => {
         execute(task);
       });
-      test.formation.deploy(unit);
+      OrderTest.formation.deploy(unit);
 
-      await test.evaluate();
+      await OrderTest.evaluate();
 
       expect(task).toHaveBeenCalledTimes(1);
       expect(unit.supply.isOff).toBe(false);

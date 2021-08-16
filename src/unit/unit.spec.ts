@@ -20,7 +20,7 @@ describe('Unit', () => {
     test = OrderTest.setup();
   });
   afterEach(() => {
-    test.reset();
+    OrderTest.reset();
   });
 
   describe('order', () => {

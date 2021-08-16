@@ -3,14 +3,11 @@ import { OrderTest } from '../testing';
 import { Hub } from './hub';
 
 describe('Hub', () => {
-
-  let test: OrderTest;
-
   beforeEach(() => {
-    test = OrderTest.setup();
+    OrderTest.setup();
   });
   afterEach(() => {
-    test.reset();
+    OrderTest.reset();
   });
 
   describe('uid', () => {

@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from '@jest/globals';
 import { cxConstAsset } from '@proc7ts/context-builder';
 import { CxEntry, cxSingle } from '@proc7ts/context-values';
+import Order from '@sqdn/order';
 import { Formation, FormationContext } from '../formation';
 import { OrderTest } from './order-test';
 
@@ -10,7 +11,7 @@ describe('OrderTest', () => {
     OrderTest.reset();
   });
 
-  describe('registry', () => {
+  describe('orderBuilder', () => {
     it('sets up the test automatically', () => {
 
       const entry: CxEntry<string> = { perContext: cxSingle(), toString: () => '[CxEntry test]' };
@@ -38,14 +39,26 @@ describe('OrderTest', () => {
 
       const test = OrderTest.setup();
 
-      expect(test.orderBuilder).toBe(OrderTest.orderBuilder);
-      expect(test.order).toBe(OrderTest.order);
-      expect(test.order.current).toBe(OrderTest.order);
+      expect(test.hub).toBe(OrderTest.hub);
       expect(test.formation).toBe(OrderTest.formation);
       expect(test.formationBuilder).toBe(OrderTest.formationBuilder);
-      expect(test.evaluate).toBe(OrderTest.evaluate);
-      expect(test.evaluate).toBe(OrderTest.evaluate);
-      expect(test.reset).toBe(OrderTest.reset);
+      expect(test.order).toBe(OrderTest.order);
+      expect(test.order.current).toBe(OrderTest.order);
+      expect(test.orderBuilder).toBe(OrderTest.orderBuilder);
+      expect(test.supply).toBe(OrderTest.supply);
+    });
+  });
+
+  describe('reset', () => {
+    it('makes order inactive', () => {
+      OrderTest.setup();
+      expect(Order.current.active).toBe(true);
+
+      OrderTest.reset();
+      expect(Order.current.active).toBe(false);
+
+      OrderTest.reset();
+      expect(Order.current.active).toBe(false);
     });
   });
 });
