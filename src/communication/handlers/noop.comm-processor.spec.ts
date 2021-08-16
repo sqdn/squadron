@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 import { NoopCommProcessor } from './noop.comm-processor';
 
-describe('noopCommProcessor', () => {
+describe('NoopCommProcessor', () => {
   describe('receive', () => {
     it('does not process signals', () => {
       expect(NoopCommProcessor.receive(null!, null!)).toBe(false);
