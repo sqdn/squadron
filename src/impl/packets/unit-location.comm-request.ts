@@ -1,6 +1,6 @@
 import { CommPacket } from '../../communication';
 
-export const UnitLocationCommRequest = 'unit-location';
+export const UnitLocationCommRequest = 'unit-location' as const;
 
 export interface UnitLocationCommRequest extends CommPacket {
 

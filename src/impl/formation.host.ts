@@ -121,16 +121,16 @@ export class Formation$Host implements Unit$Host {
     return newUnit;
   }
 
-  unitFormations(unit: Unit): readonly Formation[] {
+  unitFormations(unit: Unit): Formation[] {
 
-    const formations = this.#unitFormations.get(unit.uid);
+    const formations = this.#formationsOfUnit(unit);
 
     return formations ? [...formations.values()] : [];
   }
 
   isUnitDeployedAt(unit: Unit, formation: Formation): boolean {
 
-    const formations = this.#unitFormations.get(unit.uid);
+    const formations = this.#formationsOfUnit(unit);
 
     return !!formations && formations.has(formation.uid);
   }
@@ -141,7 +141,7 @@ export class Formation$Host implements Unit$Host {
 
   deploy(formation: Formation, unit: Unit): void {
 
-    let unitFormations = this.#unitFormations.get(unit.uid);
+    let unitFormations = this.#formationsOfUnit(unit);
 
     if (!unitFormations) {
       this.#unitFormations.set(unit.uid, unitFormations = new Map());
@@ -154,8 +154,25 @@ export class Formation$Host implements Unit$Host {
     }
   }
 
+  #formationsOfUnit(unit: Unit): Map<string, Formation> | undefined {
+
+    let unitFormations = this.#unitFormations.get(unit.uid);
+
+    if (!unitFormations) {
+
+      const asFormation = unit.asFormation;
+
+      if (asFormation) {
+        this.#unitFormations.set(unit.uid, unitFormations = new Map());
+        unitFormations.set(asFormation.uid, asFormation);
+      }
+    }
+
+    return unitFormations;
+  }
+
   async executeTask<TUnit extends Unit>(unit: TUnit, task: OrderTask<TUnit>): Promise<void> {
-    await task(this.unitDeployment(unit).context());
+    await task(this.unitDeployment(unit).context);
   }
 
   unitDeployment<TUnit extends Unit>(unit: TUnit): Unit$Deployment<TUnit> {

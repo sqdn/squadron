@@ -21,10 +21,10 @@ export interface CommLink {
    *
    * It is an error trying to connect to a unit which is not deployed there.
    *
-   * @param unit - Target unit.
+   * @param to - Target unit.
    *
    * @returns New communication channel.
    */
-  connect(unit: Unit): CommChannel;
+  connect(to: Unit): CommChannel;
 
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { Formation$Host } from '../formation.host';
+import { Formation$Host } from './formation.host';
 
 describe('Formation$Host', () => {
   describe('toString', () => {

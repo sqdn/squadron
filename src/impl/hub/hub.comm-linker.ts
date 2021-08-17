@@ -15,7 +15,12 @@ import {
 import { Formation, FormationContext } from '../../formation';
 import { FormationCtl, FormationManager } from '../../hub';
 import { OrderUnits, Unit } from '../../unit';
-import { LinkMessagePortCommRequest, LinkMessagePortCommResponse, UseMessagePortCommRequest } from '../packets';
+import {
+  LinkMessagePortCommRequest,
+  LinkMessagePortCommResponse,
+  UseMessagePortCommRequest,
+  UseMessagePortCommResponder,
+} from '../packets';
 
 /**
  * Communication linker implementation to be used by {@link Hub central hub}.
@@ -34,6 +39,7 @@ export class Hub$CommLinker implements CommLinker {
     const linker = new Hub$CommLinker(target);
 
     target.provide(cxConstAsset(CommLinker, linker));
+    target.provide(UseMessagePortCommResponder);
     target.provide(cxConstAsset(
         CommProtocol,
         {
@@ -78,7 +84,7 @@ export class Hub$CommLinker implements CommLinker {
               const { port1, port2 } = new MessageChannel();
 
               return ctl.channel.request<UseMessagePortCommRequest>(
-                  LinkMessagePortCommRequest,
+                  UseMessagePortCommRequest,
                   {
                     meta: { transferList: [port2] },
                     fromFormation: request.fromFormation,

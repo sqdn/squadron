@@ -1,22 +1,21 @@
 import { cxConstAsset } from '@proc7ts/context-builder';
 import { CxEntry } from '@proc7ts/context-values';
-import { afterThe, mapOn_, OnEvent } from '@proc7ts/fun-events';
+import { mapOn_, OnEvent } from '@proc7ts/fun-events';
 import { Logger } from '@proc7ts/logger';
 import { MessageChannel } from 'worker_threads';
 import {
   CommChannel,
   CommLink,
   CommLinker,
-  CommPacket,
   commProcessorBy,
   CommProtocol,
   MessageCommChannel,
   ProxyCommChannel,
 } from '../../communication';
 import { Formation, FormationContext } from '../../formation';
-import { OrderUnits, Unit } from '../../unit';
+import { Unit } from '../../unit';
 import { Formation$Host } from '../formation.host';
-import { UseMessagePortCommRequest } from '../packets';
+import { UseMessagePortCommRequest, UseMessagePortCommResponder } from '../packets';
 import { Formation$CtlChannel } from './formation.ctl-channel';
 
 /**
@@ -36,23 +35,15 @@ export class Formation$CommLinker implements CommLinker {
     const linker = new Formation$CommLinker(target);
 
     target.provide(cxConstAsset(CommLinker, linker));
-    target.provide(cxConstAsset(
-        CommProtocol,
-        {
-          name: UseMessagePortCommRequest,
-          respond: (request: UseMessagePortCommRequest) => linker.#acceptPort(request),
-        },
-    ));
+    target.provide(UseMessagePortCommResponder);
   }
 
   readonly #context: FormationContext;
-  readonly #orderUnits: OrderUnits;
   readonly #links = new Map<string, CommLink>();
   readonly #ctlChannel: Formation$CtlChannel;
 
   private constructor(target: CxEntry.Target<CommLinker>) {
     this.#context = target.get(FormationContext);
-    this.#orderUnits = this.#context.formation.order.get(OrderUnits);
     this.#ctlChannel = target.get(Formation$CtlChannel);
   }
 
@@ -100,26 +91,6 @@ export class Formation$CommLinker implements CommLinker {
     return link;
   }
 
-  #acceptPort(request: UseMessagePortCommRequest): OnEvent<[CommPacket]> {
-    return afterThe(request).do(
-        mapOn_(({ fromFormation, port }) => {
-
-          // Process inbound commands.
-          const to = this.#orderUnits.unitByUid(fromFormation, Formation);
-          const processor = commProcessorBy(this.#context.get(CommProtocol).channelProcessor(to));
-
-          new MessageCommChannel({
-            to,
-            port,
-            processor,
-            logger: this.#context.get(Logger),
-          });
-
-          return {};
-        }),
-    );
-  }
-
 }
 
 class Formation$CommLink implements CommLink {
@@ -144,8 +115,7 @@ class Formation$CommLink implements CommLink {
 
   connect(to: Unit): CommChannel {
 
-    const deployment = this.#host.unitDeployment(to);
-    const context = deployment.context();
+    const { context } = this.#host.unitDeployment(to);
     const logger = context.get(Logger);
     const { port1, port2 } = new MessageChannel();
     const onPortAccepted = this.#channel.request<UseMessagePortCommRequest>(

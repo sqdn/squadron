@@ -1,6 +1,6 @@
 import { cxConstAsset } from '@proc7ts/context-builder';
 import { CxEntry } from '@proc7ts/context-values';
-import { afterThe, OnEvent, onEventBy } from '@proc7ts/fun-events';
+import { afterThe, OnEvent, onEventBy, onPromise } from '@proc7ts/fun-events';
 import { CommProtocol } from '../../communication';
 import { Formation, UnitLocation, UnitLocator } from '../../formation';
 import { OrderUnits, Unit } from '../../unit';
@@ -40,9 +40,11 @@ export class Hub$UnitLocator implements UnitLocator {
   }
 
   #locateUnit({ unit }: UnitLocationCommRequest): OnEvent<[UnitLocationCommResponse]> {
-    return onEventBy(() => ({
-      formations: this.#host.unitFormations(this.#orderUnits.unitByUid(unit, Unit)).map(({ uid }) => uid),
-    }));
+    return onEventBy(receiver => {
+      onPromise({
+        formations: this.#host.unitFormations(this.#orderUnits.unitByUid(unit, Unit)).map(({ uid }) => uid),
+      })(receiver);
+    });
   }
 
 }

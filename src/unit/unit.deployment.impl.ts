@@ -1,4 +1,3 @@
-import { lazyValue } from '@proc7ts/primitives';
 import { Formation } from '../formation';
 import { Formation$Host } from '../impl';
 import { OrderInstruction, OrderSubject } from '../order';
@@ -10,7 +9,11 @@ import { UnitContext$create } from './unit.context.impl';
 
 export class Unit$Deployment<TUnit extends Unit> extends Unit$Backend<TUnit, Formation$Host> {
 
-  readonly context: () => UnitContext = lazyValue(() => UnitContext$create(this.host, this.unit));
+  #context?: UnitContext;
+
+  get context(): UnitContext {
+    return this.#context ||= UnitContext$create(this.host, this.unit);
+  }
 
   instruct(instruction: OrderInstruction<TUnit>): void {
 

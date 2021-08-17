@@ -1,7 +1,7 @@
 import { MessagePort } from 'worker_threads';
 import { CommPacket } from '../../communication';
 
-export const LinkMessagePortCommRequest = 'link-message-port';
+export const LinkMessagePortCommRequest = 'link-message-port' as const;
 
 /**
  * A request for message port to use by {@link CommLink communication link}.

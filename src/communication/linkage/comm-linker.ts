@@ -8,7 +8,7 @@ import { CommLink } from './comm-link';
  * Allows to {@link CommLink link} to other formation. The established link can be used to connect to units deployed to
  * target formation.
  *
- * The linker is used by {@link Communicator communicators} or {@link CommMethod communication methods} internally.
+ * The linker is used by {@link Communicator communicator} internally.
  */
 export interface CommLinker {
 
