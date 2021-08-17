@@ -62,6 +62,7 @@ export class MessageCommChannel implements CommChannel {
     this.#processor = new FinalCommProcessor(processor);
     this.#logger = logger;
     port.on('message', (wrapper: MessageComm$Wrapper) => this.#onCommand(wrapper));
+    port.unref(); // Allow exiting the thread.
   }
 
   get to(): Unit {
