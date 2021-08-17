@@ -1,5 +1,6 @@
 import { Supply, SupplyPeer } from '@proc7ts/supply';
 import Order from '@sqdn/order';
+import { Formation } from '../formation';
 import { Formation$Host, Order$Evaluator } from '../impl';
 import { OrderInstruction } from '../order';
 import { Unit$Backend, Unit$Backend__symbol } from './unit.backend.impl';
@@ -40,6 +41,15 @@ export class Unit implements SupplyPeer {
         new.target,
     );
     this.order.get(Formation$Host).addUnit(this);
+  }
+
+  /**
+   * Represents this unit as {@link Formation}, if possible.
+   *
+   * This is the unit itself if it is a formation, or `undefined` otherwise.
+   */
+  get asFormation(): Formation | undefined {
+    return;
   }
 
   /**

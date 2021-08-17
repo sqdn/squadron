@@ -27,6 +27,13 @@ export class Formation extends Unit {
   }
 
   /**
+   * The formation itself.
+   */
+  override get asFormation(): this {
+    return this;
+  }
+
+  /**
    * Instructs to deploy the given executive unit to target formation.
    *
    * The unit will be actually deployed when order executed within actual formation.

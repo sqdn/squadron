@@ -23,6 +23,12 @@ describe('Unit', () => {
     OrderTest.reset();
   });
 
+  describe('asFormation', () => {
+    it('is `undefined`', () => {
+      expect(new TestUnit().asFormation).toBeUndefined();
+    });
+  });
+
   describe('order', () => {
     it('equals to original order', () => {
 
@@ -33,16 +39,6 @@ describe('Unit', () => {
 
       OrderTest.reset();
       expect(unit.order).not.toBe(OrderTest.order);
-    });
-  });
-
-  describe('supply', () => {
-    it('is the same for units with the same UID', () => {
-
-      const unit1 = new TestUnit();
-      const unit2 = new TestUnit({ id: unit1.uid });
-
-      expect(unit1.supply).toBe(unit2.supply);
     });
   });
 
@@ -77,6 +73,16 @@ describe('Unit', () => {
       const [unit1, unit2] = units;
 
       expect(unit1.uid).not.toBe(unit2.uid);
+    });
+  });
+
+  describe('supply', () => {
+    it('is the same for units with the same UID', () => {
+
+      const unit1 = new TestUnit();
+      const unit2 = new TestUnit({ id: unit1.uid });
+
+      expect(unit1.supply).toBe(unit2.supply);
     });
   });
 
