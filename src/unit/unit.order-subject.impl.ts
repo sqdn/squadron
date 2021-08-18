@@ -1,7 +1,9 @@
 import { CxAsset, CxEntry, CxRequest } from '@proc7ts/context-values';
 import { Supply } from '@proc7ts/supply';
-import { Formation } from '../formation';
+import Order from '@sqdn/order';
+import { Formation, FormationContext } from '../formation';
 import { Hub } from '../hub';
+import { Formation$Host } from '../impl';
 import { OrderSubject, OrderTask } from '../order';
 import { Unit } from './unit';
 import { UnitContext } from './unit-context';
@@ -47,8 +49,24 @@ export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit
     return this.context.get(entry, request);
   }
 
+  get #host(): Formation$Host {
+    return this.#deployment.host;
+  }
+
   provide<TValue, TAsset = TValue>(asset: CxAsset<TValue, TAsset, UnitContext<TUnit>>): Supply {
-    return this.#deployment.builder.provide(asset).needs(this.supply);
+    return this.#deployment.builder.provide(asset).needs(this);
+  }
+
+  perFormation<TValue, TAsset = TValue>(asset: CxAsset<TValue, TAsset, FormationContext>): Supply {
+    return this.#host.formationBuilder.provide(asset).needs(this);
+  }
+
+  perOrder<TValue, TAsset = TValue>(asset: CxAsset<TValue, TAsset, Order>): Supply {
+    return this.#host.perOrderCxPeer.provide(asset).needs(this);
+  }
+
+  perUnit<TValue, TAsset = TValue>(asset: CxAsset<TValue, TAsset, UnitContext>): Supply {
+    return this.#host.perUnitCxPeer.provide(asset).needs(this);
   }
 
   execute(task: OrderTask<TUnit>): void {
@@ -57,7 +75,7 @@ export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit
 
   #doExec(task: OrderTask<TUnit>): void {
 
-    const { host } = this.#deployment;
+    const host = this.#host;
 
     host.workbench.execute(async () => {
       try {
@@ -69,8 +87,8 @@ export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit
     });
   }
 
-  #dontExec(error: unknown): () => Promise<void> {
-    return () => Promise.reject(error);
+  #dontExec(error: unknown): () => void {
+    return () => this.#host.log.warn(`Task for ${this.unit} rejected`, error);
   }
 
 }

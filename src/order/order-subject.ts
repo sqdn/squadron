@@ -1,6 +1,7 @@
 import { CxAsset, CxModifier, CxValues } from '@proc7ts/context-values';
 import { Supply, SupplyPeer } from '@proc7ts/supply';
-import { Formation } from '../formation';
+import Order from '@sqdn/order';
+import { Formation, FormationContext } from '../formation';
 import { Hub } from '../hub';
 import { Unit, UnitContext } from '../unit';
 import { OrderTask } from './order-task';
@@ -36,7 +37,7 @@ export interface OrderSubject<TUnit extends Unit = Unit>
   /**
    * Order subject supply.
    *
-   * Revokes the context values once cut off.
+   * Once cut off, revokes all context values provided by this subject.
    */
   readonly supply: Supply;
 
@@ -50,6 +51,39 @@ export interface OrderSubject<TUnit extends Unit = Unit>
    * @returns Asset supply. Revokes provided asset once cut off.
    */
   provide<TValue, TAsset = TValue>(asset: CxAsset<TValue, TAsset, UnitContext<TUnit>>): Supply;
+
+  /**
+   * Provides an asset for the entry of {@link formation formation} context the unit deployed to.
+   *
+   * @typeParam TValue - Context value type.
+   * @typeParam TAsset - Context value asset type.
+   * @param asset - Context entry asset.
+   *
+   * @returns Asset supply. Revokes provided asset once cut off.
+   */
+  perFormation<TValue, TAsset = TValue>(asset: CxAsset<TValue, TAsset, FormationContext>): Supply;
+
+  /**
+   * Provides an asset for the entry of each order executed by unit {@link formation}.
+   *
+   * @typeParam TValue - Context value type.
+   * @typeParam TAsset - Context value asset type.
+   * @param asset - Context entry asset.
+   *
+   * @returns Asset supply. Revokes provided asset once cut off.
+   */
+  perOrder<TValue, TAsset = TValue>(asset: CxAsset<TValue, TAsset, Order>): Supply;
+
+  /**
+   * Provides an asset for the entry of each unit deployed to the same {@link formation}.
+   *
+   * @typeParam TValue - Context value type.
+   * @typeParam TAsset - Context value asset type.
+   * @param asset - Context entry asset.
+   *
+   * @returns Asset supply. Revokes provided asset once cut off.
+   */
+  perUnit<TValue, TAsset = TValue>(asset: CxAsset<TValue, TAsset, UnitContext>): Supply;
 
   execute(task: OrderTask<TUnit>): void;
 

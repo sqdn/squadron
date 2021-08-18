@@ -1,4 +1,4 @@
-import { CxBuilder, cxConstAsset, CxPeer, CxPeerBuilder } from '@proc7ts/context-builder';
+import { CxBuilder, cxConstAsset, CxPeerBuilder } from '@proc7ts/context-builder';
 import { CxEntry, cxSingle } from '@proc7ts/context-values';
 import { Logger } from '@proc7ts/logger';
 import Order from '@sqdn/order';
@@ -29,7 +29,7 @@ export class Formation$Host implements Unit$Host {
   readonly formationBuilder: CxBuilder<FormationContext>;
   readonly context: FormationContext;
   readonly perOrderCxPeer: CxPeerBuilder<Order>;
-  readonly perUnitCxPeer: CxPeer<UnitContext>;
+  readonly perUnitCxPeer: CxPeerBuilder<UnitContext>;
 
   readonly #factory: Formation$Factory;
   #order?: Order;
