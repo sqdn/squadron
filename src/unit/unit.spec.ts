@@ -165,8 +165,8 @@ describe('Unit', () => {
       const instruction: OrderInstruction<TestUnit> = jest.fn();
 
       test.formation.deploy(unit);
-      unit.instruct(({ supply }) => {
-        supply.off();
+      unit.instruct(() => {
+        unit.supply.off();
         unit.instruct(instruction);
       });
       await test.evaluate();
@@ -293,29 +293,6 @@ describe('Unit', () => {
         await test.evaluate();
 
         expect(instruction).not.toHaveBeenCalled();
-      });
-    });
-  });
-
-  describe('deploy', () => {
-    describe('after order evaluation', () => {
-      it('does not deploy the unit', async () => {
-
-        const logger = {
-          warn: jest.fn<void, any[]>(),
-        } as Partial<Logger> as Logger;
-
-        test.formationBuilder.provide(cxConstAsset(Logger, logger));
-
-        const unit = new Unit();
-
-        test.formation.deploy(unit);
-        await test.evaluate();
-
-        test.formation.deploy(unit);
-        await test.evaluate();
-
-        expect(logger.warn).toHaveBeenCalledWith(`${unit} can not be deployed to ${test.formation} outside the order`);
       });
     });
   });

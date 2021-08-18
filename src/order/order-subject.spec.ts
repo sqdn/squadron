@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { cxConstAsset } from '@proc7ts/context-builder';
+import { CxEntry, cxRecent } from '@proc7ts/context-values';
 import { Logger } from '@proc7ts/logger';
 import { asis } from '@proc7ts/primitives';
 import { Supply } from '@proc7ts/supply';
@@ -20,14 +21,98 @@ describe('OrderSubject', () => {
     OrderTest.reset();
   });
 
+  describe('hub', () => {
+    it('refers the central hub', async () => {
+
+      const unit = new Unit();
+      let unitSubject!: OrderSubject;
+
+      unit.instruct(subject => {
+        unitSubject = subject;
+      });
+
+      OrderTest.formation.deploy(unit);
+
+      await OrderTest.evaluate();
+
+      expect(unitSubject.hub).toBe(OrderTest.hub);
+    });
+  });
+
+  describe('formation', () => {
+    it('refers the target formation', async () => {
+
+      const unit = new Unit();
+      let unitSubject!: OrderSubject;
+
+      unit.instruct(subject => {
+        unitSubject = subject;
+      });
+
+      OrderTest.formation.deploy(unit);
+
+      await OrderTest.evaluate();
+
+      expect(unitSubject.formation).toBe(OrderTest.formation);
+    });
+  });
+
+  describe('unit', () => {
+    it('refers the unit', async () => {
+
+      const unit = new Unit();
+      let unitSubject!: OrderSubject;
+
+      unit.instruct(subject => {
+        unitSubject = subject;
+      });
+
+      OrderTest.formation.deploy(unit);
+
+      await OrderTest.evaluate();
+
+      expect(unitSubject.unit).toBe(unit);
+    });
+  });
+
+  describe('provide', () => {
+    it('provides unit context value', async () => {
+
+      const entry: CxEntry<string> = {
+        perContext: cxRecent({ byDefault: () => 'default' }),
+        toString: () => '[CxEntry test]',
+      };
+      const unit = new Unit();
+      let unitSubject!: OrderSubject;
+      let unitContext!: UnitContext;
+
+      unit.instruct(subject => {
+        unitSubject = subject;
+        unitContext = subject.context;
+        subject.provide(cxConstAsset(entry, 'provided'));
+      });
+
+      OrderTest.formation.deploy(unit);
+
+      await OrderTest.evaluate();
+
+      expect(unitContext.get(entry)).toBe('provided');
+      expect(unitSubject.get(entry)).toBe('provided');
+
+      unitSubject.supply.off();
+      expect(unitContext.get(entry)).toBe('default');
+      expect(unitSubject.get(entry)).toBe('default');
+    });
+  });
+
   describe('execute', () => {
     it('executes the task', async () => {
 
       const task: OrderTask<Unit> = jest.fn();
       const unit = new Unit();
 
-      unit.instruct(({ execute }) => {
-        execute(task);
+      unit.instruct(subject => {
+        subject.execute(task);
       });
       OrderTest.formation.deploy(unit);
 
@@ -48,15 +133,15 @@ describe('OrderSubject', () => {
       const task: Mock<void, [UnitContext<Unit>]> = jest.fn();
 
       await new Promise<void>(resolve => {
-        unit.instruct(({ execute }) => {
-          execute(task.mockImplementation(() => resolve()));
+        unit.instruct(subject => {
+          subject.execute(task.mockImplementation(() => resolve()));
         });
       });
 
       expect(task).toHaveBeenCalledTimes(1);
       expect(unit.supply.isOff).toBe(false);
     });
-    it('withdraws the unit if task execution fails', async () => {
+    it('withdraws the subject if task execution fails', async () => {
 
       const logger = {
         error: jest.fn<void, any[]>(),
@@ -69,17 +154,20 @@ describe('OrderSubject', () => {
         throw error;
       });
       const unit = new Unit();
+      let unitSubject!: OrderSubject;
 
-      unit.instruct(({ execute }) => {
-        execute(task);
+      unit.instruct(subject => {
+        unitSubject = subject;
+        subject.execute(task);
       });
       test.formation.deploy(unit);
 
       await test.evaluate();
 
       expect(task).toHaveBeenCalledTimes(1);
-      expect(unit.supply.isOff).toBe(true);
-      expect(await unit.supply.whenDone().catch(asis)).toBe(error);
+      expect(unitSubject.supply.isOff).toBe(true);
+      expect(unit.supply.isOff).toBe(false);
+      expect(await unitSubject.supply.whenDone().catch(asis)).toBe(error);
       expect(logger.error).toHaveBeenCalledWith(`Failed to execute ${unit} task`, error);
     });
 
@@ -89,8 +177,8 @@ describe('OrderSubject', () => {
         const unit = new Unit();
         let exec!: OrderSubject<Unit>['execute'];
 
-        unit.instruct(({ execute }) => {
-          exec = execute;
+        unit.instruct(subject => {
+          exec = subject.execute.bind(subject);
         });
         test.formation.deploy(unit);
         await test.evaluate();
@@ -116,9 +204,9 @@ describe('OrderSubject', () => {
         let exec!: OrderSubject<Unit>['execute'];
         let subjectSupply!: Supply;
 
-        unit.instruct(({ execute, supply }) => {
-          exec = execute;
-          subjectSupply = supply;
+        unit.instruct(subject => {
+          exec = subject.execute.bind(subject);
+          subjectSupply = subject.supply;
         });
         test.formation.deploy(unit);
         await test.evaluate();
@@ -153,8 +241,8 @@ describe('OrderSubject', () => {
       const task: Mock<void, [UnitContext<Unit>]> = jest.fn();
 
       await new Promise<void>(resolve => {
-        unit.instruct(({ execute }) => {
-          execute(task.mockImplementation(() => resolve()));
+        unit.instruct(subject => {
+          subject.execute(task.mockImplementation(() => resolve()));
         });
       });
 
@@ -181,9 +269,9 @@ describe('OrderSubject', () => {
       });
       let subjectSupply!: Supply;
 
-      unit.instruct(({ execute, supply }) => {
-        subjectSupply = supply;
-        execute(task);
+      unit.instruct(subject => {
+        subjectSupply = subject.supply;
+        subject.execute(task);
       });
 
       await test.evaluate();

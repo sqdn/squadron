@@ -7,17 +7,18 @@ import { Unit } from './unit';
 import { UnitContext } from './unit-context';
 import { UnitContext__entry } from './unit.entries.impl';
 
-export function UnitContext$create<TUnit extends Unit>(host: Formation$Host, unit: TUnit): UnitContext<TUnit> {
+export function UnitContext$createBuilder<TUnit extends Unit>(
+    host: Formation$Host,
+    unit: TUnit,
+): CxBuilder<UnitContext<TUnit>> {
   if (host.formation.uid === unit.uid) {
-    return host.context as UnitContext;
+    return host.formationBuilder as CxBuilder<UnitContext>;
   }
 
-  const cxBuilder = new CxBuilder<UnitContext<TUnit>>(
+  return new CxBuilder<UnitContext<TUnit>>(
       (get, builder) => new Unit$Context(host, unit, get, builder),
       host.perUnitCxPeer,
   );
-
-  return cxBuilder.context;
 }
 
 class Unit$Context<TUnit extends Unit> implements UnitContext<TUnit> {
@@ -31,6 +32,7 @@ class Unit$Context<TUnit extends Unit> implements UnitContext<TUnit> {
     this.#unit = unit;
     this.#get = get;
     builder.provide(cxConstAsset(UnitContext__entry, this));
+    builder.supply.as(unit);
   }
 
   get hub(): Hub {

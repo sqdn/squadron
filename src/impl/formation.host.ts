@@ -50,6 +50,18 @@ export class Formation$Host implements Unit$Host {
     this.perUnitCxPeer = new CxPeerBuilder<UnitContext>(this.formationBuilder.boundPeer);
   }
 
+  get hub(): Hub {
+    return this.#origin.hub;
+  }
+
+  get formation(): Formation {
+    return this.#origin.formation;
+  }
+
+  get #origin(): UnitOrigin {
+    return this.#_origin ||= this.#factory.createOrigin(this.order, this.orderBuilder);
+  }
+
   get order(): Order {
     return this.#order ||= this.orderBuilder.context;
   }
@@ -73,18 +85,6 @@ export class Formation$Host implements Unit$Host {
         },
         this.perOrderCxPeer,
     );
-  }
-
-  get hub(): Hub {
-    return this.#origin.hub;
-  }
-
-  get formation(): Formation {
-    return this.#origin.formation;
-  }
-
-  get #origin(): UnitOrigin {
-    return this.#_origin ||= this.#factory.createOrigin(this.order, this.orderBuilder);
   }
 
   get log(): Logger {

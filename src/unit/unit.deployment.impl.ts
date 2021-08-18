@@ -1,23 +1,29 @@
+import { CxBuilder } from '@proc7ts/context-builder';
 import { Formation } from '../formation';
 import { Formation$Host } from '../impl';
 import { OrderInstruction, OrderSubject } from '../order';
 import { Unit } from './unit';
 import { UnitContext } from './unit-context';
 import { Unit$Backend } from './unit.backend.impl';
-import { Unit$Backend$OrderSubject } from './unit.backend.order-subject.impl';
-import { UnitContext$create } from './unit.context.impl';
+import { UnitContext$createBuilder } from './unit.context.impl';
+import { Unit$OrderSubject } from './unit.order-subject.impl';
 
 export class Unit$Deployment<TUnit extends Unit> extends Unit$Backend<TUnit, Formation$Host> {
 
-  #context?: UnitContext;
+  readonly builder: CxBuilder<UnitContext<TUnit>>;
 
-  get context(): UnitContext {
-    return this.#context ||= UnitContext$create(this.host, this.unit);
+  constructor(host: Formation$Host, unit: TUnit) {
+    super(host, unit);
+    this.builder = UnitContext$createBuilder(host, unit);
+  }
+
+  get context(): UnitContext<TUnit> {
+    return this.builder.context;
   }
 
   instruct(instruction: OrderInstruction<TUnit>): void {
 
-    let subject: OrderSubject<TUnit> | null = new Unit$Backend$OrderSubject(this, this.supply.derive());
+    let subject: OrderSubject<TUnit> | null = new Unit$OrderSubject(this, this.supply.derive());
 
     subject.supply.whenOff(_ => subject = null);
 
