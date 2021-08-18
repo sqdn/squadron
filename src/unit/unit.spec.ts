@@ -76,6 +76,20 @@ describe('Unit', () => {
     });
   });
 
+  describe('origin', () => {
+    it('reflects unit file', () => {
+
+      const unit = new TestUnit();
+      const filePath = fileURLToPath(import.meta.url);
+      const pattern = new RegExp(`^\\[TestUnit...${unit.uid.slice(-7)}\\((.+)\\)\\]$`);
+
+      expect(unit.toString()).toMatch(pattern);
+
+      expect(unit.origin).toContain(filePath);
+      expect(unit.origin).toMatch(/:\d+:\d+$/);
+    });
+  });
+
   describe('supply', () => {
     it('is the same for units with the same UID', () => {
 

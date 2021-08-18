@@ -55,13 +55,12 @@ export class Unit$Id {
 }
 
 const Unit$stack$nlPattern = /\n/;
-const Unit$stack$originPattern$parents = /\((.+)\)/;
-const Unit$stack$originPattern$noParents = /at (.+)/;
+const Unit$stack$originPattern = /^\s*at\s+(?:.*\((.*)\)|(.*[^)]))$/;
 
 function Unit$origin(stack: string): string {
 
   const line = stack.split(Unit$stack$nlPattern, 2)[1];
-  const result = Unit$stack$originPattern$parents.exec(line) || Unit$stack$originPattern$noParents.exec(line);
+  const result = Unit$stack$originPattern.exec(line);
 
   return result![1];
 }
