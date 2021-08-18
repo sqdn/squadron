@@ -12,7 +12,7 @@ import {
 import { Formation } from '../../formation';
 import { OrderUnits, Unit } from '../../unit';
 import { Formation$Host } from '../formation.host';
-import { UseMessagePortCommRequest } from './index';
+import { UseMessagePortCommRequest } from './use-message-port.comm-request';
 
 export class UseMessagePortCommResponder implements CommResponder<UseMessagePortCommRequest> {
 
