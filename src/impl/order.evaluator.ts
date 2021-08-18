@@ -4,8 +4,8 @@ import { noop } from '@proc7ts/primitives';
 import { Workbench } from '@proc7ts/workbench';
 import Order from '@sqdn/order';
 import { Formation } from '../formation';
-import { OrderTask } from '../order';
 import { Unit } from '../unit';
+import { Unit$Deployment } from '../unit/unit.deployment.impl';
 import { Unit$Evaluator } from '../unit/unit.evaluator.impl';
 import { Unit$Host } from '../unit/unit.host.impl';
 import { Unit$Workbench } from '../unit/unit.workbench.impl';
@@ -40,31 +40,27 @@ export class Order$Evaluator implements Unit$Host {
 
     // Ensure all stages executed in order.
     this.#workbench.accept(() => {
-      this.formation.deploy(this.formation);
+      this.host.formation.deploy(this.host.formation);
     });
     this.#workbench.execute(noop);
     this.#workbench.deliver(noop);
     this.#workbench.finalize(executed);
   }
 
-  get log(): Logger {
-    return this.order.get(Logger);
-  }
-
   get workbench(): Unit$Workbench {
     return this.#workbench;
   }
 
-  get formation(): Formation {
-    return this.host.formation;
+  get log(): Logger {
+    return this.order.get(Logger);
+  }
+
+  unitDeployment<TUnit extends Unit>(unit: TUnit): Unit$Deployment<TUnit> {
+    return this.host.unitDeployment(unit);
   }
 
   deploy(formation: Formation, unit: Unit): void {
     this.host.deploy(formation, unit);
-  }
-
-  executeTask<TUnit extends Unit>(unit: TUnit, task: OrderTask<TUnit>): Promise<void> {
-    return this.host.executeTask(unit, task);
   }
 
   executeOrder(): Promise<void> {

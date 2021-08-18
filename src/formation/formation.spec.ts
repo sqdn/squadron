@@ -1,5 +1,8 @@
-import { afterEach, beforeEach, describe, expect, it } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { cxConstAsset } from '@proc7ts/context-builder';
+import { Logger } from '@proc7ts/logger';
 import { OrderTest } from '../testing';
+import { Unit } from '../unit';
 import { Formation } from './formation';
 
 describe('Formation', () => {
@@ -17,6 +20,31 @@ describe('Formation', () => {
       const formation = new Formation();
 
       expect(formation.asFormation).toBe(formation);
+    });
+  });
+
+  describe('deploy', () => {
+    describe('after order evaluation', () => {
+      it('does not deploy the unit', async () => {
+
+        const logger = {
+          warn: jest.fn<void, any[]>(),
+        } as Partial<Logger> as Logger;
+
+        OrderTest.formationBuilder.provide(cxConstAsset(Logger, logger));
+
+        const unit = new Unit();
+
+        OrderTest.formation.deploy(unit);
+        await OrderTest.evaluate();
+
+        OrderTest.formation.deploy(unit);
+        await OrderTest.evaluate();
+
+        expect(logger.warn).toHaveBeenCalledWith(
+            `${unit} can not be deployed to ${OrderTest.formation} outside the order`,
+        );
+      });
     });
   });
 

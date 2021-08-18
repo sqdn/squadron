@@ -1,4 +1,4 @@
-import { Formation } from './index';
+import { Formation } from './formation';
 
 /**
  * A location of the unit consists of formations the unit is deployed at.

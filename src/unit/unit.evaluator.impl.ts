@@ -4,8 +4,8 @@ import { Order$Evaluator } from '../impl';
 import { OrderInstruction, OrderSubject } from '../order';
 import { Unit } from './unit';
 import { Unit$Backend, Unit$Backend__symbol, Unit$rejectOrder } from './unit.backend.impl';
-import { Unit$Backend$OrderSubject } from './unit.backend.order-subject.impl';
 import { Unit$Id__symbol } from './unit.id.impl';
+import { Unit$OrderSubject } from './unit.order-subject.impl';
 
 export class Unit$Evaluator<TUnit extends Unit> extends Unit$Backend<TUnit, Order$Evaluator> {
 
@@ -21,7 +21,10 @@ export class Unit$Evaluator<TUnit extends Unit> extends Unit$Backend<TUnit, Orde
 
     const { host } = this;
 
-    let subject: OrderSubject<TUnit> | null = new Unit$Backend$OrderSubject(this, this.supply);
+    let subject: OrderSubject<TUnit> | null = new Unit$OrderSubject(
+        host.unitDeployment(this.unit),
+        this.supply.derive(),
+    );
 
     const instruct = (instruction: OrderInstruction<TUnit>): void => {
       host.workbench.accept(async () => {
