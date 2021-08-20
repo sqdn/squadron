@@ -1,6 +1,7 @@
 import { Supply } from '@proc7ts/supply';
 import { Formation } from '../formation';
 import { FormationManager, Hub } from '../hub';
+import { OrderUnits, Unit } from '../unit';
 import { FormationTest } from './formation-test';
 import { HubTest } from './hub-test';
 import { HubTest$Instance } from './hub-test.instance.impl';
@@ -27,6 +28,16 @@ export class FormationTest$Nested extends OrderTest$Instance implements Formatio
     void this.#hubTest.formationBuilder.get(FormationManager).formationCtl(this.#hubFormation).channel;
 
     return this;
+  }
+
+  deploy<TUnit extends Unit>(unit: TUnit): TUnit {
+    this.#hubFormation.deploy(unit);
+
+    const fmnUnit = this.order.get(OrderUnits).unitByUid(unit.uid, unit.constructor as new (init?: Unit.Init) => TUnit);
+
+    this.formation.deploy(fmnUnit);
+
+    return fmnUnit;
   }
 
 }

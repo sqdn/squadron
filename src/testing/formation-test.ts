@@ -1,10 +1,13 @@
 import { Logger } from '@proc7ts/logger';
 import { Supply } from '@proc7ts/supply';
+import { Unit } from '../unit';
 import { OrderTest } from './order-test';
 
 export interface FormationTest extends OrderTest {
 
   init(): this;
+
+  deploy<TUnit extends Unit>(unit: TUnit): TUnit;
 
 }
 
