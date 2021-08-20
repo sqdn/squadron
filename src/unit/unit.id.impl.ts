@@ -25,10 +25,10 @@ export class Unit$Id {
     return this.unit.constructor.name;
   }
 
-  get origin(): string {
+  get location(): string {
     if (!this.#origin) {
 
-      const origin = Unit$origin(this.stack);
+      const origin = Unit$location(this.stack);
       const tag = this.#tag;
 
       this.#origin = tag ? `${origin}#${tag}` : origin;
@@ -55,12 +55,12 @@ export class Unit$Id {
 }
 
 const Unit$stack$nlPattern = /\n/;
-const Unit$stack$originPattern = /^\s*at\s+(?:.*\((.*)\)|(.*[^)]))$/;
+const Unit$stack$locationPattern = /^\s*at\s+(?:.*\((.*)\)|(.*[^)]))$/;
 
-function Unit$origin(stack: string): string {
+function Unit$location(stack: string): string {
 
   const line = stack.split(Unit$stack$nlPattern, 2)[1];
-  const result = Unit$stack$originPattern.exec(line);
+  const result = Unit$stack$locationPattern.exec(line);
 
   return result![1];
 }

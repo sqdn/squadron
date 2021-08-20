@@ -76,20 +76,6 @@ describe('Unit', () => {
     });
   });
 
-  describe('origin', () => {
-    it('reflects unit file', () => {
-
-      const unit = new TestUnit();
-      const filePath = fileURLToPath(import.meta.url);
-      const pattern = new RegExp(`^\\[TestUnit...${unit.uid.slice(-7)}\\((.+)\\)\\]$`);
-
-      expect(unit.toString()).toMatch(pattern);
-
-      expect(unit.origin).toContain(filePath);
-      expect(unit.origin).toMatch(/:\d+:\d+$/);
-    });
-  });
-
   describe('supply', () => {
     it('is the same for units with the same UID', () => {
 
@@ -100,8 +86,25 @@ describe('Unit', () => {
     });
   });
 
+  describe('location', () => {
+    it('reflects source file', () => {
+
+      const unit = new TestUnit();
+      const filePath = fileURLToPath(import.meta.url);
+
+      expect(unit.location).toContain(filePath);
+      expect(unit.location).toMatch(/:\d+:\d+$/);
+    });
+    it('reflects unit tag', () => {
+
+      const unit = new TestUnit({ tag: 'test' });
+
+      expect(unit.location).toMatch(/.*:\d+:\d+#test$/);
+    });
+  });
+
   describe('toString', () => {
-    it('reflects unit type, UID, and origin', () => {
+    it('reflects unit type, UID, and location', () => {
 
       const unit = new TestUnit();
       const filePath = fileURLToPath(import.meta.url);

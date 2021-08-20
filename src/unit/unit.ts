@@ -67,12 +67,12 @@ export class Unit implements SupplyPeer {
   }
 
   /**
-   * Unit origin.
+   * Source code location where the unit has been created at.
    *
-   * Contains a location within the order the unit were created at.
+   * Contains source file name, line, column, and a {@link Unit.Init.tag tag} if present.
    */
-  get origin(): string {
-    return this[Unit$Id__symbol].origin;
+  get location(): string {
+    return this[Unit$Id__symbol].location;
   }
 
   /**
@@ -142,7 +142,7 @@ export class Unit implements SupplyPeer {
 
     const { uid } = this[Unit$Id__symbol];
 
-    return `[${this[Symbol.toStringTag]}...${uid.slice(-7)}(${this.origin})]`;
+    return `[${this[Symbol.toStringTag]}...${uid.slice(-7)}(${this.location})]`;
   }
 
 }
