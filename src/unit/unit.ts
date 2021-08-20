@@ -69,7 +69,7 @@ export class Unit implements SupplyPeer {
   /**
    * Source code location where the unit has been created at.
    *
-   * Contains source file name, line, column, and a {@link Unit.Init.tag tag} if present.
+   * Has format like `${file}:${line}:${column}`.
    */
   get location(): string {
     return this[Unit$Id__symbol].location;
@@ -140,9 +140,22 @@ export class Unit implements SupplyPeer {
 
   toString(): string {
 
-    const { uid } = this[Unit$Id__symbol];
+    const { prefix, suffix } = this[Unit$Id__symbol];
+    let uid: string;
 
-    return `[${this[Symbol.toStringTag]}...${uid.slice(-7)}(${this.location})]`;
+    if (prefix.length > 1) {
+      if (suffix.length > 9) {
+        uid = `${prefix.slice(0, -1)}...${suffix.slice(-7)}`;
+      } else {
+        uid = this.uid;
+      }
+    } else if (suffix.length > 10) {
+      uid = `...${suffix.slice(-7)}`;
+    } else {
+      uid = this.uid;
+    }
+
+    return `[${this[Symbol.toStringTag]} ${uid}(${this.location})]`;
   }
 
 }

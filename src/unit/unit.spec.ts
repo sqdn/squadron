@@ -95,12 +95,6 @@ describe('Unit', () => {
       expect(unit.location).toContain(filePath);
       expect(unit.location).toMatch(/:\d+:\d+$/);
     });
-    it('reflects unit tag', () => {
-
-      const unit = new TestUnit({ tag: 'test' });
-
-      expect(unit.location).toMatch(/.*:\d+:\d+#test$/);
-    });
   });
 
   describe('toString', () => {
@@ -108,7 +102,7 @@ describe('Unit', () => {
 
       const unit = new TestUnit();
       const filePath = fileURLToPath(import.meta.url);
-      const pattern = new RegExp(`^\\[TestUnit...${unit.uid.slice(-7)}\\((.+)\\)\\]$`);
+      const pattern = new RegExp(`^\\[TestUnit ...${unit.uid.slice(-7)}\\((.+)\\)\\]$`);
 
       expect(unit.toString()).toMatch(pattern);
 
@@ -121,14 +115,70 @@ describe('Unit', () => {
 
       const unit = new TestUnit({ tag: 'test' });
       const filePath = fileURLToPath(import.meta.url);
-      const pattern = new RegExp(`^\\[TestUnit...${unit.uid.slice(-7)}\\((.+)\\)\\]$`);
+      const pattern = new RegExp(`^\\[TestUnit test...${unit.uid.slice(-7)}\\((.+)\\)\\]$`);
 
       expect(unit.toString()).toMatch(pattern);
 
       const location = pattern.exec(unit.toString())![1];
 
       expect(location).toContain(filePath);
-      expect(location).toMatch(/.*:\d+:\d+#test$/);
+      expect(location).toMatch(/.*:\d+:\d+$/);
+    });
+    it('reflects short custom id', () => {
+
+      const unit = new TestUnit({ id: '0123456789' });
+      const pattern = new RegExp(`^\\[TestUnit 0123456789\\((.+)\\)\\]$`);
+
+      expect(unit.toString()).toMatch(pattern);
+    });
+    it('reflects short custom id and tag', () => {
+
+      const unit = new TestUnit({ id: '123456789', tag: 'test' });
+      const pattern = new RegExp(`^\\[TestUnit test@123456789\\((.+)\\)\\]$`);
+
+      expect(unit.toString()).toMatch(pattern);
+    });
+    it('reflects custom uid with custom id', () => {
+
+      const unit = new TestUnit({ id: 'test@123456789' });
+      const pattern = new RegExp(`^\\[TestUnit test@123456789\\((.+)\\)\\]$`);
+
+      expect(unit.toString()).toMatch(pattern);
+    });
+    it('reflects custom uid with short id and tag', () => {
+
+      const unit = new TestUnit({ id: 'custom@123456789', tag: 'test' });
+      const pattern = new RegExp(`^\\[TestUnit test@custom@123456789\\((.+)\\)\\]$`);
+
+      expect(unit.toString()).toMatch(pattern);
+    });
+    it('reflects long custom id', () => {
+
+      const unit = new TestUnit({ id: '0123456789a' });
+      const pattern = new RegExp(`^\\[TestUnit ...456789a\\((.+)\\)\\]$`);
+
+      expect(unit.toString()).toMatch(pattern);
+    });
+    it('reflects long custom id and tag', () => {
+
+      const unit = new TestUnit({ id: '0123456789', tag: 'test' });
+      const pattern = new RegExp(`^\\[TestUnit test...3456789\\((.+)\\)\\]$`);
+
+      expect(unit.toString()).toMatch(pattern);
+    });
+    it('reflects custom uid with long id', () => {
+
+      const unit = new TestUnit({ id: 'test@0123456789' });
+      const pattern = new RegExp(`^\\[TestUnit test...3456789\\((.+)\\)\\]$`);
+
+      expect(unit.toString()).toMatch(pattern);
+    });
+    it('reflects custom uid with long id and tag', () => {
+
+      const unit = new TestUnit({ id: 'custom@0123456789', tag: 'test' });
+      const pattern = new RegExp(`^\\[TestUnit test@custom...3456789\\((.+)\\)\\]$`);
+
+      expect(unit.toString()).toMatch(pattern);
     });
   });
 

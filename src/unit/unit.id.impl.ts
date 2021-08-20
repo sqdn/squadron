@@ -6,14 +6,33 @@ export const Unit$Id__symbol = (/*#__PURE__*/ Symbol('Unit.id'));
 export class Unit$Id {
 
   stack!: string;
-  readonly #tag: string;
-  #origin?: string;
+  readonly prefix: string;
+  #suffix?: string;
   #uid?: string;
+  #location?: string;
 
   constructor(readonly unit: Unit, { tag = '', id }: Unit.Init) {
-    this.#tag = tag;
     if (id) {
-      this.#uid = tag ? `${tag}@${id}` : id;
+
+      const atIdx = id.lastIndexOf('@');
+
+      if (tag) {
+        if (atIdx < 0) {
+          this.prefix = `${tag}@`;
+          this.#suffix = id;
+        } else {
+          this.prefix = `${tag}@${id.slice(0, atIdx + 1)}`;
+          this.#suffix = id.slice(atIdx + 1);
+        }
+      } else if (atIdx < 0) {
+        this.prefix = '';
+        this.#suffix = id;
+      } else {
+        this.prefix = id.slice(0, atIdx + 1);
+        this.#suffix = id.slice(atIdx + 1);
+      }
+    } else {
+      this.prefix = tag ? `${tag}@` : '';
     }
   }
 
@@ -25,31 +44,29 @@ export class Unit$Id {
     return this.unit.constructor.name;
   }
 
-  get location(): string {
-    if (!this.#origin) {
-
-      const origin = Unit$location(this.stack);
-      const tag = this.#tag;
-
-      this.#origin = tag ? `${origin}#${tag}` : origin;
-    }
-
-    return this.#origin;
-  }
-
-  get uid(): string {
-    if (!this.#uid) {
+  get suffix(): string {
+    if (!this.#suffix) {
 
       const hash = createHash('sha256');
 
       hash.update(this.stack);
 
-      const stackHash = hash.digest('hex');
-
-      this.#uid = this.#tag ? `${this.#tag}@${stackHash}` : stackHash;
+      this.#suffix = hash.digest('hex');
     }
 
-    return this.#uid;
+    return this.#suffix;
+  }
+
+  get uid(): string {
+    return this.#uid ??= `${this.prefix}${this.suffix}`;
+  }
+
+  get location(): string {
+    if (!this.#location) {
+      this.#location = Unit$location(this.stack);
+    }
+
+    return this.#location;
   }
 
 }
