@@ -30,7 +30,7 @@ describe('Communicator', () => {
 
     fmnTest.formationBuilder.provide(cxConstAsset(CommProtocol, responder));
     fmnTest.init();
-    await fmnTest.evaluate(false);
+    await fmnTest.evaluate();
 
     const channel = HubTest.formationBuilder.get(Communicator).connect(formation);
 
@@ -93,8 +93,8 @@ describe('Communicator', () => {
 
     fmnTest2.init();
 
-    await fmnTest1.evaluate(false);
-    await fmnTest2.evaluate(false);
+    await fmnTest1.evaluate();
+    await fmnTest2.evaluate();
 
     const channel = communicator.connect(unit1);
 
@@ -129,7 +129,7 @@ describe('Communicator', () => {
 
     fmnTest.init();
 
-    await fmnTest.evaluate(false);
+    await fmnTest.evaluate();
 
     const channel = communicator.connect(unit1);
 

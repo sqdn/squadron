@@ -159,7 +159,7 @@ describe('OrderSubject', () => {
 
       OrderTest.formation.deploy(unit);
 
-      await OrderTest.evaluate(false);
+      await OrderTest.evaluate();
 
       const formationContext = unitContext.get(FormationContext);
 
@@ -203,7 +203,7 @@ describe('OrderSubject', () => {
 
       OrderTest.formation.deploy(unit2);
 
-      await OrderTest.evaluate(false);
+      await OrderTest.evaluate();
 
       const formationContext = unitContext1.get(FormationContext);
 
@@ -248,11 +248,11 @@ describe('OrderSubject', () => {
 
       const task: Mock<void, [UnitContext<Unit>]> = jest.fn();
 
-      await new Promise<void>(resolve => {
-        unit.instruct(subject => {
-          subject.execute(task.mockImplementation(() => resolve()));
-        });
+      unit.instruct(subject => {
+        subject.execute(task);
       });
+
+      await test.evaluate();
 
       expect(task).toHaveBeenCalledTimes(1);
       expect(unit.supply.isOff).toBe(false);
@@ -379,11 +379,11 @@ describe('OrderSubject', () => {
 
       const task: Mock<void, [UnitContext<Unit>]> = jest.fn();
 
-      await new Promise<void>(resolve => {
-        unit.instruct(subject => {
-          subject.execute(task.mockImplementation(() => resolve()));
-        });
+      unit.instruct(subject => {
+        subject.execute(task);
       });
+
+      await test.evaluate();
 
       expect(task).toHaveBeenCalledTimes(1);
       expect(unit.supply.isOff).toBe(false);

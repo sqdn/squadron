@@ -22,7 +22,7 @@ export interface OrderTest {
 
   readonly supply: Supply;
 
-  evaluate(reset?: boolean): Promise<void>;
+  evaluate(): Promise<void>;
 
 }
 

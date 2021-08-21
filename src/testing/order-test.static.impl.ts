@@ -43,8 +43,8 @@ export abstract class OrderTest$StaticBase<TTest extends OrderTest> implements O
     return this.test.supply;
   }
 
-  evaluate(reset?: boolean): Promise<void> {
-    return this.test.evaluate(reset);
+  evaluate(): Promise<void> {
+    return this.test.evaluate();
   }
 
   reset(): void {

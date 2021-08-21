@@ -11,7 +11,7 @@ import { Unit$Deployment } from '../unit/unit.deployment.impl';
 import { Unit$Host } from '../unit/unit.host.impl';
 import { Formation$Factory } from './formation.factory';
 import { Formation$Order } from './formation.order';
-import { Formation$Workbench } from './formation.workbench';
+import { Order$Workbench } from './order.workbench';
 
 const Formation$Host$perContext: CxEntry.Definer<Formation$Host> = (/*#__PURE__*/ cxSingle());
 
@@ -25,7 +25,7 @@ export class Formation$Host implements Unit$Host {
     return '[Formation:Host]';
   }
 
-  readonly workbench = new Formation$Workbench();
+  readonly workbench = new Order$Workbench();
   readonly formationBuilder: CxBuilder<FormationContext>;
   readonly context: FormationContext;
   readonly perOrderCxPeer: CxPeerBuilder<Order>;
@@ -38,6 +38,7 @@ export class Formation$Host implements Unit$Host {
   readonly #units = new Map<string, Unit>();
   readonly #unitFormations = new Map<string, Map<string, Formation>>();
   readonly #deployments = new Map<string, Unit$Deployment<any>>();
+  #formationDeployed: 0 | 1 = 0;
 
   constructor(factory: Formation$Factory) {
     this.#factory = factory;
@@ -185,6 +186,15 @@ export class Formation$Host implements Unit$Host {
     }
 
     return deployment;
+  }
+
+  executeOrder(): Promise<void> {
+    if (!this.#formationDeployed) {
+      this.#formationDeployed = 1;
+      this.formation.deploy(this.formation);
+    }
+
+    return this.workbench.executeOrder();
   }
 
 }
