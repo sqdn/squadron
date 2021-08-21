@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { cxConstAsset } from '@proc7ts/context-builder';
 import { Logger } from '@proc7ts/logger';
-import { asis } from '@proc7ts/primitives';
+import { asis, newPromiseResolver } from '@proc7ts/primitives';
 import { Supply } from '@proc7ts/supply';
 import { fileURLToPath } from 'url';
 import { Formation } from '../formation';
@@ -299,6 +299,41 @@ describe('Unit', () => {
 
       expect(await unit.supply.whenDone().catch(asis)).toBe(error);
       expect(logger.error).toHaveBeenCalledWith(`Instructions for ${unit} rejected`, error);
+    });
+    it('handles recurrent order evaluation', async () => {
+
+      const unit = new TestUnit();
+      const recurrent = newPromiseResolver();
+
+      unit.instruct(() => {
+        recurrent.resolve(test.evaluate());
+      });
+      test.formation.deploy(unit);
+
+      let evaluated: unknown;
+
+      test.evaluate().then(() => evaluated = true).catch(error => evaluated = error);
+
+      await recurrent.promise();
+      expect(evaluated).toBe(true);
+    });
+    it('allows to deploy during execution', async () => {
+
+      const unit1 = new TestUnit();
+      const unit2 = new TestUnit();
+      const instruction2: OrderInstruction = jest.fn();
+
+      unit1.instruct(subject => {
+        subject.execute(({ formation }) => {
+          formation.deploy(unit2);
+        });
+      });
+      test.formation.deploy(unit1);
+      unit2.instruct(instruction2);
+
+      await test.evaluate();
+
+      expect(instruction2).toHaveBeenCalled();
     });
 
     describe('when instructed after order evaluation', () => {

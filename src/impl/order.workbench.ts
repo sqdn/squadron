@@ -19,7 +19,7 @@ export class Order$Workbench {
   readonly #stages: Order$Stage[] = [];
 
   #runningStageId: Order$StageId = Order$StageId.None;
-  readonly #canExecute = new Array<PromiseResolver | undefined>(Order$StageId.Last);
+  readonly #stageStarters = new Array<PromiseResolver | undefined>(Order$StageId.Last);
   #whenExecuted!: PromiseResolver;
   #pendingTasks: (() => void)[] = [];
   readonly #lastTasks = new Array<Workbench.Task<unknown> | undefined>(Order$StageId.Last + 1);
@@ -49,7 +49,7 @@ export class Order$Workbench {
   }
 
   #startExecution(): PromiseResolver {
-    this.#runStage(Order$StageId.First);
+    this.#startStage(Order$StageId.First);
     return this.#whenExecuted = newPromiseResolver();
   }
 
@@ -57,26 +57,18 @@ export class Order$Workbench {
     this.#stages[stage.stageId] = stage;
   }
 
-  startStage(stageId: Order$StageId): Promise<void> {
-    return (
-        stageId < this.#runningStageId
-            ? this.#deferStage(stageId)
-            : this.#startStage(stageId)
-    ).promise().then(noop); // Delay required to resolve empty order evaluation issue.
+  canStartStage(stageId: Order$StageId): Promise<void> {
+    return this.#stageStarter(stageId).promise().then(noop); // Delay required to resolve empty order evaluation issue.
   }
 
-  #startStage(stageId: Order$StageId): PromiseResolver {
-    return this.#canExecute[stageId] ||= newPromiseResolver();
+  #stageStarter(stageId: Order$StageId): PromiseResolver {
+    return this.#stageStarters[stageId] ||= newPromiseResolver();
   }
 
-  #deferStage(stageId: Order$StageId): PromiseResolver {
-    return this.#canExecute[stageId] = newPromiseResolver();
-  }
-
-  #runStage(stageId: Order$StageId): void {
+  #startStage(stageId: Order$StageId): void {
     this.#runningStageId = stageId;
     this.#run(this.#stages[stageId], noop);
-    this.#startStage(stageId).resolve();
+    this.#stageStarter(stageId).resolve();
   }
 
   accept(task: Workbench.Task<void>): void {
@@ -116,9 +108,9 @@ export class Order$Workbench {
 
   #endStage({ stageId }: Order$Stage): void {
     this.#lastTasks[stageId] = undefined;
-    this.#canExecute[stageId] = undefined;
+    this.#stageStarters[stageId] = undefined;
     if (stageId < Order$StageId.Last) {
-      this.#runStage(stageId + 1);
+      this.#startStage(stageId + 1);
     } else if (this.#pendingTasks.length) {
       this.#restartExecution();
     } else {
@@ -127,13 +119,12 @@ export class Order$Workbench {
   }
 
   #restartExecution(): void {
+    this.#startStage(Order$StageId.First);
 
     const tasks = this.#pendingTasks;
 
     this.#pendingTasks = [];
     tasks.forEach(task => task());
-
-    this.#startExecution();
   }
 
   #endExecution(): void {
@@ -150,7 +141,7 @@ class Order$Stage extends WorkStage {
       readonly stageId: Order$StageId,
       name: string,
   ) {
-    super(name, { start: _ => workbench.startStage(stageId) });
+    super(name, { start: _ => workbench.canStartStage(stageId) });
     workbench.addStage(this);
   }
 
