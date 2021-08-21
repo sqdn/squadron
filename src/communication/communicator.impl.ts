@@ -1,6 +1,7 @@
 import { mapOn_, OnEvent } from '@proc7ts/fun-events';
 import { Logger } from '@proc7ts/logger';
 import { UnitLocator } from '../formation';
+import { Formation$Host } from '../impl';
 import { Unit, UnitContext } from '../unit';
 import { DirectCommChannel, ProxyCommChannel } from './channels';
 import { CommChannel } from './comm-channel';
@@ -11,15 +12,17 @@ import { CommLinker } from './linkage';
 
 export class Communicator$ implements Communicator {
 
+  readonly #unit: Unit;
   readonly #locator: UnitLocator;
-  readonly #protocol: CommProtocol;
+  readonly #host: Formation$Host;
   readonly #linker: CommLinker;
   readonly #logger: Logger;
   readonly #channels = new Map<string, CommChannel>();
 
   constructor(context: UnitContext) {
+    this.#unit = context.unit;
     this.#locator = context.get(UnitLocator);
-    this.#protocol = context.get(CommProtocol);
+    this.#host = context.get(Formation$Host);
     this.#linker = context.get(CommLinker);
     this.#logger = context.get(Logger);
   }
@@ -38,7 +41,9 @@ export class Communicator$ implements Communicator {
           if (location.isLocal) {
             return new DirectCommChannel({
               to,
-              processor: commProcessorBy(this.#protocol.channelProcessor(to)),
+              processor: commProcessorBy(
+                  this.#host.unitDeployment(to).context.get(CommProtocol).channelProcessor(this.#unit),
+              ),
             });
           }
 

@@ -101,6 +101,41 @@ describe('Communicator', () => {
     expect(await channel.request<TestRequest, TestResponse>('test', { payload: 'test data' }))
         .toMatchObject({ re: 'test data' });
   });
+  it('connects unit -> unit directly', async () => {
+
+    const formation = new Formation();
+    const unit1 = new Unit({ tag: '1' });
+    const unit2 = new Unit({ tag: '2' });
+
+    let communicator!: Communicator;
+    const fmnTest = HubTest.testFormation(formation);
+
+    fmnTest.deploy(unit1).instruct(subject => {
+
+      const responder: CommResponder<TestRequest, TestResponse> = {
+        name: 'test',
+        respond: ({ payload }) => onEventBy(receiver => {
+          onPromise<TestResponse>({ re: payload })(receiver);
+        }),
+      };
+
+      subject.provide(cxConstAsset(CommProtocol, responder));
+    });
+    fmnTest.deploy(unit2).instruct(subject => {
+      subject.execute(context => {
+        communicator = context.get(Communicator);
+      });
+    });
+
+    fmnTest.init();
+
+    await fmnTest.evaluate(false);
+
+    const channel = communicator.connect(unit1);
+
+    expect(await channel.request<TestRequest, TestResponse>('test', { payload: 'test data' }))
+        .toMatchObject({ re: 'test data' });
+  });
 
   describe('toString', () => {
     it('provides string representation', () => {
