@@ -23,7 +23,7 @@ describe('FormationManager', () => {
         formationManager = context.get(FormationManager);
       });
     });
-    await HubTest.evaluate(false);
+    await HubTest.evaluate();
   });
 
   describe('FormationCtl', () => {

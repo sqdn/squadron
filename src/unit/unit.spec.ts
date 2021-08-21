@@ -322,6 +322,7 @@ describe('Unit', () => {
           subjectSupply = supply;
           throw error;
         });
+
         unit.instruct(instruction);
 
         await test.evaluate();

@@ -6,7 +6,7 @@ import MockOrder from '@sqdn/order/mock';
 import { Formation, FormationContext } from '../formation';
 import { Formation$Context } from '../formation/formation.context.impl';
 import { Hub } from '../hub';
-import { Formation$Host, Order$Evaluator } from '../impl';
+import { Formation$Host } from '../impl';
 import { OrderTest } from './order-test';
 
 export class OrderTest$Instance implements OrderTest {
@@ -71,19 +71,8 @@ export class OrderTest$Instance implements OrderTest {
     return this.#supply;
   }
 
-  evaluate(reset = true): Promise<void> {
-    if (this.order.active) {
-      return this.order
-          .get(Order$Evaluator)
-          .executeOrder()
-          .then(() => {
-            if (reset) {
-              this.#order = MockOrder.mockReset();
-            }
-          });
-    }
-
-    return this.#host.workbench.evaluate();
+  evaluate(): Promise<void> {
+    return this.#host.executeOrder();
   }
 
 }
