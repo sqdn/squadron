@@ -36,7 +36,7 @@ export class Communicator$ implements Communicator {
     }
 
     const onLocation = this.#locator.locateUnit(to);
-    const target: OnEvent<[CommChannel]> = onLocation.do(
+    const target: OnEvent<[CommChannel?]> = onLocation.do(
         mapOn_(location => {
           if (location.isLocal) {
             return new DirectCommChannel({
@@ -50,7 +50,7 @@ export class Communicator$ implements Communicator {
           const { formations } = location;
 
           if (!formations.length) {
-            throw new TypeError(`${to} is not deployed`);
+            return;
           }
 
           const formation = formations[Math.floor(Math.random() * formations.length)];
