@@ -9,7 +9,7 @@ export class Unit$Id {
   readonly prefix: string;
   #suffix?: string;
   #uid?: string;
-  #location?: string;
+  #sourceLink?: string;
 
   constructor(readonly unit: Unit, { tag = '', id }: Unit.Init) {
     if (id) {
@@ -45,39 +45,35 @@ export class Unit$Id {
   }
 
   get suffix(): string {
-    if (!this.#suffix) {
-
-      const hash = createHash('sha256');
-
-      hash.update(this.stack);
-
-      this.#suffix = hash.digest('hex');
-    }
-
-    return this.#suffix;
+    return this.#suffix ??= Unit$Id$suffix(this.stack);
   }
 
   get uid(): string {
     return this.#uid ??= `${this.prefix}${this.suffix}`;
   }
 
-  get location(): string {
-    if (!this.#location) {
-      this.#location = Unit$location(this.stack);
-    }
-
-    return this.#location;
+  get sourceLink(): string {
+    return this.#sourceLink ??= Unit$sourceLink(this.stack);
   }
 
 }
 
-const Unit$stack$nlPattern = /\n/;
-const Unit$stack$locationPattern = /^\s*at\s+(?:.*\((.*)\)|(.*[^)]))$/;
+function Unit$Id$suffix(stack: string): string {
 
-function Unit$location(stack: string): string {
+  const hash = createHash('sha256');
+
+  hash.update(stack);
+
+  return hash.digest('hex');
+}
+
+const Unit$stack$nlPattern = /\n/;
+const Unit$stack$sourceLinkPattern = /^\s*at\s+(?:.*\((.*)\)|(.*[^)]))$/;
+
+function Unit$sourceLink(stack: string): string {
 
   const line = stack.split(Unit$stack$nlPattern, 2)[1];
-  const result = Unit$stack$locationPattern.exec(line);
+  const result = Unit$stack$sourceLinkPattern.exec(line);
 
   return result![1];
 }

@@ -13,7 +13,7 @@ import { Unit$Id, Unit$Id__symbol } from './unit.id.impl';
  *
  * Unit's {@link uid unique identifier} is a hash of its stack trace. So, the identifier would stay the same on each
  * order evaluation. It is also possible to specify a {@link Unit.Init.tag tag} to add to identifier to make a
- * distinction between units created at the same location, e.g. within loops.
+ * distinction between units created at the same line of source code, e.g. within loops.
  */
 export class Unit implements SupplyPeer {
 
@@ -67,12 +67,12 @@ export class Unit implements SupplyPeer {
   }
 
   /**
-   * Source code location where the unit has been created at.
+   * A link to fragment of source code that created this unit.
    *
-   * Has format like `${file}:${line}:${column}`.
+   * Has format inherent from stack trace: `${file}:${line}:${column}`.
    */
-  get location(): string {
-    return this[Unit$Id__symbol].location;
+  get sourceLink(): string {
+    return this[Unit$Id__symbol].sourceLink;
   }
 
   /**
@@ -155,7 +155,7 @@ export class Unit implements SupplyPeer {
       uid = this.uid;
     }
 
-    return `[${this[Symbol.toStringTag]} ${uid}(${this.location})]`;
+    return `[${this[Symbol.toStringTag]} ${uid}(${this.sourceLink})]`;
   }
 
 }

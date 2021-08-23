@@ -43,14 +43,14 @@ describe('Unit', () => {
   });
 
   describe('uid', () => {
-    it('is unique to each unit instantiation location', () => {
+    it('is unique to each source code fragment where the unit has been created', () => {
 
       const unit1 = new TestUnit();
       const unit2 = new TestUnit();
 
       expect(unit1.uid).not.toBe(unit2.uid);
     });
-    it('is the same for the same instantiation location', () => {
+    it('is the same for the units created by the same source code fragment', () => {
 
       const units: TestUnit[] = [];
 
@@ -62,7 +62,7 @@ describe('Unit', () => {
 
       expect(unit1.uid).toBe(unit2.uid);
     });
-    it('is unique for different tags and the same instantiation location', () => {
+    it('is unique for the units created by the same source code fragment with different tags', () => {
 
       const units: TestUnit[] = [];
 
@@ -86,19 +86,19 @@ describe('Unit', () => {
     });
   });
 
-  describe('location', () => {
-    it('reflects source file', () => {
+  describe('sourceLink', () => {
+    it('reflects fragment of source code', () => {
 
       const unit = new TestUnit();
       const filePath = fileURLToPath(import.meta.url);
 
-      expect(unit.location).toContain(filePath);
-      expect(unit.location).toMatch(/:\d+:\d+$/);
+      expect(unit.sourceLink).toContain(filePath);
+      expect(unit.sourceLink).toMatch(/:\d+:\d+$/);
     });
   });
 
   describe('toString', () => {
-    it('reflects unit type, UID, and location', () => {
+    it('reflects unit type, UID, and source code fragment', () => {
 
       const unit = new TestUnit();
       const filePath = fileURLToPath(import.meta.url);
@@ -106,10 +106,10 @@ describe('Unit', () => {
 
       expect(unit.toString()).toMatch(pattern);
 
-      const location = pattern.exec(unit.toString())![1];
+      const sourceLink = pattern.exec(unit.toString())![1];
 
-      expect(location).toContain(filePath);
-      expect(location).toMatch(/.*:\d+:\d+$/);
+      expect(sourceLink).toContain(filePath);
+      expect(sourceLink).toMatch(/.*:\d+:\d+$/);
     });
     it('reflects unit tag', () => {
 
@@ -119,10 +119,10 @@ describe('Unit', () => {
 
       expect(unit.toString()).toMatch(pattern);
 
-      const location = pattern.exec(unit.toString())![1];
+      const sourceLink = pattern.exec(unit.toString())![1];
 
-      expect(location).toContain(filePath);
-      expect(location).toMatch(/.*:\d+:\d+$/);
+      expect(sourceLink).toContain(filePath);
+      expect(sourceLink).toMatch(/.*:\d+:\d+$/);
     });
     it('reflects short custom id', () => {
 
