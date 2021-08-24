@@ -3,6 +3,7 @@ import { Logger } from '@proc7ts/logger';
 import Order from '@sqdn/order';
 import { Formation } from '../formation';
 import { Unit } from '../unit';
+import { Unit$Backend } from '../unit/unit.backend.impl';
 import { Unit$Deployment } from '../unit/unit.deployment.impl';
 import { Unit$Evaluator } from '../unit/unit.evaluator.impl';
 import { Unit$Host } from '../unit/unit.host.impl';
@@ -46,7 +47,7 @@ export class Order$Evaluator implements Unit$Host {
     this.host.deploy(formation, unit);
   }
 
-  evalUnit<TUnit extends Unit>(unit: TUnit): Unit$Evaluator<TUnit> {
+  evalUnit<TUnit extends Unit>(unit: TUnit): Unit$Backend<TUnit> {
 
     let evaluator = this.#evaluators.get(unit.uid);
 
@@ -56,7 +57,7 @@ export class Order$Evaluator implements Unit$Host {
       this.host.putUnit(unit);
     }
 
-    return evaluator;
+    return evaluator.backend;
   }
 
 }

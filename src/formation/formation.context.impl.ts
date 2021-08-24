@@ -1,7 +1,9 @@
 import { cxBuildAsset, CxBuilder, cxConstAsset } from '@proc7ts/context-builder';
 import { CxAccessor, CxEntry, CxGlobals, CxRequest } from '@proc7ts/context-values';
+import { AfterEvent } from '@proc7ts/fun-events';
 import { Hub } from '../hub';
 import { Formation$Host } from '../impl';
+import { UnitStatus } from '../unit';
 import { UnitContext__entry } from '../unit/unit.entries.impl';
 import { Formation } from './formation';
 import { FormationContext } from './formation-context';
@@ -36,6 +38,10 @@ export class Formation$Context implements FormationContext {
 
   get unit(): Formation {
     return this.formation;
+  }
+
+  get readStatus(): AfterEvent<[UnitStatus]> {
+    return this.#host.workbench.readStatus;
   }
 
   get<TValue>(entry: CxEntry<TValue, unknown>, request?: CxRequest<TValue>): TValue | null {

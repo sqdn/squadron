@@ -1,22 +1,25 @@
+import { AfterEvent, trackValue } from '@proc7ts/fun-events';
 import { newPromiseResolver, noop, PromiseResolver } from '@proc7ts/primitives';
 import { Workbench, WorkStage } from '@proc7ts/workbench';
+import { UnitStatus } from '../unit';
 
 const enum Order$StageId {
   None,
-  Acceptance,
+  Instruction,
   Execution,
   Delivery,
-  First = Acceptance,
+  First = Instruction,
   Last = Delivery,
 }
 
 export class Order$Workbench {
 
   readonly #workbench = new Workbench();
-  readonly #acceptanceStage: Order$Stage;
+  readonly #instructionStage: Order$Stage;
   readonly #executionStage: Order$Stage;
   readonly #deliveryStage: Order$Stage;
   readonly #stages: Order$Stage[] = [];
+  readonly #status = trackValue<UnitStatus>(UnitStatus.Available);
 
   #runningStageId: Order$StageId = Order$StageId.None;
   readonly #stageStarters = new Array<PromiseResolver | undefined>(Order$StageId.Last);
@@ -25,21 +28,28 @@ export class Order$Workbench {
   readonly #lastTasks = new Array<Workbench.Task<unknown> | undefined>(Order$StageId.Last + 1);
 
   constructor() {
-    this.#acceptanceStage = new Order$Stage(
+    this.#instructionStage = new Order$Stage(
         this,
-        Order$StageId.Acceptance,
-        'acceptance',
+        Order$StageId.Instruction,
+        UnitStatus.Instructed,
+        'instruction',
     );
     this.#executionStage = new Order$Stage(
         this,
         Order$StageId.Execution,
+        UnitStatus.Executed,
         'execution',
     );
     this.#deliveryStage = new Order$Stage(
         this,
         Order$StageId.Delivery,
+        UnitStatus.Ready,
         'delivery',
     );
+  }
+
+  get readStatus(): AfterEvent<[UnitStatus]> {
+    return this.#status.read;
   }
 
   executeOrder(): Promise<void> {
@@ -71,8 +81,8 @@ export class Order$Workbench {
     this.#stageStarter(stageId).resolve();
   }
 
-  accept(task: Workbench.Task<void>): void {
-    this.#run(this.#acceptanceStage, task);
+  instruct(task: Workbench.Task<void>): void {
+    this.#run(this.#instructionStage, task);
   }
 
   execute(task: Workbench.Task<void>): void {
@@ -106,9 +116,12 @@ export class Order$Workbench {
     this.#workbench.work(stage).run(orderTask).catch(noop);
   }
 
-  #endStage({ stageId }: Order$Stage): void {
+  #endStage({ stageId, endStatus }: Order$Stage): void {
     this.#lastTasks[stageId] = undefined;
     this.#stageStarters[stageId] = undefined;
+    if (this.#status.it < endStatus) {
+      this.#status.it = endStatus;
+    }
     if (stageId < Order$StageId.Last) {
       this.#startStage(stageId + 1);
     } else if (this.#pendingTasks.length) {
@@ -139,6 +152,7 @@ class Order$Stage extends WorkStage {
   constructor(
       workbench: Order$Workbench,
       readonly stageId: Order$StageId,
+      readonly endStatus: UnitStatus,
       name: string,
   ) {
     super(name, { start: _ => workbench.canStartStage(stageId) });

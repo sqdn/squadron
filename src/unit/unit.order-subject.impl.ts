@@ -7,6 +7,7 @@ import { Formation$Host } from '../impl';
 import { OrderSubject, OrderTask } from '../order';
 import { Unit } from './unit';
 import { UnitContext } from './unit-context';
+import { UnitStatus } from './unit-status';
 import { Unit$Deployment } from './unit.deployment.impl';
 
 export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit> {
@@ -15,6 +16,7 @@ export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit
   readonly #supply: Supply;
   #exec = this.#doExec;
   readonly #execute = (task: OrderTask<TUnit>): void => this.#exec(task);
+  #tasks = 0;
 
   constructor(backend: Unit$Deployment<TUnit>, supply: Supply) {
     this.#deployment = backend;
@@ -74,12 +76,16 @@ export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit
   }
 
   #doExec(task: OrderTask<TUnit>): void {
+    ++this.#tasks;
 
     const host = this.#host;
 
     host.workbench.execute(async () => {
       try {
         await host.executeTask(this.unit, task);
+        if (!--this.#tasks) {
+          this.#deployment.setStatus(UnitStatus.Executed);
+        }
       } catch (error) {
         host.log.error(`Failed to execute ${this.unit} task`, error);
         this.supply.off(error);

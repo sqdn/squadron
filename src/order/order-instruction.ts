@@ -4,6 +4,9 @@ import { OrderSubject } from './order-subject';
 /**
  * Instruction {@link Unit.instruct recorded} by unit to be applied when unit deployed to formation.
  *
+ * The instructions first applied for the unit with {@link UnitStatus.Available} status. When all instructions applied
+ * the unit status becomes {@link UnitStatus.Instructed}.
+ *
  * @typeParam TUnit - Type of deployed unit.
  * @param subject - A subject of order the instruction is applied to.
  *

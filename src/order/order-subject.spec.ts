@@ -7,7 +7,7 @@ import { Supply } from '@proc7ts/supply';
 import { Mock } from 'jest-mock';
 import { FormationContext } from '../formation';
 import { OrderTest } from '../testing';
-import { Unit, UnitContext } from '../unit';
+import { Unit, UnitContext, UnitStatus } from '../unit';
 import { OrderSubject } from './order-subject';
 import { OrderTask } from './order-task';
 
@@ -73,6 +73,91 @@ describe('OrderSubject', () => {
       await OrderTest.evaluate();
 
       expect(unitSubject.unit).toBe(unit);
+    });
+  });
+
+  describe('context', () => {
+    it('tracks unit status', async () => {
+
+      const unit = new Unit();
+      const statuses: UnitStatus[] = [];
+      let instructionStatus1: UnitStatus | undefined;
+      let instructionStatus2: UnitStatus | undefined;
+      let taskStatus1: UnitStatus | undefined;
+      let taskStatus2: UnitStatus | undefined;
+
+      unit.instruct(async subject => {
+        subject.context.readStatus(status => statuses.push(status));
+        instructionStatus1 = await subject.context.readStatus;
+
+        subject.execute(async context => {
+          taskStatus1 = await context.readStatus;
+        });
+      });
+      unit.instruct(async subject => {
+        instructionStatus2 = await subject.context.readStatus;
+
+        subject.execute(async context => {
+          taskStatus2 = await context.readStatus;
+        });
+      });
+
+      OrderTest.formation.deploy(unit);
+
+      await OrderTest.evaluate();
+
+      expect(instructionStatus1).toBe(UnitStatus.Available);
+      expect(instructionStatus2).toBe(UnitStatus.Available);
+      expect(taskStatus1).toBe(UnitStatus.Instructed);
+      expect(taskStatus2).toBe(UnitStatus.Instructed);
+      expect(statuses).toEqual([
+        UnitStatus.Available,
+        UnitStatus.Instructed,
+        UnitStatus.Executed,
+        UnitStatus.Ready,
+      ]);
+    });
+    it('tracks formation status', async () => {
+
+      const unit = new Unit();
+      const statuses: UnitStatus[] = [];
+      let instructionStatus1: UnitStatus | undefined;
+      let instructionStatus2: UnitStatus | undefined;
+      let taskStatus1: UnitStatus | undefined;
+      let taskStatus2: UnitStatus | undefined;
+
+      const fmnContext = OrderTest.formationBuilder.context;
+
+      fmnContext.readStatus(status => statuses.push(status));
+      unit.instruct(async subject => {
+        instructionStatus1 = await fmnContext.readStatus;
+
+        subject.execute(async () => {
+          taskStatus1 = await fmnContext.readStatus;
+        });
+      });
+      unit.instruct(async subject => {
+        instructionStatus2 = await fmnContext.readStatus;
+
+        subject.execute(async () => {
+          taskStatus2 = await fmnContext.readStatus;
+        });
+      });
+
+      OrderTest.formation.deploy(unit);
+
+      await OrderTest.evaluate();
+
+      expect(instructionStatus1).toBe(UnitStatus.Available);
+      expect(instructionStatus2).toBe(UnitStatus.Available);
+      expect(taskStatus1).toBe(UnitStatus.Instructed);
+      expect(taskStatus2).toBe(UnitStatus.Instructed);
+      expect(statuses).toEqual([
+        UnitStatus.Available,
+        UnitStatus.Instructed,
+        UnitStatus.Executed,
+        UnitStatus.Ready,
+      ]);
     });
   });
 

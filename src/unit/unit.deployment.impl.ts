@@ -1,24 +1,36 @@
 import { CxBuilder } from '@proc7ts/context-builder';
+import { AfterEvent, trackValue, ValueTracker } from '@proc7ts/fun-events';
 import { Formation } from '../formation';
 import { Formation$Host } from '../impl';
 import { OrderInstruction, OrderSubject } from '../order';
 import { Unit } from './unit';
 import { UnitContext } from './unit-context';
+import { UnitStatus } from './unit-status';
 import { Unit$Backend } from './unit.backend.impl';
 import { UnitContext$createBuilder } from './unit.context.impl';
 import { Unit$OrderSubject } from './unit.order-subject.impl';
 
-export class Unit$Deployment<TUnit extends Unit> extends Unit$Backend<TUnit, Formation$Host> {
+export class Unit$Deployment<TUnit extends Unit = Unit> extends Unit$Backend<TUnit, Formation$Host> {
 
   readonly builder: CxBuilder<UnitContext<TUnit>>;
+  readonly #status: ValueTracker<UnitStatus>;
 
   constructor(host: Formation$Host, unit: TUnit) {
     super(host, unit);
-    this.builder = UnitContext$createBuilder(host, unit);
+    this.#status = trackValue(UnitStatus.Available);
+    this.builder = UnitContext$createBuilder(this);
   }
 
   get context(): UnitContext<TUnit> {
     return this.builder.context;
+  }
+
+  get readStatus(): AfterEvent<[UnitStatus]> {
+    return this.#status.read;
+  }
+
+  setStatus(status: UnitStatus): void {
+    this.#status.it = status;
   }
 
   instruct(instruction: OrderInstruction<TUnit>): void {
@@ -27,7 +39,7 @@ export class Unit$Deployment<TUnit extends Unit> extends Unit$Backend<TUnit, For
 
     subject.supply.whenOff(_ => subject = null);
 
-    this.host.workbench.accept(async () => {
+    this.host.workbench.instruct(async () => {
       if (subject) {
         try {
           await instruction(subject);
