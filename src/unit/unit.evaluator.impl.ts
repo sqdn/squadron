@@ -3,6 +3,7 @@ import { Formation } from '../formation';
 import { Order$Evaluator } from '../impl';
 import { OrderInstruction, OrderSubject } from '../order';
 import { Unit } from './unit';
+import { UnitStatus } from './unit-status';
 import { Unit$Backend, Unit$Backend__symbol, Unit$rejectOrder } from './unit.backend.impl';
 import { Unit$Id__symbol } from './unit.id.impl';
 import { Unit$OrderSubject } from './unit.order-subject.impl';
@@ -10,6 +11,7 @@ import { Unit$OrderSubject } from './unit.order-subject.impl';
 export class Unit$Evaluator<TUnit extends Unit> extends Unit$Backend<TUnit, Order$Evaluator> {
 
   readonly #instructions: OrderInstruction<TUnit>[] = [];
+  backend: Unit$Backend<TUnit> = this;
   #deliver = this.#doDeliver;
 
   instruct(instruction: OrderInstruction<TUnit>): void {
@@ -20,17 +22,22 @@ export class Unit$Evaluator<TUnit extends Unit> extends Unit$Backend<TUnit, Orde
     this.supply.needs(formation);
 
     const { host } = this;
-
+    const deployment = host.unitDeployment(this.unit);
     let subject: OrderSubject<TUnit> | null = new Unit$OrderSubject(
-        host.unitDeployment(this.unit),
+        deployment,
         this.supply.derive(),
     );
 
+    let numInstructions = 0;
     const instruct = (instruction: OrderInstruction<TUnit>): void => {
-      host.workbench.accept(async () => {
+      ++numInstructions;
+      host.workbench.instruct(async () => {
         if (subject) {
           try {
             await instruction(subject);
+            if (!--numInstructions) {
+              deployment.setStatus(UnitStatus.Instructed);
+            }
           } catch (error) {
             this.supply.off(error);
             host.log.error(`Instructions for ${this.unit} rejected`, error);
@@ -64,10 +71,13 @@ export class Unit$Evaluator<TUnit extends Unit> extends Unit$Backend<TUnit, Orde
     this.unit[Unit$Id__symbol] = deployment.unit[Unit$Id__symbol];
 
     // Replace unit evaluator with unit deployment.
-    this.unit[Unit$Backend__symbol] = deployment;
+    this.unit[Unit$Backend__symbol] = this.backend = deployment;
 
     // Evaluator depends on deployment from now on.
     this.supply.needs(deployment.supply);
+
+    // The unit is ready.
+    deployment.setStatus(UnitStatus.Ready);
   }
 
 }
