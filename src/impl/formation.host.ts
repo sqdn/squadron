@@ -6,12 +6,12 @@ import { Formation, FormationContext } from '../formation';
 import { Hub } from '../hub';
 import { OrderTask } from '../order';
 import { Unit, UnitContext, UnitOrigin } from '../unit';
-import { Unit$Backend__symbol } from '../unit/unit.backend.impl';
 import { Unit$Deployment } from '../unit/unit.deployment.impl';
 import { Unit$Host } from '../unit/unit.host.impl';
 import { Formation$Factory } from './formation.factory';
 import { Formation$Order } from './formation.order';
 import { Order$Workbench } from './order.workbench';
+import { Unit$DeploymentTracker } from './unit.deployment-tracker';
 
 const Formation$Host$perContext: CxEntry.Definer<Formation$Host> = (/*#__PURE__*/ cxSingle());
 
@@ -36,8 +36,8 @@ export class Formation$Host implements Unit$Host {
   #orderBuilder?: CxBuilder<Order>;
   #_origin?: UnitOrigin;
   readonly #units = new Map<string, Unit>();
-  readonly #unitFormations = new Map<string, Map<string, Formation>>();
   readonly #deployments = new Map<string, Unit$Deployment<any>>();
+  readonly #deploymentTrackers = new Map<string, Unit$DeploymentTracker>();
   #formationDeployed: 0 | 1 = 0;
 
   constructor(factory: Formation$Factory) {
@@ -122,54 +122,19 @@ export class Formation$Host implements Unit$Host {
     return newUnit;
   }
 
-  unitFormations(unit: Unit): Formation[] {
-
-    const formations = this.#formationsOfUnit(unit);
-
-    return formations ? [...formations.values()] : [];
-  }
-
-  isUnitDeployedAt(unit: Unit, formation: Formation): boolean {
-
-    const formations = this.#formationsOfUnit(unit);
-
-    return !!formations && formations.has(formation.uid);
-  }
-
-  isLocalUnit(unit: Unit): boolean {
-    return this.isUnitDeployedAt(unit, this.formation);
-  }
-
   deploy(formation: Formation, unit: Unit): void {
-
-    let unitFormations = this.#formationsOfUnit(unit);
-
-    if (!unitFormations) {
-      this.#unitFormations.set(unit.uid, unitFormations = new Map());
-    }
-
-    unitFormations.set(formation.uid, formation); // Record the formation the unit is deployed to.
-
-    if (this.formation.uid === formation.uid) {
-      unit[Unit$Backend__symbol].deployTo(this.formation);
-    }
+    this.trackDeployments(unit).deployTo(formation);
   }
 
-  #formationsOfUnit(unit: Unit): Map<string, Formation> | undefined {
+  trackDeployments<TUnit extends Unit>(unit: TUnit): Unit$DeploymentTracker<TUnit> {
 
-    let unitFormations = this.#unitFormations.get(unit.uid);
+    let tracker = this.#deploymentTrackers.get(unit.uid);
 
-    if (!unitFormations) {
-
-      const asFormation = unit.asFormation;
-
-      if (asFormation) {
-        this.#unitFormations.set(unit.uid, unitFormations = new Map());
-        unitFormations.set(asFormation.uid, asFormation);
-      }
+    if (!tracker) {
+      this.#deploymentTrackers.set(unit.uid, tracker = new Unit$DeploymentTracker(this, unit));
     }
 
-    return unitFormations;
+    return tracker as Unit$DeploymentTracker<TUnit>;
   }
 
   async executeTask<TUnit extends Unit>(unit: TUnit, task: OrderTask<TUnit>): Promise<void> {
