@@ -10,7 +10,7 @@ export default {
   ],
   coverageDirectory: 'target/coverage',
   coverageThreshold: {
-    global: 0,
+    global: 100,
   },
   extensionsToTreatAsEsm: ['.ts'],
   moduleNameMapper: {

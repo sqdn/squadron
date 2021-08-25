@@ -78,7 +78,7 @@ export class Formation$Host implements Unit$Host {
           const { createOrder } = this.#factory;
           const order = createOrder
               ? createOrder(get, builder)
-              : new Formation$Order(this.#factory.orderId, get);
+              : (/* istanbul ignore next */ new Formation$Order(this.#factory.orderId, get));
 
           builder.provide(cxConstAsset(Order.entry, order));
 
