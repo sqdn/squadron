@@ -3,7 +3,7 @@ import { CxAccessor, CxEntry, CxGlobals, CxRequest } from '@proc7ts/context-valu
 import { AfterEvent } from '@proc7ts/fun-events';
 import { Hub } from '../hub';
 import { Formation$Host } from '../impl';
-import { UnitStatus } from '../unit';
+import { Unit, UnitContext, UnitStatus } from '../unit';
 import { UnitContext__entry } from '../unit/unit.entries.impl';
 import { Formation } from './formation';
 import { FormationContext } from './formation-context';
@@ -46,6 +46,10 @@ export class Formation$Context implements FormationContext {
 
   get<TValue>(entry: CxEntry<TValue, unknown>, request?: CxRequest<TValue>): TValue | null {
     return this.#get(entry, request);
+  }
+
+  unitContext<TUnit extends Unit>(unit: TUnit): UnitContext<TUnit> {
+    return this.#host.unitDeployment(unit).context;
   }
 
 }

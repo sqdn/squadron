@@ -58,6 +58,7 @@ describe('Communicator', () => {
     const fmnTest = HubTest.testFormation(formation);
 
     fmnTest.init();
+    await HubTest.evaluate();
 
     const communicator = fmnTest.formationBuilder.get(Communicator);
     const channel = communicator.connect(fmnTest.hub);

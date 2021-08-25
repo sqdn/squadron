@@ -29,7 +29,7 @@ describe('FormationContext', () => {
     let context!: FormationContext;
 
     formation.instruct(subject => subject.execute(ctx => {
-      context = ctx;
+      context = ctx as any;
     }));
 
     await OrderTest.evaluate();
