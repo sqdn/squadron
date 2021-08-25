@@ -96,7 +96,6 @@ describe('Communicator', () => {
     let communicator!: Communicator;
     const fmnTest2 = HubTest.testFormation(formation2);
 
-
     fmnTest2.deploy(unit2).instruct(subject => {
       subject.execute(context => {
         communicator = context.get(Communicator);
