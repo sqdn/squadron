@@ -1,6 +1,6 @@
 import { cxConstAsset } from '@proc7ts/context-builder';
 import { CxEntry } from '@proc7ts/context-values';
-import { afterThe, OnEvent, onEventBy, onPromise } from '@proc7ts/fun-events';
+import { mapAfter, mapAfter_, OnEvent } from '@proc7ts/fun-events';
 import { CommProtocol } from '../../communication';
 import { Formation, UnitLocation, UnitLocator } from '../../formation';
 import { OrderUnits, Unit } from '../../unit';
@@ -36,15 +36,15 @@ export class Hub$UnitLocator implements UnitLocator {
   }
 
   locateUnit(unit: Unit): OnEvent<[UnitLocation]> {
-    return afterThe(new Hub$UnitLocation(this.#host, unit));
+    return this.#host.trackDeployments(unit).read.do(
+        mapAfter(formations => new Hub$UnitLocation(this.#host, formations)),
+    );
   }
 
   #locateUnit({ unit }: UnitLocationCommRequest): OnEvent<[UnitLocationCommResponse]> {
-    return onEventBy(receiver => {
-      onPromise({
-        formations: this.#host.unitFormations(this.#orderUnits.unitByUid(unit, Unit)).map(({ uid }) => uid),
-      })(receiver);
-    });
+    return this.#host.trackDeployments(this.#orderUnits.unitByUid(unit, Unit)).read.do(
+        mapAfter_(formations => ({ formations: [...formations.keys()] })),
+    );
   }
 
 }
@@ -52,23 +52,23 @@ export class Hub$UnitLocator implements UnitLocator {
 class Hub$UnitLocation implements UnitLocation {
 
   readonly #host: Formation$Host;
-  readonly #unit: Unit;
+  readonly #formations: ReadonlyMap<string, Formation>;
 
-  constructor(host: Formation$Host, unit: Unit) {
+  constructor(host: Formation$Host, formations: ReadonlyMap<string, Formation>) {
     this.#host = host;
-    this.#unit = unit;
+    this.#formations = formations;
   }
 
   get formations(): readonly Formation[] {
-    return this.#host.unitFormations(this.#unit);
+    return [...this.#formations.values()];
   }
 
   get isLocal(): boolean {
-    return this.#host.isLocalUnit(this.#unit);
+    return this.isDeployedAt(this.#host.formation);
   }
 
   isDeployedAt(formation: Formation): boolean {
-    return this.#host.isUnitDeployedAt(this.#unit, formation);
+    return this.#formations.has(formation.uid);
   }
 
 }
