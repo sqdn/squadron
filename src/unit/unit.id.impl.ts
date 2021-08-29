@@ -7,9 +7,9 @@ export class Unit$Id {
 
   stack!: string;
   readonly prefix: string;
-  #suffix?: string;
-  #uid?: string;
-  #sourceLink?: string;
+  #suffix?: string | undefined;
+  #uid?: string | undefined;
+  #sourceLink?: string | undefined;
 
   constructor(readonly unit: Unit, { tag = '', id }: Unit.Init) {
     if (id) {

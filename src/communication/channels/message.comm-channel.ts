@@ -47,8 +47,8 @@ export class MessageCommChannel implements CommChannel {
       }: {
         to: Unit;
         port: MessagePort;
-        processor?: CommProcessor;
-        logger?: Logger;
+        processor?: CommProcessor | undefined;
+        logger?: Logger | undefined;
       },
   ) {
     this.#to = to;
@@ -242,7 +242,7 @@ interface MessageComm$Wrapper {
   sqdn?: {
     type: MessageComm$Type;
     name: string;
-    body?: CommPacket;
+    body?: CommPacket | undefined;
   };
 }
 

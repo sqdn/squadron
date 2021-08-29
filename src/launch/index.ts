@@ -31,11 +31,11 @@ declare module 'vm' {
   }
 
   interface SourceTextModuleOptions {
-    readonly identifier?: string;
-    readonly cacheData?: Buffer | NodeJS.TypedArray | DataView;
-    readonly context?: object;
-    readonly lineOffset?: number;
-    readonly columnOffset?: number;
+    readonly identifier?: string | undefined;
+    readonly cacheData?: Buffer | NodeJS.TypedArray | DataView | undefined;
+    readonly context?: object | undefined;
+    readonly lineOffset?: number | undefined;
+    readonly columnOffset?: number | undefined;
     initializeImportMeta?(meta: any, module: SourceTextModule): void;
     importModuleDynamically?(
         specifier: string,
@@ -56,8 +56,8 @@ declare module 'vm' {
   }
 
   interface SyntheticModuleOptions {
-    readonly identifier?: string;
-    context?: object;
+    readonly identifier?: string | undefined;
+    context?: object | undefined;
   }
 
 }

@@ -46,7 +46,7 @@ class Hub$FormationCtl implements FormationCtl {
 
   readonly #formation: Formation;
   readonly #context: FormationContext;
-  #channel?: CommChannel;
+  #channel?: CommChannel | undefined;
 
   constructor(formation: Formation, context: FormationContext) {
     this.#formation = formation;

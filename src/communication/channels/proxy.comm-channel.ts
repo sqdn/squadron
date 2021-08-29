@@ -51,11 +51,11 @@ export class ProxyCommChannel implements CommChannel {
         logger = consoleLogger,
       }: {
         to: Unit;
-        supply?: Supply;
+        supply?: Supply | undefined;
         target: CommChannel | OnEvent<[CommChannel?]>;
-        closeTarget?: boolean;
-        buffer?: number | CommBuffer;
-        logger?: Logger;
+        closeTarget?: boolean | undefined;
+        buffer?: number | CommBuffer | undefined;
+        logger?: Logger | undefined;
       },
   ) {
     this.#to = to;

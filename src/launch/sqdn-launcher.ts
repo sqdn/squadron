@@ -12,8 +12,8 @@ export class SqdnLauncher {
   readonly #resolve: RequireResolve;
   readonly #cache = new Map<string, SqdnLaunchModule>();
   #order!: Order;
-  #launchData?: Formation$LaunchData | null = null;
-  #orderModule?: Promise<Module>;
+  #launchData?: Formation$LaunchData | null | undefined = null;
+  #orderModule?: Promise<Module> | undefined;
 
   constructor(readonly vmContext: object, readonly rootURL: string) {
     this.#resolve = createRequire(rootURL).resolve;

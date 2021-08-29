@@ -32,9 +32,9 @@ export class Formation$Host implements Unit$Host {
   readonly perUnitCxPeer: CxPeerBuilder<UnitContext>;
 
   readonly #factory: Formation$Factory;
-  #order?: Order;
-  #orderBuilder?: CxBuilder<Order>;
-  #_origin?: UnitOrigin;
+  #order?: Order | undefined;
+  #orderBuilder?: CxBuilder<Order> | undefined;
+  #_origin?: UnitOrigin | undefined;
   readonly #units = new Map<string, Unit>();
   readonly #deployments = new Map<string, Unit$Deployment<any>>();
   readonly #deploymentTrackers = new Map<string, Unit$DeploymentTracker>();

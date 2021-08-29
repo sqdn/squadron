@@ -32,7 +32,7 @@ export class DirectCommChannel implements CommChannel {
         processor,
       }: {
         to: Unit;
-        supply?: Supply;
+        supply?: Supply | undefined;
         processor: CommProcessor;
       },
   ) {
