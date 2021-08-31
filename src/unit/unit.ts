@@ -145,9 +145,9 @@ export class Unit implements SqdnLoggable, SupplyPeer {
 
   toLog(target: DueSqdnLog.Target): void | unknown {
 
-    const { on = 'out', zDetails } = target;
+    const { on = 'out', index, zDetails } = target;
 
-    if (!zDetails) {
+    if (!zDetails || index) {
       return this.toString();
     }
     if (on !== 'out') {

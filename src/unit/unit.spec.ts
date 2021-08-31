@@ -140,6 +140,20 @@ describe('Unit', () => {
         details: {},
       });
     });
+    it('converts to string representation if not in the leading position', () => {
+
+      const unit = new TestUnit({ tag: 'custom' });
+
+      expect(dueLogZ({
+        line: ['prefix', unit],
+        zLevel: ZLogLevel.Info,
+        zDetails: {},
+      }).zMessage).toEqual({
+        level: ZLogLevel.Info,
+        line: ['prefix', String(unit)],
+        details: {},
+      });
+    });
   });
 
   describe('toString', () => {
