@@ -21,4 +21,19 @@ describe('Hub', () => {
       expect(new Hub({ id: 'custom', tag: 'test' }).uid).toBe('test@custom');
     });
   });
+
+  describe('toString', () => {
+    it('provides string representation', () => {
+
+      const hub = new Hub();
+
+      expect(String(hub)).toBe(`[Hub hub(${hub.sourceLink})]`);
+    });
+    it('provides tagged string representation', () => {
+
+      const hub = new Hub({ tag: 'test' });
+
+      expect(String(hub)).toBe(`[Hub test@hub(${hub.sourceLink})]`);
+    });
+  });
 });

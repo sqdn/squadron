@@ -17,6 +17,15 @@ import { Unit$Id, Unit$Id__symbol } from './unit.id.impl';
  */
 export class Unit implements SupplyPeer {
 
+  /**
+   * The name of the unit instance of this type.
+   *
+   * Displayed in unit's string representation.
+   */
+  static get unitName(): string {
+    return this.name;
+  }
+
   readonly #order: Order;
 
   /**
@@ -111,10 +120,6 @@ export class Unit implements SupplyPeer {
     return this[Unit$Backend__symbol].supply;
   }
 
-  get [Symbol.toStringTag](): string {
-    return this.constructor.name;
-  }
-
   /**
    * Records an instruction for this unit to execute later.
    *
@@ -155,8 +160,16 @@ export class Unit implements SupplyPeer {
       uid = this.uid;
     }
 
-    return `[${this[Symbol.toStringTag]} ${uid}(${this.sourceLink})]`;
+    const { unitName } = this.constructor;
+
+    return `[${unitName} ${uid}(${this.sourceLink})]`;
   }
+
+}
+
+export interface Unit {
+
+  constructor: Unit.Class<this>;
 
 }
 
@@ -187,6 +200,26 @@ export namespace Unit {
      * When missing or empty, the identifier will be generated based on the stack trace of its constructor invocation.
      */
     readonly id?: string | undefined;
+
+  }
+
+  /**
+   * Unit class constructor.
+   *
+   * @typeParam TUnit - Unit type.
+   */
+  export interface Class<TUnit extends Unit = Unit> extends Function {
+
+    prototype: TUnit;
+
+    /**
+     * The name of the unit instance of this type.
+     *
+     * Displayed in unit's string representation.
+     */
+    unitName: string;
+
+    new (init?: Init): TUnit;
 
   }
 

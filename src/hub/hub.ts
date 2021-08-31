@@ -10,6 +10,10 @@ import { Unit } from '../unit';
  */
 export class Hub extends Formation {
 
+  static override get unitName(): string {
+    return 'Hub';
+  }
+
   /**
    * Constructs a hub representation instance.
    *

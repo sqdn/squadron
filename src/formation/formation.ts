@@ -26,6 +26,10 @@ export class Formation extends Unit {
     return '[Formation]';
   }
 
+  static override get unitName(): string {
+    return 'Formation';
+  }
+
   /**
    * The formation itself.
    */
