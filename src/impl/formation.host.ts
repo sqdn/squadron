@@ -4,7 +4,6 @@ import { Logger } from '@proc7ts/logger';
 import Order from '@sqdn/order';
 import { Formation, FormationContext } from '../formation';
 import { Hub } from '../hub';
-import { OrderTask } from '../order';
 import { Unit, UnitContext, UnitOrigin } from '../unit';
 import { Unit$Deployment } from '../unit/unit.deployment.impl';
 import { Unit$Host } from '../unit/unit.host.impl';
@@ -135,10 +134,6 @@ export class Formation$Host implements Unit$Host {
     }
 
     return tracker as Unit$DeploymentTracker<TUnit>;
-  }
-
-  async executeTask<TUnit extends Unit>(unit: TUnit, task: OrderTask<TUnit>): Promise<void> {
-    await task(this.unitDeployment(unit).context);
   }
 
   unitDeployment<TUnit extends Unit>(unit: TUnit): Unit$Deployment<TUnit> {

@@ -40,7 +40,7 @@ export class Formation extends Unit {
   /**
    * Instructs to deploy the given executive unit to target formation.
    *
-   * The unit will be actually deployed when order executed within actual formation.
+   * The unit will be actually deployed when the order executed by target formation.
    *
    * @param unit - An executive unit to deploy.
    *

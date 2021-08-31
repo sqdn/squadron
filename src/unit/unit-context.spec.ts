@@ -22,13 +22,13 @@ describe('UnitContext', () => {
     expect(context.unit).toBe(OrderTest.formation);
     expect(context).toBe(OrderTest.order.get(FormationContext));
   });
-  it('is available during unit execution', async () => {
+  it('is available during unit deployment', async () => {
 
     const orderFormation = OrderTest.order.get(Formation);
     const unit = new Unit({ tag: 'test' });
     let context!: UnitContext;
 
-    unit.instruct(subject => subject.execute(ctx => {
+    unit.instruct(subject => subject.deploy(ctx => {
       context = ctx;
     }));
 

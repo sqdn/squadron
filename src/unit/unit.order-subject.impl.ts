@@ -1,4 +1,5 @@
 import { CxAsset, CxEntry, CxRequest } from '@proc7ts/context-values';
+import { logline } from '@proc7ts/logger';
 import { Supply } from '@proc7ts/supply';
 import Order from '@sqdn/order';
 import { Formation, FormationContext } from '../formation';
@@ -14,13 +15,12 @@ export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit
 
   readonly #deployment: Unit$Deployment<TUnit>;
   readonly #supply: Supply;
-  #exec = this.#doExec;
-  readonly #execute = (task: OrderTask<TUnit>): void => this.#exec(task);
-  #tasks = 0;
+  #deploy = this.#doDeploy;
+  #deploymentsCount = 0;
 
   constructor(backend: Unit$Deployment<TUnit>, supply: Supply) {
     this.#deployment = backend;
-    this.#supply = supply.whenOff(reason => this.#exec = this.#dontExec(reason));
+    this.#supply = supply.whenOff(reason => this.#deploy = this.#rejectDeployment(reason));
   }
 
   get hub(): Hub {
@@ -71,30 +71,30 @@ export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit
     return this.#host.perUnitCxPeer.provide(asset).needs(this);
   }
 
-  execute(task: OrderTask<TUnit>): void {
-    this.#execute(task);
+  deploy(task: OrderTask<TUnit>): void {
+    this.#deploy(task);
   }
 
-  #doExec(task: OrderTask<TUnit>): void {
-    ++this.#tasks;
+  #doDeploy(task: OrderTask<TUnit>): void {
+    ++this.#deploymentsCount;
 
     const host = this.#host;
 
-    host.workbench.execute(async () => {
+    host.workbench.deploy(async () => {
       try {
-        await host.executeTask(this.unit, task);
-        if (!--this.#tasks) {
-          this.#deployment.setStatus(UnitStatus.Executed);
+        await task(host.unitDeployment(this.unit).context);
+        if (!--this.#deploymentsCount) {
+          this.#deployment.setStatus(UnitStatus.Deployed);
         }
       } catch (error) {
-        host.log.error(`Failed to execute ${this.unit} task`, error);
+        host.log.error(logline`Failed to deploy ${this.unit}`, error);
         this.supply.off(error);
       }
     });
   }
 
-  #dontExec(error: unknown): () => void {
-    return () => this.#host.log.warn(`Task for ${this.unit} rejected`, error);
+  #rejectDeployment(error: unknown): () => void {
+    return () => this.#host.log.warn(logline`Deployment of ${this.unit} rejected`, error);
   }
 
 }

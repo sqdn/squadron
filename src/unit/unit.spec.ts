@@ -362,14 +362,14 @@ describe('Unit', () => {
       await recurrent.promise();
       expect(evaluated).toBe(true);
     });
-    it('allows to deploy during execution', async () => {
+    it('allows to deploy during deployment', async () => {
 
       const unit1 = new TestUnit();
       const unit2 = new TestUnit();
       const instruction2: OrderInstruction = jest.fn();
 
       unit1.instruct(subject => {
-        subject.execute(({ formation }) => {
+        subject.deploy(({ formation }) => {
           formation.deploy(unit2);
         });
       });
@@ -411,7 +411,7 @@ describe('Unit', () => {
         expect(await subjectSupply.whenDone().catch(asis)).toBe(error);
         expect(logger.error).toHaveBeenCalledWith(`Instructions for ${unit} rejected`, error);
       });
-      it('is not executed for withdrawn unit', async () => {
+      it('does not apply instruction to withdrawn unit', async () => {
 
         const unit = new TestUnit();
 
@@ -428,7 +428,7 @@ describe('Unit', () => {
 
         expect(instruction).not.toHaveBeenCalled();
       });
-      it('is not executed for not deployed unit', async () => {
+      it('does not apply instruction to not deployed unit', async () => {
 
         const unit = new TestUnit();
 

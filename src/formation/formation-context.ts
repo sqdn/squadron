@@ -3,7 +3,7 @@ import { Unit, UnitContext } from '../unit';
 import { Formation } from './formation';
 
 /**
- * Formation execution context.
+ * Formation operations context.
  *
  * Exactly one formation context instance available per formation worker.
  */

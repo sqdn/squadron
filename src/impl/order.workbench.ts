@@ -6,20 +6,20 @@ import { UnitStatus } from '../unit';
 const enum Order$StageId {
   None,
   Instruction,
-  Execution,
-  Delivery,
+  Deployment,
+  Readiness,
   First = Instruction,
-  Last = Delivery,
+  Last = Readiness,
 }
 
 export class Order$Workbench {
 
   readonly #workbench = new Workbench();
   readonly #instructionStage: Order$Stage;
-  readonly #executionStage: Order$Stage;
-  readonly #deliveryStage: Order$Stage;
+  readonly #deploymentStage: Order$Stage;
+  readonly #readinessStage: Order$Stage;
   readonly #stages: Order$Stage[] = [];
-  readonly #status = trackValue<UnitStatus>(UnitStatus.Available);
+  readonly #status = trackValue<UnitStatus>(UnitStatus.Arrived);
 
   #runningStageId: Order$StageId = Order$StageId.None;
   readonly #stageStarters = new Array<PromiseResolver | undefined>(Order$StageId.Last);
@@ -34,17 +34,17 @@ export class Order$Workbench {
         UnitStatus.Instructed,
         'instruction',
     );
-    this.#executionStage = new Order$Stage(
+    this.#deploymentStage = new Order$Stage(
         this,
-        Order$StageId.Execution,
-        UnitStatus.Executed,
-        'execution',
+        Order$StageId.Deployment,
+        UnitStatus.Deployed,
+        'deployment',
     );
-    this.#deliveryStage = new Order$Stage(
+    this.#readinessStage = new Order$Stage(
         this,
-        Order$StageId.Delivery,
+        Order$StageId.Readiness,
         UnitStatus.Ready,
-        'delivery',
+        'readiness',
     );
   }
 
@@ -85,12 +85,12 @@ export class Order$Workbench {
     this.#run(this.#instructionStage, task);
   }
 
-  execute(task: Workbench.Task<void>): void {
-    return this.#run(this.#executionStage, task);
+  deploy(task: Workbench.Task<void>): void {
+    return this.#run(this.#deploymentStage, task);
   }
 
-  deliver(task: Workbench.Task<void>): void {
-    return this.#run(this.#deliveryStage, task);
+  ready(task: Workbench.Task<void>): void {
+    return this.#run(this.#readinessStage, task);
   }
 
   #run(stage: Order$Stage, task: Workbench.Task<void>): void {
