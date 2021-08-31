@@ -2,6 +2,7 @@ import { Supply, SupplyPeer } from '@proc7ts/supply';
 import Order from '@sqdn/order';
 import { Formation } from '../formation';
 import { Formation$Host, Order$Evaluator } from '../impl';
+import { DueSqdnLog, SqdnLoggable } from '../logging';
 import { OrderInstruction } from '../order';
 import { Unit$Backend, Unit$Backend__symbol } from './unit.backend.impl';
 import { Unit$Id, Unit$Id__symbol } from './unit.id.impl';
@@ -15,7 +16,7 @@ import { Unit$Id, Unit$Id__symbol } from './unit.id.impl';
  * order evaluation. It is also possible to specify a {@link Unit.Init.tag tag} to add to identifier to make a
  * distinction between units created at the same line of source code, e.g. within loops.
  */
-export class Unit implements SupplyPeer {
+export class Unit implements SqdnLoggable, SupplyPeer {
 
   /**
    * The name of the unit instance of this type.
@@ -141,6 +142,26 @@ export class Unit implements SupplyPeer {
   off(): this {
     this.supply.off();
     return this;
+  }
+
+  toLog(target: DueSqdnLog.Target): void | unknown {
+
+    const { on = 'out', zDetails } = target;
+
+    if (!zDetails) {
+      return this.toString();
+    }
+    if (on !== 'out') {
+      return;
+    }
+
+    zDetails.unit = {
+      name: this.constructor.unitName,
+      uid: this.uid,
+      src: this.sourceLink,
+    };
+
+    return [];
   }
 
   toString(): string {

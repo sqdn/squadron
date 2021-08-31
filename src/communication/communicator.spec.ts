@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { cxConstAsset } from '@proc7ts/context-builder';
 import { onEventBy, onPromise } from '@proc7ts/fun-events';
-import { Logger, logline, processingLogger } from '@proc7ts/logger';
+import { Logger, processingLogger } from '@proc7ts/logger';
 import { Formation } from '../formation';
 import { HubTest } from '../testing';
 import { Unit } from '../unit';
@@ -170,7 +170,12 @@ describe('Communicator', () => {
     channel.signal('test', {});
     channel.supply.off();
 
-    expect(logger.warn).toHaveBeenCalledWith(...logline`Signal "test" to ${unit} aborted`, undefined);
+    expect(logger.warn).toHaveBeenCalledWith(
+        'Signal "test" to',
+        String(unit),
+        'aborted',
+        undefined,
+    );
   });
 
   describe('toString', () => {

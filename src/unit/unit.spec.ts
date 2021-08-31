@@ -1,8 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { cxConstAsset } from '@proc7ts/context-builder';
-import { Logger } from '@proc7ts/logger';
+import { Logger, processingLogger } from '@proc7ts/logger';
 import { asis, newPromiseResolver } from '@proc7ts/primitives';
 import { Supply } from '@proc7ts/supply';
+import { zlogINFO } from '@run-z/log-z';
+import { dueLogZ, ZLogLevel } from '@run-z/log-z/src';
 import { fileURLToPath } from 'url';
 import { Formation } from '../formation';
 import { OrderInstruction } from '../order';
@@ -94,6 +96,50 @@ describe('Unit', () => {
 
       expect(unit.sourceLink).toContain(filePath);
       expect(unit.sourceLink).toMatch(/:\d+:\d+$/);
+    });
+  });
+
+  describe('toLog', () => {
+    it('logs unit string representation by default', () => {
+
+      const logger: Logger = {
+        info: jest.fn(),
+      } as Partial<Logger> as Logger;
+      const unit = new TestUnit({ tag: 'custom' });
+
+      processingLogger(logger).info(unit);
+
+      expect(logger.info).toHaveBeenCalledWith(String(unit));
+    });
+    it('expands to unit details', () => {
+
+      const unit = new TestUnit({ tag: 'custom' });
+
+      expect(dueLogZ({
+        line: [unit],
+        zLevel: ZLogLevel.Info,
+        zDetails: {},
+      }).zMessage).toEqual({
+        level: ZLogLevel.Info,
+        line: [],
+        details: {
+          unit: {
+            name: 'TestUnit',
+            uid: unit.uid,
+            src: unit.sourceLink,
+          },
+        },
+      });
+    });
+    it('does not expand to unit details on input', () => {
+
+      const unit = new TestUnit({ tag: 'custom' });
+
+      expect(zlogINFO(unit)).toEqual({
+        level: ZLogLevel.Info,
+        line: [unit],
+        details: {},
+      });
     });
   });
 
