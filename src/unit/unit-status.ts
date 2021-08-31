@@ -6,23 +6,23 @@
 export const enum UnitStatus {
 
   /**
-   * The unit is available in formation, but its {@link Unit.instruct instructions} are not applied yet.
+   * The unit is arrived to formation, but its {@link Unit.instruct instructions} are not applied yet.
    */
-  Available,
+  Arrived,
 
   /**
    * The unit is instructed when its {@link Unit instruct instructions} applied, but its tasks
-   * {@link OrderSubject.execute execution} is not completed yet.
+   * {@link OrderSubject.deploy deployment} is not completed yet.
    */
   Instructed,
 
   /**
-   * The unit is executed when its its tasks {@link OrderSubject.execute execution} completed.
+   * The unit considered deployed when its {@link OrderSubject.deploy deployment tasks} execution completed.
    */
-  Executed,
+  Deployed,
 
   /**
-   * The unit is ready for use when its startup sequence completed.
+   * The unit is ready for use after its deployment sequence completed.
    */
   Ready
 

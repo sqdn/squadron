@@ -85,6 +85,13 @@ export interface OrderSubject<TUnit extends Unit = Unit>
    */
   perUnit<TValue, TAsset = TValue>(asset: CxAsset<TValue, TAsset, UnitContext>): Supply;
 
-  execute(task: OrderTask<TUnit>): void;
+  /**
+   * Adds a unit deployment task.
+   *
+   * Unit deployment starts when all tasks arrived to the formation {@link Unit.instruct instructed}.
+   *
+   * @param task - Unit deployment task.
+   */
+  deploy(task: OrderTask<TUnit>): void;
 
 }

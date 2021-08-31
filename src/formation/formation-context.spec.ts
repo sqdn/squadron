@@ -22,13 +22,13 @@ describe('FormationContext', () => {
     expect(context.unit).toBe(OrderTest.formation);
     expect(Object.is(context.unit.order, OrderTest.order)).toBe(true);
   });
-  it('is available during formation execution', async () => {
+  it('is available during formation deployment', async () => {
 
     const formation = OrderTest.formation;
     const orderFormation = OrderTest.order.get(Formation);
     let context!: FormationContext;
 
-    formation.instruct(subject => subject.execute(ctx => {
+    formation.instruct(subject => subject.deploy(ctx => {
       context = ctx as any;
     }));
 

@@ -52,7 +52,7 @@ export class Unit$Evaluator<TUnit extends Unit> extends Unit$Backend<TUnit, Orde
       }
       this.#instructions.length = 0;
       this.instruct = instruct;
-      this.host.workbench.deliver(() => this.#deliver());
+      this.host.workbench.ready(() => this.#deliver());
     }
 
     this.supply.whenOff(() => {

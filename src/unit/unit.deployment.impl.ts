@@ -17,7 +17,7 @@ export class Unit$Deployment<TUnit extends Unit = Unit> extends Unit$Backend<TUn
 
   constructor(host: Formation$Host, unit: TUnit) {
     super(host, unit);
-    this.#status = trackValue(UnitStatus.Available);
+    this.#status = trackValue(UnitStatus.Arrived);
     this.builder = UnitContext$createBuilder(this);
   }
 

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { cxConstAsset } from '@proc7ts/context-builder';
 import { CxEntry, cxRecent } from '@proc7ts/context-values';
-import { Logger } from '@proc7ts/logger';
+import { Logger, processingLogger } from '@proc7ts/logger';
 import { asis } from '@proc7ts/primitives';
 import { Supply } from '@proc7ts/supply';
 import { Mock } from 'jest-mock';
@@ -90,14 +90,14 @@ describe('OrderSubject', () => {
         subject.context.readStatus(status => statuses.push(status));
         instructionStatus1 = await subject.context.readStatus;
 
-        subject.execute(async context => {
+        subject.deploy(async context => {
           taskStatus1 = await context.readStatus;
         });
       });
       unit.instruct(async subject => {
         instructionStatus2 = await subject.context.readStatus;
 
-        subject.execute(async context => {
+        subject.deploy(async context => {
           taskStatus2 = await context.readStatus;
         });
       });
@@ -106,14 +106,14 @@ describe('OrderSubject', () => {
 
       await OrderTest.evaluate();
 
-      expect(instructionStatus1).toBe(UnitStatus.Available);
-      expect(instructionStatus2).toBe(UnitStatus.Available);
+      expect(instructionStatus1).toBe(UnitStatus.Arrived);
+      expect(instructionStatus2).toBe(UnitStatus.Arrived);
       expect(taskStatus1).toBe(UnitStatus.Instructed);
       expect(taskStatus2).toBe(UnitStatus.Instructed);
       expect(statuses).toEqual([
-        UnitStatus.Available,
+        UnitStatus.Arrived,
         UnitStatus.Instructed,
-        UnitStatus.Executed,
+        UnitStatus.Deployed,
         UnitStatus.Ready,
       ]);
     });
@@ -132,14 +132,14 @@ describe('OrderSubject', () => {
       unit.instruct(async subject => {
         instructionStatus1 = await fmnContext.readStatus;
 
-        subject.execute(async () => {
+        subject.deploy(async () => {
           taskStatus1 = await fmnContext.readStatus;
         });
       });
       unit.instruct(async subject => {
         instructionStatus2 = await fmnContext.readStatus;
 
-        subject.execute(async () => {
+        subject.deploy(async () => {
           taskStatus2 = await fmnContext.readStatus;
         });
       });
@@ -148,14 +148,14 @@ describe('OrderSubject', () => {
 
       await OrderTest.evaluate();
 
-      expect(instructionStatus1).toBe(UnitStatus.Available);
-      expect(instructionStatus2).toBe(UnitStatus.Available);
+      expect(instructionStatus1).toBe(UnitStatus.Arrived);
+      expect(instructionStatus2).toBe(UnitStatus.Arrived);
       expect(taskStatus1).toBe(UnitStatus.Instructed);
       expect(taskStatus2).toBe(UnitStatus.Instructed);
       expect(statuses).toEqual([
-        UnitStatus.Available,
+        UnitStatus.Arrived,
         UnitStatus.Instructed,
-        UnitStatus.Executed,
+        UnitStatus.Deployed,
         UnitStatus.Ready,
       ]);
     });
@@ -307,14 +307,14 @@ describe('OrderSubject', () => {
     });
   });
 
-  describe('execute', () => {
-    it('executes the task', async () => {
+  describe('deploy', () => {
+    it('executes deployment task', async () => {
 
       const task: OrderTask<Unit> = jest.fn();
       const unit = new Unit();
 
       unit.instruct(subject => {
-        subject.execute(task);
+        subject.deploy(task);
       });
       OrderTest.formation.deploy(unit);
 
@@ -323,7 +323,7 @@ describe('OrderSubject', () => {
       expect(task).toHaveBeenCalledTimes(1);
       expect(unit.supply.isOff).toBe(false);
     });
-    it('executes the task added after order evaluation', async () => {
+    it('executes deployment task added after order evaluation', async () => {
 
       const unit = new Unit();
 
@@ -334,7 +334,7 @@ describe('OrderSubject', () => {
       const task: Mock<void, [UnitContext<Unit>]> = jest.fn();
 
       unit.instruct(subject => {
-        subject.execute(task);
+        subject.deploy(task);
       });
 
       await test.evaluate();
@@ -342,13 +342,13 @@ describe('OrderSubject', () => {
       expect(task).toHaveBeenCalledTimes(1);
       expect(unit.supply.isOff).toBe(false);
     });
-    it('withdraws the subject if task execution fails', async () => {
+    it('withdraws the subject if deployment fails', async () => {
 
       const logger = {
         error: jest.fn<void, any[]>(),
       } as Partial<Logger> as Logger;
 
-      test.formationBuilder.provide(cxConstAsset(Logger, logger));
+      test.formationBuilder.provide(cxConstAsset(Logger, processingLogger(logger)));
 
       const error = new Error('test');
       const task: OrderTask<Unit> = jest.fn(() => {
@@ -359,7 +359,7 @@ describe('OrderSubject', () => {
 
       unit.instruct(subject => {
         unitSubject = subject;
-        subject.execute(task);
+        subject.deploy(task);
       });
       test.formation.deploy(unit);
 
@@ -369,15 +369,15 @@ describe('OrderSubject', () => {
       expect(unitSubject.supply.isOff).toBe(true);
       expect(unit.supply.isOff).toBe(false);
       expect(await unitSubject.supply.whenDone().catch(asis)).toBe(error);
-      expect(logger.error).toHaveBeenCalledWith(`Failed to execute ${unit} task`, error);
+      expect(logger.error).toHaveBeenCalledWith('Failed to deploy', String(unit), error);
     });
-    it('rejects the task for revoked subject', async () => {
+    it('rejects deployment task for revoked subject', async () => {
 
       const logger = {
         warn: jest.fn<void, any[]>(),
       } as Partial<Logger> as Logger;
 
-      test.formationBuilder.provide(cxConstAsset(Logger, logger));
+      test.formationBuilder.provide(cxConstAsset(Logger, processingLogger(logger)));
 
       const error = new Error('test');
       const task: OrderTask<Unit> = jest.fn();
@@ -385,24 +385,24 @@ describe('OrderSubject', () => {
 
       unit.instruct(subject => {
         subject.supply.off(error);
-        subject.execute(task);
+        subject.deploy(task);
       });
       test.formation.deploy(unit);
 
       await test.evaluate();
 
       expect(task).not.toHaveBeenCalled();
-      expect(logger.warn).toHaveBeenCalledWith(`Task for ${unit} rejected`, error);
+      expect(logger.warn).toHaveBeenCalledWith('Deployment of', String(unit), 'rejected', error);
     });
 
     describe('after order evaluation', () => {
-      it('executes the task after order evaluation', async () => {
+      it('executes deployment task after order evaluation', async () => {
 
         const unit = new Unit();
-        let exec!: OrderSubject['execute'];
+        let deploy!: OrderSubject['deploy'];
 
         unit.instruct(subject => {
-          exec = subject.execute.bind(subject);
+          deploy = subject.deploy.bind(subject);
         });
         test.formation.deploy(unit);
         await test.evaluate();
@@ -410,26 +410,26 @@ describe('OrderSubject', () => {
         const task: Mock<void, [UnitContext<Unit>]> = jest.fn();
 
         await new Promise<void>(resolve => {
-          exec(task.mockImplementation(() => resolve()));
+          deploy(task.mockImplementation(() => resolve()));
         });
 
         expect(task).toHaveBeenCalledTimes(1);
         expect(unit.supply.isOff).toBe(false);
       });
-      it('does not withdraw the unit if task execution fails', async () => {
+      it('does not withdraw the unit if deployment fails', async () => {
 
         const logger = {
           error: jest.fn<void, any[]>(),
         } as Partial<Logger> as Logger;
 
-        test.formationBuilder.provide(cxConstAsset(Logger, logger));
+        test.formationBuilder.provide(cxConstAsset(Logger, processingLogger(logger)));
 
         const unit = new Unit();
-        let exec!: OrderSubject['execute'];
+        let deploy!: OrderSubject['deploy'];
         let subjectSupply!: Supply;
 
         unit.instruct(subject => {
-          exec = subject.execute.bind(subject);
+          deploy = subject.deploy.bind(subject);
           subjectSupply = subject.supply;
         });
         test.formation.deploy(unit);
@@ -440,13 +440,13 @@ describe('OrderSubject', () => {
           throw error;
         });
 
-        exec(task);
+        deploy(task);
         await test.evaluate();
 
         expect(task).toHaveBeenCalledTimes(1);
         expect(unit.supply.isOff).toBe(false);
 
-        expect(logger.error).toHaveBeenCalledWith(`Failed to execute ${unit} task`, error);
+        expect(logger.error).toHaveBeenCalledWith('Failed to deploy', String(unit), error);
         expect(subjectSupply.isOff).toBe(true);
         expect(await subjectSupply.whenDone().catch(asis)).toBe(error);
       });
@@ -454,7 +454,7 @@ describe('OrderSubject', () => {
   });
 
   describe('for the task created after order evaluation', () => {
-    it('executes the task', async () => {
+    it('executes deployment task', async () => {
 
       const unit = new Unit();
 
@@ -465,7 +465,7 @@ describe('OrderSubject', () => {
       const task: Mock<void, [UnitContext<Unit>]> = jest.fn();
 
       unit.instruct(subject => {
-        subject.execute(task);
+        subject.deploy(task);
       });
 
       await test.evaluate();
@@ -473,13 +473,13 @@ describe('OrderSubject', () => {
       expect(task).toHaveBeenCalledTimes(1);
       expect(unit.supply.isOff).toBe(false);
     });
-    it('does not withdraw the unit if task execution fails', async () => {
+    it('does not withdraw the unit if deployment fails', async () => {
 
       const logger = {
         error: jest.fn<void, any[]>(),
       } as Partial<Logger> as Logger;
 
-      test.formationBuilder.provide(cxConstAsset(Logger, logger));
+      test.formationBuilder.provide(cxConstAsset(Logger, processingLogger(logger)));
 
       const unit = new Unit();
 
@@ -495,7 +495,7 @@ describe('OrderSubject', () => {
 
       unit.instruct(subject => {
         subjectSupply = subject.supply;
-        subject.execute(task);
+        subject.deploy(task);
       });
 
       await test.evaluate();
@@ -503,7 +503,7 @@ describe('OrderSubject', () => {
       expect(task).toHaveBeenCalledTimes(1);
       expect(unit.supply.isOff).toBe(false);
 
-      expect(logger.error).toHaveBeenCalledWith(`Failed to execute ${unit} task`, error);
+      expect(logger.error).toHaveBeenCalledWith('Failed to deploy', String(unit), error);
       expect(subjectSupply.isOff).toBe(true);
       expect(await subjectSupply.whenDone().catch(asis)).toBe(error);
     });

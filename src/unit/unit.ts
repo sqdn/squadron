@@ -122,10 +122,9 @@ export class Unit implements SqdnLoggable, SupplyPeer {
   }
 
   /**
-   * Records an instruction for this unit to execute later.
+   * Records an instruction for this unit to apply later.
    *
-   * The recorded instruction will be first accepted and then executed within the formation(s) this unit
-   * {@link Formation.deploy deployed} to.
+   * Once the unit arrives to deployment formation, the recorded instruction will be applied.
    *
    * @param instruction - An instruction to record.
    *
