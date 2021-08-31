@@ -173,7 +173,7 @@ describe('ProxyCommChannel', () => {
         targets.send(target);
         expect(errorSpy).toHaveBeenCalledWith(
             'Failed to send signal "test" to',
-            unit,
+            String(unit),
             new TypeError(`Unknown signal received: "test"`),
         );
       });
@@ -184,7 +184,12 @@ describe('ProxyCommChannel', () => {
 
         channel.supply.off(reason);
 
-        expect(warnSpy).toHaveBeenCalledWith('Signal "test" to', unit, 'aborted', reason);
+        expect(warnSpy).toHaveBeenCalledWith(
+            'Signal "test" to',
+            String(unit),
+            'aborted',
+            reason,
+        );
       });
       it('warns on eviction', () => {
 
@@ -198,7 +203,12 @@ describe('ProxyCommChannel', () => {
         channel.signal('test', signal1);
         channel.signal('test', signal2);
 
-        expect(warnSpy).toHaveBeenLastCalledWith('Signal "test" to', unit, 'aborted', 'Command buffer overflow');
+        expect(warnSpy).toHaveBeenLastCalledWith(
+            'Signal "test" to',
+            String(unit),
+            'aborted',
+            'Command buffer overflow',
+        );
       });
     });
 
