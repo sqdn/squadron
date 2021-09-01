@@ -19,7 +19,7 @@ export class Order$Workbench {
   readonly #deploymentStage: Order$Stage;
   readonly #readinessStage: Order$Stage;
   readonly #stages: Order$Stage[] = [];
-  readonly #status = trackValue<UnitStatus>(UnitStatus.Arrived);
+  readonly #status = trackValue<UnitStatus>(UnitStatus.Idle);
 
   #runningStageId: Order$StageId = Order$StageId.None;
   readonly #stageStarters = new Array<PromiseResolver | undefined>(Order$StageId.Last);

@@ -106,12 +106,12 @@ describe('OrderSubject', () => {
 
       await OrderTest.evaluate();
 
-      expect(instructionStatus1).toBe(UnitStatus.Arrived);
-      expect(instructionStatus2).toBe(UnitStatus.Arrived);
+      expect(instructionStatus1).toBe(UnitStatus.Idle);
+      expect(instructionStatus2).toBe(UnitStatus.Idle);
       expect(taskStatus1).toBe(UnitStatus.Instructed);
       expect(taskStatus2).toBe(UnitStatus.Instructed);
       expect(statuses).toEqual([
-        UnitStatus.Arrived,
+        UnitStatus.Idle,
         UnitStatus.Instructed,
         UnitStatus.Deployed,
         UnitStatus.Ready,
@@ -148,12 +148,12 @@ describe('OrderSubject', () => {
 
       await OrderTest.evaluate();
 
-      expect(instructionStatus1).toBe(UnitStatus.Arrived);
-      expect(instructionStatus2).toBe(UnitStatus.Arrived);
+      expect(instructionStatus1).toBe(UnitStatus.Idle);
+      expect(instructionStatus2).toBe(UnitStatus.Idle);
       expect(taskStatus1).toBe(UnitStatus.Instructed);
       expect(taskStatus2).toBe(UnitStatus.Instructed);
       expect(statuses).toEqual([
-        UnitStatus.Arrived,
+        UnitStatus.Idle,
         UnitStatus.Instructed,
         UnitStatus.Deployed,
         UnitStatus.Ready,

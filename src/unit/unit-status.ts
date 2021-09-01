@@ -6,9 +6,9 @@
 export const enum UnitStatus {
 
   /**
-   * The unit is arrived to formation, but its {@link Unit.instruct instructions} are not applied yet.
+   * The unit becomes idle when it arrives to formation, but its {@link Unit.instruct instructions} are not applied yet.
    */
-  Arrived,
+  Idle,
 
   /**
    * The unit is instructed when its {@link Unit instruct instructions} applied, but its tasks
