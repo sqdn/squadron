@@ -57,7 +57,7 @@
     "@run-z/log-z": "^2.1.0",
     "@run-z/rollup-helpers": "^1.1.1",
     "@sqdn/order": "^0.2.1",
-    "@types/node": "^16.7.8",
+    "@types/node": "^16.7.10",
     "@types/uuid": "^8.3.1",
     "@typescript-eslint/eslint-plugin": "^4.30.0",
     "@typescript-eslint/parser": "^4.30.0",
