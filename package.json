@@ -57,7 +57,7 @@
     "@run-z/log-z": "^2.1.0",
     "@run-z/rollup-helpers": "^1.1.1",
     "@sqdn/order": "^0.2.1",
-    "@types/node": "^16.9.0",
+    "@types/node": "^16.9.1",
     "@types/uuid": "^8.3.1",
     "@typescript-eslint/eslint-plugin": "^4.31.0",
     "@typescript-eslint/parser": "^4.31.0",
@@ -79,8 +79,8 @@
     "shx": "^0.3.3",
     "ts-jest": "^27.0.5",
     "tslib": "^2.3.1",
-    "typedoc": "^0.21.9",
-    "typescript": "^4.4.2"
+    "typedoc": "^0.22.2",
+    "typescript": "^4.4.3"
   },
   "scripts": {
     "all": "run-z build,lint,test",
