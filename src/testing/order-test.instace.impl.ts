@@ -33,6 +33,7 @@ export class OrderTest$Instance implements OrderTest {
       createOrigin,
       createContext(host, get, builder) {
         builder.provide(cxConstAsset(Logger, logger));
+
         return new Formation$Context(host, get, builder);
       },
       createOrder: (_get, orderBuilder) => this.#order = MockOrder.mock({
@@ -44,6 +45,7 @@ export class OrderTest$Instance implements OrderTest {
 
   initOrder(): this {
     void this.#host.order; // Ensure order is mocked
+
     return this;
   }
 

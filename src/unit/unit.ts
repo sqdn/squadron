@@ -132,6 +132,7 @@ export class Unit implements SqdnLoggable, SupplyPeer {
    */
   instruct(instruction: OrderInstruction<this>): this {
     this[Unit$Backend__symbol].instruct(instruction);
+
     return this;
   }
 
@@ -140,6 +141,7 @@ export class Unit implements SqdnLoggable, SupplyPeer {
    */
   off(): this {
     this.supply.off();
+
     return this;
   }
 

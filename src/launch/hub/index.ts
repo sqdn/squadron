@@ -27,6 +27,7 @@ export default function launchHub(launcher: SqdnLauncher): void {
         createContext(host, get, cxBuilder) {
           cxBuilder.provide(Hub$createAssets());
           cxBuilder.provide(cxBuildAsset(FormationStarter, target => new Hub$FormationStarter(host, target)));
+
           return new Formation$Context(host, get, cxBuilder);
         },
       },

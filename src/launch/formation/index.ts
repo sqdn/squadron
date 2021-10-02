@@ -20,6 +20,7 @@ export default function launchFormation(launcher: SqdnLauncher): void {
         }),
         createContext(host, get, cxBuilder) {
           cxBuilder.provide(Formation$createAssets(launcher.launchData!));
+
           return new Formation$Context(host, get, cxBuilder);
         },
       },

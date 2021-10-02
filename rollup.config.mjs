@@ -38,6 +38,7 @@ export default defineConfig({
     if (id.startsWith(path.resolve('src', 'launch') + path.sep)) {
       return 'squadron.launch';
     }
+
     return 'squadron';
   },
   output: {

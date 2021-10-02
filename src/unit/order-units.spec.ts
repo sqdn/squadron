@@ -31,6 +31,7 @@ describe('OrderUnits', () => {
     it('fails if existing unit is not compatible', () => {
 
       class TestUnit1 extends Unit {}
+
       class TestUnit2 extends Unit {}
 
       const unit = new TestUnit1();
@@ -40,6 +41,7 @@ describe('OrderUnits', () => {
     it('upgrades compatible reference-only unit', () => {
 
       class TestUnit1 extends Unit {}
+
       class TestUnit2 extends TestUnit1 {}
 
       const unit = new TestUnit1();
@@ -49,6 +51,7 @@ describe('OrderUnits', () => {
     it('does not upgrade compatible unit with instructions', () => {
 
       class TestUnit1 extends Unit {}
+
       class TestUnit2 extends TestUnit1 {}
 
       const unit = new TestUnit1();
@@ -60,6 +63,7 @@ describe('OrderUnits', () => {
     it('does not upgrade compatible deployed unit', () => {
 
       class TestUnit1 extends Unit {}
+
       class TestUnit2 extends TestUnit1 {}
 
       const unit = new TestUnit1();

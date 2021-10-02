@@ -48,6 +48,7 @@ export class Formation extends Unit {
    */
   deploy(unit: Unit): this {
     this[Unit$Backend__symbol].host.deploy(this, unit);
+
     return this;
   }
 

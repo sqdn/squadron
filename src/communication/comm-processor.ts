@@ -53,5 +53,6 @@ export function commProcessorBy(handler?: CommReceiver | CommResponder | CommPro
   if (isCommProcessor(handler)) {
     return handler;
   }
+
   return new HandlerCommProcessor(handler);
 }

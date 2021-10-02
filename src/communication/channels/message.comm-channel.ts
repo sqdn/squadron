@@ -184,6 +184,7 @@ export class MessageCommChannel implements CommChannel {
 
     if (!streamId) {
       this.#logger.error('Unrecognized request received', request);
+
       return;
     }
 

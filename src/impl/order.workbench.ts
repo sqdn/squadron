@@ -60,6 +60,7 @@ export class Order$Workbench {
 
   #startExecution(): PromiseResolver {
     this.#startStage(Order$StageId.First);
+
     return this.#whenExecuted = newPromiseResolver();
   }
 
@@ -99,6 +100,7 @@ export class Order$Workbench {
 
     if (stageId < this.#runningStageId) {
       this.#pendingTasks.push(() => this.#run(stage, task));
+
       return;
     }
 

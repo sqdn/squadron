@@ -386,6 +386,7 @@ describe('ProxyCommChannel', () => {
           name: 'test',
           receive() {
             supply1.off();
+
             return true;
           },
         };

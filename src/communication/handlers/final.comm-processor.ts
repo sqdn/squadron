@@ -35,6 +35,7 @@ export class FinalCommProcessor implements CommProcessor {
     if (!this.#processor.receive(name, signal)) {
       throw new TypeError(`Unknown signal received: "${name}"`);
     }
+
     return true;
   }
 

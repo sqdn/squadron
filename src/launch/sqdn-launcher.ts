@@ -77,6 +77,7 @@ export class SqdnLauncher {
     if (specifier === '@sqdn/order') {
       return this.orderModule;
     }
+
     return await (this.#moduleByURL(this.#moduleURL(specifier, referencingModule))).module;
   }
 
