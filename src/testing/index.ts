@@ -1,6 +1,6 @@
 /**
  * @packageDocumentation
- * @module Module @sqdn/squadron/testing
+ * @module @sqdn/squadron/testing
  */
 export * from './formation-test';
 export * from './hub-test';

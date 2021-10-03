@@ -1,6 +1,6 @@
 /**
  * @packageDocumentation
- * @module Module @sqdn/squadron/launch/hub
+ * @module @sqdn/squadron/launch/hub
  */
 import { cxBuildAsset } from '@proc7ts/context-builder';
 import { Formation$Context } from '../../formation/formation.context.impl';

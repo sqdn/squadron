@@ -1,6 +1,6 @@
 /**
  * @packageDocumentation
- * @module Module @sqdn/squadron
+ * @module @sqdn/squadron
  */
 export * from './communication';
 export * from './formation';

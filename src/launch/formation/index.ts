@@ -1,6 +1,6 @@
 /**
  * @packageDocumentation
- * @module Module @sqdn/squadron/launch/formation
+ * @module @sqdn/squadron/launch/formation
  */
 import { Formation } from '../../formation';
 import { Formation$Context } from '../../formation/formation.context.impl';

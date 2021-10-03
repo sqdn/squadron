@@ -1,6 +1,6 @@
 /**
  * @packageDocumentation
- * @module Module @sqdn/squadron/launch
+ * @module @sqdn/squadron/launch
  */
 export * from './sqdn-launcher';
 
