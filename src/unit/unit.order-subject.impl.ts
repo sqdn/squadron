@@ -15,12 +15,12 @@ export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit
 
   readonly #deployment: Unit$Deployment<TUnit>;
   readonly #supply: Supply;
-  #run = this.#actuallyRun;
-  #deploymentsCount = 0;
+  #execute = this.#doExecute;
+  #executionCount = 0;
 
   constructor(backend: Unit$Deployment<TUnit>, supply: Supply) {
     this.#deployment = backend;
-    this.#supply = supply.whenOff(reason => this.#run = this.#rejectDeployment(reason));
+    this.#supply = supply.whenOff(reason => this.#execute = this.#rejectDeployment(reason));
   }
 
   get hub(): Hub {
@@ -71,19 +71,19 @@ export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit
     return this.#host.perUnitCxPeer.provide(asset).needs(this);
   }
 
-  run(task: OrderTask<TUnit>): void {
-    this.#run(task);
+  execute(task: OrderTask<TUnit>): void {
+    this.#execute(task);
   }
 
-  #actuallyRun(task: OrderTask<TUnit>): void {
-    ++this.#deploymentsCount;
+  #doExecute(task: OrderTask<TUnit>): void {
+    ++this.#executionCount;
 
     const host = this.#host;
 
     host.workbench.deploy(async () => {
       try {
         await task(host.unitDeployment(this.unit).context);
-        if (!--this.#deploymentsCount) {
+        if (!--this.#executionCount) {
           this.#deployment.setStatus(UnitStatus.Executed);
         }
       } catch (error) {

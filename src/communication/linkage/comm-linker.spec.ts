@@ -41,7 +41,7 @@ describe('CommLinker', () => {
     const fmnTest2 = HubTest.testFormation(formation2);
 
     fmnTest2.deploy(unit2).instruct(subject => {
-      subject.run(context => {
+      subject.execute(context => {
         linker = context.get(CommLinker);
       });
     });

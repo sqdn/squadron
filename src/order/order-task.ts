@@ -1,10 +1,10 @@
 import { Unit, UnitContext } from '../unit';
 
 /**
- * A task {@link OrderSubject.run executed} by unit.
+ * A task {@link OrderSubject.execute executed} by unit.
  *
- * The first task executed for the unit with {@link UnitStatus.Instructed} status. When all pending tasks executed,
- * the unit status becomes {@link UnitStatus.Executed}.
+ * At first, the tasks executed while the unit is in the {@link UnitStatus.Instructed} status. When all pending tasks
+ * executed, the unit status becomes {@link UnitStatus.Executed}.
  *
  * @typeParam TUnit - A type of unit to execute the task for.
  * @param context - Target unit's operations context.

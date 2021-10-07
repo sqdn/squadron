@@ -28,7 +28,7 @@ describe('UnitContext', () => {
     const unit = new Unit({ tag: 'test' });
     let context!: UnitContext;
 
-    unit.instruct(subject => subject.run(ctx => {
+    unit.instruct(subject => subject.execute(ctx => {
       context = ctx;
     }));
 

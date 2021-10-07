@@ -90,14 +90,14 @@ describe('OrderSubject', () => {
         subject.context.readStatus(status => statuses.push(status));
         instructionStatus1 = await subject.context.readStatus;
 
-        subject.run(async context => {
+        subject.execute(async context => {
           taskStatus1 = await context.readStatus;
         });
       });
       unit.instruct(async subject => {
         instructionStatus2 = await subject.context.readStatus;
 
-        subject.run(async context => {
+        subject.execute(async context => {
           taskStatus2 = await context.readStatus;
         });
       });
@@ -132,14 +132,14 @@ describe('OrderSubject', () => {
       unit.instruct(async subject => {
         instructionStatus1 = await fmnContext.readStatus;
 
-        subject.run(async () => {
+        subject.execute(async () => {
           taskStatus1 = await fmnContext.readStatus;
         });
       });
       unit.instruct(async subject => {
         instructionStatus2 = await fmnContext.readStatus;
 
-        subject.run(async () => {
+        subject.execute(async () => {
           taskStatus2 = await fmnContext.readStatus;
         });
       });
@@ -314,7 +314,7 @@ describe('OrderSubject', () => {
       const unit = new Unit();
 
       unit.instruct(subject => {
-        subject.run(task);
+        subject.execute(task);
       });
       OrderTest.formation.deploy(unit);
 
@@ -334,7 +334,7 @@ describe('OrderSubject', () => {
       const task: Mock<void, [UnitContext<Unit>]> = jest.fn();
 
       unit.instruct(subject => {
-        subject.run(task);
+        subject.execute(task);
       });
 
       await test.evaluate();
@@ -359,7 +359,7 @@ describe('OrderSubject', () => {
 
       unit.instruct(subject => {
         unitSubject = subject;
-        subject.run(task);
+        subject.execute(task);
       });
       test.formation.deploy(unit);
 
@@ -385,7 +385,7 @@ describe('OrderSubject', () => {
 
       unit.instruct(subject => {
         subject.supply.off(error);
-        subject.run(task);
+        subject.execute(task);
       });
       test.formation.deploy(unit);
 
@@ -399,10 +399,10 @@ describe('OrderSubject', () => {
       it('executes deployment task after order evaluation', async () => {
 
         const unit = new Unit();
-        let deploy!: OrderSubject['run'];
+        let deploy!: OrderSubject['execute'];
 
         unit.instruct(subject => {
-          deploy = subject.run.bind(subject);
+          deploy = subject.execute.bind(subject);
         });
         test.formation.deploy(unit);
         await test.evaluate();
@@ -425,11 +425,11 @@ describe('OrderSubject', () => {
         test.formationBuilder.provide(cxConstAsset(Logger, processingLogger(logger)));
 
         const unit = new Unit();
-        let deploy!: OrderSubject['run'];
+        let deploy!: OrderSubject['execute'];
         let subjectSupply!: Supply;
 
         unit.instruct(subject => {
-          deploy = subject.run.bind(subject);
+          deploy = subject.execute.bind(subject);
           subjectSupply = subject.supply;
         });
         test.formation.deploy(unit);
@@ -465,7 +465,7 @@ describe('OrderSubject', () => {
       const task: Mock<void, [UnitContext<Unit>]> = jest.fn();
 
       unit.instruct(subject => {
-        subject.run(task);
+        subject.execute(task);
       });
 
       await test.evaluate();
@@ -495,7 +495,7 @@ describe('OrderSubject', () => {
 
       unit.instruct(subject => {
         subjectSupply = subject.supply;
-        subject.run(task);
+        subject.execute(task);
       });
 
       await test.evaluate();

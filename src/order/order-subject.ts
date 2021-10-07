@@ -85,12 +85,12 @@ export interface OrderSubject<TUnit extends Unit = Unit> extends CxValues, CxMod
   perUnit<TValue, TAsset = TValue>(asset: CxAsset<TValue, TAsset, UnitContext>): Supply;
 
   /**
-   * Instructs the order to run the given task.
+   * Instructs the order to execute the given task.
    *
-   * The task will be started when all units arrived to the formation {@link Unit.instruct instructed}.
+   * The task will start execution when all units arrived to the formation {@link Unit.instruct instructed}.
    *
-   * @param task - Unit task to run.
+   * @param task - Unit task to execute.
    */
-  run(task: OrderTask<TUnit>): void;
+  execute(task: OrderTask<TUnit>): void;
 
 }
