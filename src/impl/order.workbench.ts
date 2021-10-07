@@ -4,8 +4,9 @@ import { Workbench, WorkStage } from '@proc7ts/workbench';
 import { UnitStatus } from '../unit';
 
 const enum Order$StageId {
-  None,
+  None = 0,
   Instruction,
+  Withdrawal,
   Execution,
   Readiness,
   First = Instruction,
@@ -16,16 +17,17 @@ export class Order$Workbench {
 
   readonly #workbench = new Workbench();
   readonly #instructionStage: Order$Stage;
-  readonly #deploymentStage: Order$Stage;
+  readonly #withdrawalStage: Order$Stage;
+  readonly #executionStage: Order$Stage;
   readonly #readinessStage: Order$Stage;
   readonly #stages: Order$Stage[] = [];
   readonly #status = trackValue<UnitStatus>(UnitStatus.Idle);
 
   #runningStageId: Order$StageId = Order$StageId.None;
   readonly #stageStarters = new Array<PromiseResolver | undefined>(Order$StageId.Last);
+  readonly #stageTaskCounts: number[] = new Array<number>(Order$StageId.Last + 1);
   #whenExecuted!: PromiseResolver;
   #pendingTasks: (() => void)[] = [];
-  readonly #lastTasks = new Array<Workbench.Task<unknown> | undefined>(Order$StageId.Last + 1);
 
   constructor() {
     this.#instructionStage = new Order$Stage(
@@ -34,7 +36,13 @@ export class Order$Workbench {
         UnitStatus.Instructed,
         'instruction',
     );
-    this.#deploymentStage = new Order$Stage(
+    this.#withdrawalStage = new Order$Stage(
+        this,
+        Order$StageId.Withdrawal,
+        UnitStatus.Instructed,
+        'withdrawal',
+    );
+    this.#executionStage = new Order$Stage(
         this,
         Order$StageId.Execution,
         UnitStatus.Executed,
@@ -86,8 +94,12 @@ export class Order$Workbench {
     this.#run(this.#instructionStage, task);
   }
 
-  deploy(task: Workbench.Task<void>): void {
-    return this.#run(this.#deploymentStage, task);
+  withdraw(task: Workbench.Task<void>): void {
+    return this.#run(this.#withdrawalStage, task);
+  }
+
+  execute(task: Workbench.Task<void>): void {
+    return this.#run(this.#executionStage, task);
   }
 
   ready(task: Workbench.Task<void>): void {
@@ -108,18 +120,17 @@ export class Order$Workbench {
       try {
         await task();
       } finally {
-        if (this.#lastTasks[stageId] === orderTask) {
+        if (!--this.#stageTaskCounts[stageId]) {
           this.#endStage(stage);
         }
       }
     };
 
-    this.#lastTasks[stageId] = orderTask;
+    this.#stageTaskCounts[stageId] = (this.#stageTaskCounts[stageId] ?? 0) + 1;
     this.#workbench.work(stage).run(orderTask).catch(noop);
   }
 
   #endStage({ stageId, endStatus }: Order$Stage): void {
-    this.#lastTasks[stageId] = undefined;
     this.#stageStarters[stageId] = undefined;
     if (this.#status.it < endStatus) {
       this.#status.it = endStatus;

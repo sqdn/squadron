@@ -1,11 +1,12 @@
 import { CxAsset, CxEntry, CxRequest } from '@proc7ts/context-values';
 import { logline } from '@proc7ts/logger';
+import { noop } from '@proc7ts/primitives';
 import { Supply } from '@proc7ts/supply';
 import Order from '@sqdn/order';
 import { Formation, FormationContext } from '../formation';
 import { Hub } from '../hub';
 import { Formation$Host } from '../impl';
-import { OrderSubject, OrderTask } from '../order';
+import { OrderSubject, OrderTask, OrderWithdrawalTask } from '../order';
 import { Unit } from './unit';
 import { UnitContext } from './unit-context';
 import { UnitStatus } from './unit-status';
@@ -15,12 +16,20 @@ export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit
 
   readonly #deployment: Unit$Deployment<TUnit>;
   readonly #supply: Supply;
+
   #execute = this.#doExecute;
   #executionCount = 0;
 
+  readonly #withdrawals: OrderWithdrawalTask[] = [];
+  #addWithdrawal = this.#doAddWithdrawal;
+  #withdraw = this.#doWithdraw;
+
   constructor(backend: Unit$Deployment<TUnit>, supply: Supply) {
     this.#deployment = backend;
-    this.#supply = supply.whenOff(reason => this.#execute = this.#rejectExecution(reason));
+    this.#supply = supply.whenOff(reason => {
+      this.#execute = this.#rejectExecution(reason);
+      this.withdraw(reason).catch(noop);
+    });
   }
 
   get hub(): Hub {
@@ -80,21 +89,82 @@ export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit
 
     const host = this.#host;
 
-    host.workbench.deploy(async () => {
+    host.workbench.execute(async () => {
       try {
         await task(host.unitDeployment(this.unit).context);
-        if (!--this.#executionCount) {
-          this.#deployment.setStatus(UnitStatus.Executed);
-        }
       } catch (error) {
         host.log.error(logline`Failed to deploy ${this.unit}`, error);
         this.supply.off(error);
+      } finally {
+        if (!--this.#executionCount) {
+          this.#deployment.setStatus(UnitStatus.Executed);
+        }
       }
     });
   }
 
   #rejectExecution(error: unknown): () => void {
     return () => this.#host.log.warn(logline`Deployment of ${this.unit} rejected`, error);
+  }
+
+  executeUponWithdrawal(task: OrderWithdrawalTask): void {
+    this.#addWithdrawal(task);
+  }
+
+  #doAddWithdrawal(task: OrderWithdrawalTask): void {
+    this.#withdrawals.push(task);
+  }
+
+  #rejectWithdrawal(reason: unknown): () => void {
+    return () => this.#host.log.warn(logline`Withdrawal of ${this.unit} rejected`, reason);
+  }
+
+  withdraw(reason?: unknown): Promise<void> {
+    return this.#withdraw(reason);
+  }
+
+  #doWithdraw(reason?: unknown): Promise<void> {
+
+    const whenWithdrawn = new Promise<void>(resolve => {
+
+      const endWithdrawal = (): void => {
+        this.#addWithdrawal = this.#rejectWithdrawal(reason);
+        this.supply.off(reason);
+        resolve();
+      };
+
+      const host = this.#host;
+      const unit = this.unit;
+      let withdrawalCount = 0;
+
+      const executeWithdrawal = (task: OrderWithdrawalTask): void => {
+        ++withdrawalCount;
+        host.workbench.withdraw(async function doWithdraw() {
+          try {
+            await task(reason);
+          } catch (error) {
+            host.log.error(logline`Failed to withdraw ${unit}`, error);
+          } finally {
+            if (!--withdrawalCount) {
+              endWithdrawal();
+            }
+          }
+        });
+      };
+
+      this.#addWithdrawal = executeWithdrawal;
+
+      if (this.#withdrawals.length) {
+        this.#withdrawals.forEach(executeWithdrawal);
+        this.#withdrawals.length = 0;
+      } else {
+        endWithdrawal();
+      }
+    });
+
+    this.#withdraw = _ => whenWithdrawn;
+
+    return whenWithdrawn;
   }
 
 }

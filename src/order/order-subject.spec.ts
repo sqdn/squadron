@@ -307,8 +307,8 @@ describe('OrderSubject', () => {
     });
   });
 
-  describe('deploy', () => {
-    it('executes deployment task', async () => {
+  describe('execute', () => {
+    it('executes the task', async () => {
 
       const task: OrderTask<Unit> = jest.fn();
       const unit = new Unit();
@@ -323,7 +323,7 @@ describe('OrderSubject', () => {
       expect(task).toHaveBeenCalledTimes(1);
       expect(unit.supply.isOff).toBe(false);
     });
-    it('executes deployment task added after order evaluation', async () => {
+    it('executes the task added after order evaluation', async () => {
 
       const unit = new Unit();
 
@@ -342,7 +342,7 @@ describe('OrderSubject', () => {
       expect(task).toHaveBeenCalledTimes(1);
       expect(unit.supply.isOff).toBe(false);
     });
-    it('withdraws the subject if deployment fails', async () => {
+    it('withdraws the subject if task execution fails', async () => {
 
       const logger = {
         error: jest.fn<void, any[]>(),
@@ -371,7 +371,7 @@ describe('OrderSubject', () => {
       expect(await unitSubject.supply.whenDone().catch(asis)).toBe(error);
       expect(logger.error).toHaveBeenCalledWith('Failed to deploy', String(unit), error);
     });
-    it('rejects deployment task for revoked subject', async () => {
+    it('rejects the task for withdrawn subject', async () => {
 
       const logger = {
         warn: jest.fn<void, any[]>(),
@@ -396,7 +396,7 @@ describe('OrderSubject', () => {
     });
 
     describe('after order evaluation', () => {
-      it('executes deployment task after order evaluation', async () => {
+      it('executes the task after order evaluation', async () => {
 
         const unit = new Unit();
         let deploy!: OrderSubject['execute'];
@@ -416,7 +416,7 @@ describe('OrderSubject', () => {
         expect(task).toHaveBeenCalledTimes(1);
         expect(unit.supply.isOff).toBe(false);
       });
-      it('does not withdraw the unit if deployment fails', async () => {
+      it('does not withdraw the subject if task execution fails', async () => {
 
         const logger = {
           error: jest.fn<void, any[]>(),
@@ -454,7 +454,7 @@ describe('OrderSubject', () => {
   });
 
   describe('for the task created after order evaluation', () => {
-    it('executes deployment task', async () => {
+    it('executes the task', async () => {
 
       const unit = new Unit();
 
@@ -473,7 +473,7 @@ describe('OrderSubject', () => {
       expect(task).toHaveBeenCalledTimes(1);
       expect(unit.supply.isOff).toBe(false);
     });
-    it('does not withdraw the unit if deployment fails', async () => {
+    it('does not withdraw the subject if deployment fails', async () => {
 
       const logger = {
         error: jest.fn<void, any[]>(),
@@ -506,6 +506,154 @@ describe('OrderSubject', () => {
       expect(logger.error).toHaveBeenCalledWith('Failed to deploy', String(unit), error);
       expect(subjectSupply.isOff).toBe(true);
       expect(await subjectSupply.whenDone().catch(asis)).toBe(error);
+    });
+  });
+
+  describe('withdraw', () => {
+    it('executes withdrawal task', async () => {
+
+      let subj!: OrderSubject;
+      const withdrawal = jest.fn<void, []>();
+      const unit = new Unit();
+
+      unit.instruct(subject => {
+        subj = subject;
+        subject.executeUponWithdrawal(withdrawal);
+      });
+      OrderTest.formation.deploy(unit);
+
+      await OrderTest.evaluate();
+
+      expect(withdrawal).not.toHaveBeenCalled();
+      expect(unit.supply.isOff).toBe(false);
+
+      const reason = new Error('Test reason');
+
+      await Promise.all([subj.withdraw(reason), OrderTest.evaluate()]);
+
+      expect(withdrawal).toHaveBeenCalledWith(reason);
+      expect(withdrawal).toHaveBeenCalledTimes(1);
+      expect(await subj.supply.whenDone().catch(asis)).toBe(reason);
+    });
+    it('executes withdrawal task added by execution task', async () => {
+
+      let subj!: OrderSubject;
+      const withdrawal = jest.fn<void, []>();
+      const unit = new Unit();
+
+      unit.instruct(subject => {
+        subj = subject;
+        subject.execute(() => {
+          subject.executeUponWithdrawal(withdrawal);
+        });
+      });
+      OrderTest.formation.deploy(unit);
+
+      await OrderTest.evaluate();
+
+      expect(withdrawal).not.toHaveBeenCalled();
+      expect(unit.supply.isOff).toBe(false);
+
+      const reason = new Error('Test reason');
+
+      await Promise.all([subj.withdraw(reason), OrderTest.evaluate()]);
+
+      expect(withdrawal).toHaveBeenCalledWith(reason);
+      expect(withdrawal).toHaveBeenCalledTimes(1);
+      expect(await subj.supply.whenDone().catch(asis)).toBe(reason);
+    });
+    it('logs withdrawal failure', async () => {
+
+      const logger = {
+        error: jest.fn<void, any[]>(),
+      } as Partial<Logger> as Logger;
+
+      test.formationBuilder.provide(cxConstAsset(Logger, processingLogger(logger)));
+
+      let subj!: OrderSubject;
+      const failure = new Error('Test failure');
+      const withdrawal1 = jest.fn<void, []>();
+      const withdrawal2 = jest.fn<void, []>(() => Promise.reject(failure));
+      const unit = new Unit();
+
+      unit.instruct(subject => {
+        subj = subject;
+        subject.executeUponWithdrawal(withdrawal2);
+        subject.executeUponWithdrawal(withdrawal1);
+      });
+      OrderTest.formation.deploy(unit);
+
+      await OrderTest.evaluate();
+
+      expect(withdrawal1).not.toHaveBeenCalled();
+      expect(withdrawal2).not.toHaveBeenCalled();
+      expect(unit.supply.isOff).toBe(false);
+
+      const reason = new Error('Test reason');
+
+      await Promise.all([subj.withdraw(reason), OrderTest.evaluate()]);
+
+      expect(withdrawal1).toHaveBeenCalledWith(reason);
+      expect(withdrawal1).toHaveBeenCalledTimes(1);
+      expect(withdrawal2).toHaveBeenCalledWith(reason);
+      expect(withdrawal2).toHaveBeenCalledTimes(1);
+      expect(await subj.supply.whenDone().catch(asis)).toBe(reason);
+      expect(logger.error).toHaveBeenCalledWith('Failed to withdraw', String(unit), failure);
+    });
+  });
+
+  describe('executeUponWithdrawal', () => {
+    it('schedules withdrawal task during withdrawal', async () => {
+
+      const withdrawal = jest.fn<void, []>();
+      let subj!: OrderSubject;
+      const unit = new Unit();
+
+      unit.instruct(subject => {
+        subj = subject;
+        subject.executeUponWithdrawal(() => {
+          subject.executeUponWithdrawal(withdrawal);
+        });
+      });
+      OrderTest.formation.deploy(unit);
+
+      await OrderTest.evaluate();
+
+      const reason = new Error('Test reason');
+
+      await Promise.all([subj.withdraw(reason), OrderTest.evaluate()]);
+
+      expect(withdrawal).toHaveBeenCalledWith(reason);
+      expect(withdrawal).toHaveBeenCalledTimes(1);
+      expect(await subj.supply.whenDone().catch(asis)).toBe(reason);
+    });
+    it('rejects withdrawal task after subject withdrawal', async () => {
+
+      const logger = {
+        warn: jest.fn<void, any[]>(),
+      } as Partial<Logger> as Logger;
+
+      test.formationBuilder.provide(cxConstAsset(Logger, processingLogger(logger)));
+
+      let subj!: OrderSubject;
+      const unit = new Unit();
+
+      unit.instruct(subject => {
+        subj = subject;
+      });
+      OrderTest.formation.deploy(unit);
+
+      await OrderTest.evaluate();
+
+      const reason = new Error('Test reason');
+
+      await subj.withdraw(reason);
+
+      const withdrawal = jest.fn<void, []>();
+
+      subj.executeUponWithdrawal(withdrawal);
+
+      expect(logger.warn).toHaveBeenCalledWith('Withdrawal of', String(unit), 'rejected', reason);
     });
   });
 });
