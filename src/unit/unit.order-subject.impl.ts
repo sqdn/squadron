@@ -20,7 +20,7 @@ export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit
 
   constructor(backend: Unit$Deployment<TUnit>, supply: Supply) {
     this.#deployment = backend;
-    this.#supply = supply.whenOff(reason => this.#execute = this.#rejectDeployment(reason));
+    this.#supply = supply.whenOff(reason => this.#execute = this.#rejectExecution(reason));
   }
 
   get hub(): Hub {
@@ -93,7 +93,7 @@ export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit
     });
   }
 
-  #rejectDeployment(error: unknown): () => void {
+  #rejectExecution(error: unknown): () => void {
     return () => this.#host.log.warn(logline`Deployment of ${this.unit} rejected`, error);
   }
 
