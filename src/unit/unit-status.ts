@@ -12,18 +12,18 @@ export const enum UnitStatus {
 
   /**
    * The unit is instructed when its {@link Unit instruct instructions} applied, but its tasks
-   * {@link OrderSubject.deploy deployment} is not completed yet.
+   * {@link OrderSubject.run deployment} is not completed yet.
    */
   Instructed,
 
   /**
-   * The unit considered deployed when its {@link OrderSubject.deploy deployment tasks} execution completed.
+   * The unit considered executed when all of its {@link OrderSubject.run pending tasks} execution completes.
    */
-  Deployed,
+  Executed,
 
   /**
-   * The unit is ready for use after its deployment sequence completed.
+   * The unit is ready for use when its deployment sequence completes.
    */
-  Ready
+  Ready,
 
 }

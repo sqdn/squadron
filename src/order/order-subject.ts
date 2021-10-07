@@ -11,8 +11,7 @@ import { OrderTask } from './order-task';
  *
  * @typeParam TUnit - Type of deployed unit.
  */
-export interface OrderSubject<TUnit extends Unit = Unit>
-    extends CxValues, CxModifier<UnitContext<TUnit>>, SupplyPeer {
+export interface OrderSubject<TUnit extends Unit = Unit> extends CxValues, CxModifier<UnitContext<TUnit>>, SupplyPeer {
 
   /**
    * Central hub the formation controlled by.
@@ -86,12 +85,12 @@ export interface OrderSubject<TUnit extends Unit = Unit>
   perUnit<TValue, TAsset = TValue>(asset: CxAsset<TValue, TAsset, UnitContext>): Supply;
 
   /**
-   * Adds a unit deployment task.
+   * Instructs the order to run the given task.
    *
-   * Unit deployment starts when all tasks arrived to the formation {@link Unit.instruct instructed}.
+   * The task will be started when all units arrived to the formation {@link Unit.instruct instructed}.
    *
-   * @param task - Unit deployment task.
+   * @param task - Unit task to run.
    */
-  deploy(task: OrderTask<TUnit>): void;
+  run(task: OrderTask<TUnit>): void;
 
 }

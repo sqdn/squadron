@@ -6,7 +6,7 @@ import { UnitStatus } from '../unit';
 const enum Order$StageId {
   None,
   Instruction,
-  Deployment,
+  Execution,
   Readiness,
   First = Instruction,
   Last = Readiness,
@@ -36,9 +36,9 @@ export class Order$Workbench {
     );
     this.#deploymentStage = new Order$Stage(
         this,
-        Order$StageId.Deployment,
-        UnitStatus.Deployed,
-        'deployment',
+        Order$StageId.Execution,
+        UnitStatus.Executed,
+        'execution',
     );
     this.#readinessStage = new Order$Stage(
         this,

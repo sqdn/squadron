@@ -383,7 +383,7 @@ describe('Unit', () => {
       const instruction2: OrderInstruction = jest.fn();
 
       unit1.instruct(subject => {
-        subject.deploy(({ formation }) => {
+        subject.run(({ formation }) => {
           formation.deploy(unit2);
         });
       });

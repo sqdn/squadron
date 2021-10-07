@@ -19,7 +19,7 @@ describe('FormationManager', () => {
 
   beforeEach(async () => {
     HubTest.hub.instruct(subject => {
-      subject.deploy(context => {
+      subject.run(context => {
         formationManager = context.get(FormationManager);
       });
     });

@@ -15,12 +15,12 @@ export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit
 
   readonly #deployment: Unit$Deployment<TUnit>;
   readonly #supply: Supply;
-  #deploy = this.#doDeploy;
+  #run = this.#actuallyRun;
   #deploymentsCount = 0;
 
   constructor(backend: Unit$Deployment<TUnit>, supply: Supply) {
     this.#deployment = backend;
-    this.#supply = supply.whenOff(reason => this.#deploy = this.#rejectDeployment(reason));
+    this.#supply = supply.whenOff(reason => this.#run = this.#rejectDeployment(reason));
   }
 
   get hub(): Hub {
@@ -71,11 +71,11 @@ export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit
     return this.#host.perUnitCxPeer.provide(asset).needs(this);
   }
 
-  deploy(task: OrderTask<TUnit>): void {
-    this.#deploy(task);
+  run(task: OrderTask<TUnit>): void {
+    this.#run(task);
   }
 
-  #doDeploy(task: OrderTask<TUnit>): void {
+  #actuallyRun(task: OrderTask<TUnit>): void {
     ++this.#deploymentsCount;
 
     const host = this.#host;
@@ -84,7 +84,7 @@ export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit
       try {
         await task(host.unitDeployment(this.unit).context);
         if (!--this.#deploymentsCount) {
-          this.#deployment.setStatus(UnitStatus.Deployed);
+          this.#deployment.setStatus(UnitStatus.Executed);
         }
       } catch (error) {
         host.log.error(logline`Failed to deploy ${this.unit}`, error);

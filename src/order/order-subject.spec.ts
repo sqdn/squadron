@@ -90,14 +90,14 @@ describe('OrderSubject', () => {
         subject.context.readStatus(status => statuses.push(status));
         instructionStatus1 = await subject.context.readStatus;
 
-        subject.deploy(async context => {
+        subject.run(async context => {
           taskStatus1 = await context.readStatus;
         });
       });
       unit.instruct(async subject => {
         instructionStatus2 = await subject.context.readStatus;
 
-        subject.deploy(async context => {
+        subject.run(async context => {
           taskStatus2 = await context.readStatus;
         });
       });
@@ -113,7 +113,7 @@ describe('OrderSubject', () => {
       expect(statuses).toEqual([
         UnitStatus.Idle,
         UnitStatus.Instructed,
-        UnitStatus.Deployed,
+        UnitStatus.Executed,
         UnitStatus.Ready,
       ]);
     });
@@ -132,14 +132,14 @@ describe('OrderSubject', () => {
       unit.instruct(async subject => {
         instructionStatus1 = await fmnContext.readStatus;
 
-        subject.deploy(async () => {
+        subject.run(async () => {
           taskStatus1 = await fmnContext.readStatus;
         });
       });
       unit.instruct(async subject => {
         instructionStatus2 = await fmnContext.readStatus;
 
-        subject.deploy(async () => {
+        subject.run(async () => {
           taskStatus2 = await fmnContext.readStatus;
         });
       });
@@ -155,7 +155,7 @@ describe('OrderSubject', () => {
       expect(statuses).toEqual([
         UnitStatus.Idle,
         UnitStatus.Instructed,
-        UnitStatus.Deployed,
+        UnitStatus.Executed,
         UnitStatus.Ready,
       ]);
     });
@@ -314,7 +314,7 @@ describe('OrderSubject', () => {
       const unit = new Unit();
 
       unit.instruct(subject => {
-        subject.deploy(task);
+        subject.run(task);
       });
       OrderTest.formation.deploy(unit);
 
@@ -334,7 +334,7 @@ describe('OrderSubject', () => {
       const task: Mock<void, [UnitContext<Unit>]> = jest.fn();
 
       unit.instruct(subject => {
-        subject.deploy(task);
+        subject.run(task);
       });
 
       await test.evaluate();
@@ -359,7 +359,7 @@ describe('OrderSubject', () => {
 
       unit.instruct(subject => {
         unitSubject = subject;
-        subject.deploy(task);
+        subject.run(task);
       });
       test.formation.deploy(unit);
 
@@ -385,7 +385,7 @@ describe('OrderSubject', () => {
 
       unit.instruct(subject => {
         subject.supply.off(error);
-        subject.deploy(task);
+        subject.run(task);
       });
       test.formation.deploy(unit);
 
@@ -399,10 +399,10 @@ describe('OrderSubject', () => {
       it('executes deployment task after order evaluation', async () => {
 
         const unit = new Unit();
-        let deploy!: OrderSubject['deploy'];
+        let deploy!: OrderSubject['run'];
 
         unit.instruct(subject => {
-          deploy = subject.deploy.bind(subject);
+          deploy = subject.run.bind(subject);
         });
         test.formation.deploy(unit);
         await test.evaluate();
@@ -425,11 +425,11 @@ describe('OrderSubject', () => {
         test.formationBuilder.provide(cxConstAsset(Logger, processingLogger(logger)));
 
         const unit = new Unit();
-        let deploy!: OrderSubject['deploy'];
+        let deploy!: OrderSubject['run'];
         let subjectSupply!: Supply;
 
         unit.instruct(subject => {
-          deploy = subject.deploy.bind(subject);
+          deploy = subject.run.bind(subject);
           subjectSupply = subject.supply;
         });
         test.formation.deploy(unit);
@@ -465,7 +465,7 @@ describe('OrderSubject', () => {
       const task: Mock<void, [UnitContext<Unit>]> = jest.fn();
 
       unit.instruct(subject => {
-        subject.deploy(task);
+        subject.run(task);
       });
 
       await test.evaluate();
@@ -495,7 +495,7 @@ describe('OrderSubject', () => {
 
       unit.instruct(subject => {
         subjectSupply = subject.supply;
-        subject.deploy(task);
+        subject.run(task);
       });
 
       await test.evaluate();

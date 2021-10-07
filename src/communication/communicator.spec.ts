@@ -97,7 +97,7 @@ describe('Communicator', () => {
     const fmnTest2 = HubTest.testFormation(formation2);
 
     fmnTest2.deploy(unit2).instruct(subject => {
-      subject.deploy(context => {
+      subject.run(context => {
         communicator = context.get(Communicator);
       });
     });
@@ -137,7 +137,7 @@ describe('Communicator', () => {
       subject.provide(cxConstAsset(CommProtocol, responder));
     });
     fmnTest.deploy(unit2).instruct(subject => {
-      subject.deploy(context => {
+      subject.run(context => {
         communicator = context.get(Communicator);
       });
     });
