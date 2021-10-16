@@ -32,7 +32,7 @@ describe('UnitLocator', () => {
     });
 
     it('notifies on unit deployment to formation', async () => {
-      expect(location).not.toBeUndefined();
+      expect(location).toBeDefined();
       expect(location.formations).toHaveLength(0);
       expect(location.isLocal).toBe(false);
 
@@ -79,7 +79,7 @@ describe('UnitLocator', () => {
     });
 
     it('notifies on unit deployment to another formation', async () => {
-      expect(location).not.toBeUndefined();
+      expect(location).toBeDefined();
       expect(location?.formations).toHaveLength(0);
       expect(location?.isLocal).toBe(false);
 
