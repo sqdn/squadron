@@ -1,8 +1,8 @@
 import Order from '@sqdn/order';
-import { createRequire } from 'module';
-import { fileURLToPath, pathToFileURL } from 'url';
-import { Module, SyntheticModule } from 'vm';
-import { isMainThread, moveMessagePortToContext, workerData } from 'worker_threads';
+import { createRequire } from 'node:module';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { Module, SyntheticModule } from 'node:vm';
+import { isMainThread, moveMessagePortToContext, workerData } from 'node:worker_threads';
 import { Formation$LaunchData } from '../impl';
 import { SqdnLaunchModule } from './sqdn-launch-module.impl';
 import { SqdnLaunchOrder } from './sqdn-launch-order.impl';

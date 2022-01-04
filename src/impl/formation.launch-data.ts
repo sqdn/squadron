@@ -1,5 +1,5 @@
 import { CxEntry, cxSingle } from '@proc7ts/context-values';
-import { MessagePort } from 'worker_threads';
+import { MessagePort } from 'node:worker_threads';
 
 export interface Formation$LaunchData {
 

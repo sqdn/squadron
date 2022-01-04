@@ -1,7 +1,7 @@
 import { CxEntry } from '@proc7ts/context-values';
 import { Logger, logline } from '@proc7ts/logger';
 import { noop } from '@proc7ts/primitives';
-import { MessageChannel, Worker } from 'worker_threads';
+import { MessageChannel, Worker } from 'node:worker_threads';
 import { CommChannel, MessageCommChannel } from '../../communication';
 import { Formation } from '../../formation';
 import { FormationStarter, FormationStartOptions } from '../../hub';

@@ -2,7 +2,7 @@ import { cxConstAsset } from '@proc7ts/context-builder';
 import { CxEntry } from '@proc7ts/context-values';
 import { afterThe, digOn_, mapOn_, OnEvent } from '@proc7ts/fun-events';
 import { Logger } from '@proc7ts/logger';
-import { MessageChannel } from 'worker_threads';
+import { MessageChannel } from 'node:worker_threads';
 import {
   CommChannel,
   CommLink,

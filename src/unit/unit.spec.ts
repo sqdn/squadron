@@ -4,7 +4,7 @@ import { Logger, processingLogger } from '@proc7ts/logger';
 import { asis, newPromiseResolver } from '@proc7ts/primitives';
 import { Supply } from '@proc7ts/supply';
 import { dueLogZ, zlogINFO, ZLogLevel } from '@run-z/log-z';
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from 'node:url';
 import { Formation } from '../formation';
 import { OrderInstruction } from '../order';
 import { OrderTest } from '../testing';

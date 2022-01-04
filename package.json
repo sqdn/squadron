@@ -53,7 +53,7 @@
     "@proc7ts/context-values": "^7.0.0",
     "@proc7ts/fun-events": "^10.5.1",
     "@rollup/plugin-node-resolve": "^13.1.2",
-    "@run-z/eslint-config": "^2.0.0",
+    "@run-z/eslint-config": "^3.0.0",
     "@run-z/log-z": "^2.1.0",
     "@run-z/rollup-helpers": "^2.0.0",
     "@sqdn/order": "^0.2.1",

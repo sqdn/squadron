@@ -1,4 +1,4 @@
-import { MessagePort } from 'worker_threads';
+import { MessagePort } from 'node:worker_threads';
 import { CommPacket } from '../../communication';
 
 export const UseMessagePortCommRequest = 'use-message-port' as const;

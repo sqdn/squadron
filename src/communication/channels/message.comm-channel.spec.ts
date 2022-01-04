@@ -4,7 +4,7 @@ import { consoleLogger } from '@proc7ts/logger';
 import { asis, newPromiseResolver, noop } from '@proc7ts/primitives';
 import { Supply } from '@proc7ts/supply';
 import { SpyInstance, spyOn } from 'jest-mock';
-import { MessageChannel, MessagePort } from 'worker_threads';
+import { MessageChannel, MessagePort } from 'node:worker_threads';
 import { OrderTest } from '../../testing';
 import { Unit } from '../../unit';
 import { CommReceiver, CommResponder } from '../comm-handler';

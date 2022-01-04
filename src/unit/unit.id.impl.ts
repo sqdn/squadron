@@ -1,4 +1,4 @@
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import { Unit } from './unit';
 
 export const Unit$Id__symbol = (/*#__PURE__*/ Symbol('Unit.id'));

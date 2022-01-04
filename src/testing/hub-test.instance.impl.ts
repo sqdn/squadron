@@ -1,6 +1,6 @@
 import { cxConstAsset } from '@proc7ts/context-builder';
 import { Logger } from '@proc7ts/logger';
-import { MessageChannel } from 'worker_threads';
+import { MessageChannel } from 'node:worker_threads';
 import { CommChannel, MessageCommChannel } from '../communication';
 import { Formation } from '../formation';
 import { FormationStarter, FormationStartOptions } from '../hub';

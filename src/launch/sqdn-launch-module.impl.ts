@@ -1,6 +1,6 @@
-import { promises as fs } from 'fs';
-import { fileURLToPath } from 'url';
-import { Module, SourceTextModule } from 'vm';
+import { promises as fs } from 'node:fs';
+import { Module, SourceTextModule } from 'node:vm';
+import { fileURLToPath } from 'node:url';
 import { SqdnLauncher } from './sqdn-launcher';
 
 export class SqdnLaunchModule {

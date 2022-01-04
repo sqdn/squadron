@@ -1,4 +1,4 @@
-import { TransferListItem } from 'worker_threads';
+import { TransferListItem } from 'node:worker_threads';
 
 /**
  * Communication packet containing command body and meta information.
