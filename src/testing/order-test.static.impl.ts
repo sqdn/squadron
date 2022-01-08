@@ -46,6 +46,10 @@ export abstract class OrderTest$StaticBase<TTest extends OrderTest> implements O
     return this.test.run(fn);
   }
 
+  newOrder(init?: OrderContext.Init): OrderContext {
+    return this.test.newOrder(init);
+  }
+
   evaluate(): Promise<void> {
     return this.test.evaluate();
   }

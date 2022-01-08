@@ -23,6 +23,8 @@ export interface OrderTest {
 
   run<TResult>(fn: (this: void, context: OrderContext) => TResult): TResult;
 
+  newOrder(init?: OrderContext.Init): OrderContext;
+
   evaluate(): Promise<void>;
 
 }
@@ -51,4 +53,4 @@ export namespace OrderTest {
 
 }
 
-export const OrderTest: OrderTest.Static = (/*#__PURE__*/ new OrderTest$Static());
+export const OrderTest: OrderTest.Static = (/* #_ _PURE__ */ new OrderTest$Static());

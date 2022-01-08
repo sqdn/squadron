@@ -71,6 +71,10 @@ export class OrderTest$Instance implements OrderTest {
     return this.formation.createdIn.run(fn);
   }
 
+  newOrder(init?: OrderContext.Init): OrderContext {
+    return this.#host.formationBuilder.context.newOrder(init);
+  }
+
   evaluate(): Promise<void> {
     return this.#host.executeOrder();
   }
