@@ -136,7 +136,7 @@ export class Formation$Host implements Unit$Host {
     return tracker as Unit$DeploymentTracker<TUnit>;
   }
 
-  unitDeployment<TUnit extends Unit>(unit: TUnit): Unit$Deployment<TUnit> {
+  deploymentOf<TUnit extends Unit>(unit: TUnit): Unit$Deployment<TUnit> {
 
     let deployment = this.#deployments.get(unit.uid);
 

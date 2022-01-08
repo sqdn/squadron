@@ -91,7 +91,7 @@ export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit
 
     host.workbench.execute(async () => {
       try {
-        await task(host.unitDeployment(this.unit).context);
+        await task(host.deploymentOf(this.unit).context);
       } catch (error) {
         host.log.error(logline`Failed to deploy ${this.unit}`, error);
         this.supply.off(error);

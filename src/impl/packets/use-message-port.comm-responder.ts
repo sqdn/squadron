@@ -46,7 +46,7 @@ export class UseMessagePortCommResponder implements CommResponder<UseMessagePort
 
           const from = this.#orderUnits.unitByUid(fromFormation, Formation);
           const to = this.#orderUnits.unitByUid(toUnit, Unit);
-          const context = this.#fmnContext.unitContext(to);
+          const context = this.#fmnContext.contextOf(to);
           const processor = commProcessorBy(context.get(CommProtocol).channelProcessor(from));
 
           new MessageCommChannel({

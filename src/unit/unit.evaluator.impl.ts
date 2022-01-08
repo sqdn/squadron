@@ -22,7 +22,7 @@ export class Unit$Evaluator<TUnit extends Unit> extends Unit$Backend<TUnit, Orde
     this.supply.needs(formation);
 
     const { host } = this;
-    const deployment = host.unitDeployment(this.unit);
+    const deployment = host.deploymentOf(this.unit);
     let subject: OrderSubject<TUnit> | null = new Unit$OrderSubject(
         deployment,
         this.supply.derive(),
@@ -65,7 +65,7 @@ export class Unit$Evaluator<TUnit extends Unit> extends Unit$Backend<TUnit, Orde
 
   #doDeliver(): void {
 
-    const deployment = this.host.host.unitDeployment(this.unit);
+    const deployment = this.host.host.deploymentOf(this.unit);
 
     // Reuse the same `Unit$Id` instance to potentially free some memory.
     this.unit[Unit$Id__symbol] = deployment.unit[Unit$Id__symbol];

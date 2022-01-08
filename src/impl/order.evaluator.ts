@@ -39,8 +39,8 @@ export class Order$Evaluator implements Unit$Host {
     return this.order.get(Logger);
   }
 
-  unitDeployment<TUnit extends Unit>(unit: TUnit): Unit$Deployment<TUnit> {
-    return this.host.unitDeployment(unit);
+  deploymentOf<TUnit extends Unit>(unit: TUnit): Unit$Deployment<TUnit> {
+    return this.host.deploymentOf(unit);
   }
 
   deploy(formation: Formation, unit: Unit): void {

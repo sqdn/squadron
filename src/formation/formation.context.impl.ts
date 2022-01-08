@@ -48,8 +48,8 @@ export class Formation$Context implements FormationContext {
     return this.#get(entry, request);
   }
 
-  unitContext<TUnit extends Unit>(unit: TUnit): UnitContext<TUnit> {
-    return this.#host.unitDeployment(unit).context;
+  contextOf<TUnit extends Unit>(unit: TUnit): UnitContext<TUnit> {
+    return this.#host.deploymentOf(unit).context;
   }
 
 }

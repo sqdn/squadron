@@ -29,7 +29,7 @@ export interface FormationContext extends UnitContext<Formation> {
    *
    * @returns Unit context.
    */
-  unitContext<TUnit extends Unit>(unit: TUnit): UnitContext<TUnit>;
+  contextOf<TUnit extends Unit>(unit: TUnit): UnitContext<TUnit>;
 
 }
 
