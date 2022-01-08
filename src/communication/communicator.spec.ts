@@ -20,7 +20,7 @@ describe('Communicator', () => {
 
   it('connects hub -> formation', async () => {
 
-    const formation = new Formation();
+    const formation = HubTest.run(() => new Formation());
     const fmnTest = HubTest.testFormation(formation);
     const responder: CommResponder<TestRequest, TestResponse> = {
       name: 'test',
@@ -54,7 +54,7 @@ describe('Communicator', () => {
 
     HubTest.formationBuilder.provide(cxConstAsset(CommProtocol, responder));
 
-    const formation = new Formation();
+    const formation = HubTest.run(() => new Formation());
     const fmnTest = HubTest.testFormation(formation);
 
     fmnTest.init();
@@ -72,10 +72,10 @@ describe('Communicator', () => {
   });
   it('connects unit -> unit', async () => {
 
-    const formation1 = new Formation({ tag: '1' });
-    const unit1 = new Unit({ tag: '1' });
-    const formation2 = new Formation({ tag: '2' });
-    const unit2 = new Unit({ tag: '2' });
+    const formation1 = HubTest.run(() => new Formation({ tag: '1' }));
+    const unit1 = HubTest.run(() => new Unit({ tag: '1' }));
+    const formation2 = HubTest.run(() => new Formation({ tag: '2' }));
+    const unit2 = HubTest.run(() => new Unit({ tag: '2' }));
 
     const fmnTest1 = HubTest.testFormation(formation1);
 
@@ -118,9 +118,9 @@ describe('Communicator', () => {
   });
   it('connects unit -> unit directly', async () => {
 
-    const formation = new Formation();
-    const unit1 = new Unit({ tag: '1' });
-    const unit2 = new Unit({ tag: '2' });
+    const formation = HubTest.run(() => new Formation());
+    const unit1 = HubTest.run(() => new Unit({ tag: '1' }));
+    const unit2 = HubTest.run(() => new Unit({ tag: '2' }));
 
     let communicator!: Communicator;
     const fmnTest = HubTest.testFormation(formation);
@@ -164,7 +164,7 @@ describe('Communicator', () => {
     HubTest.formationBuilder.provide(cxConstAsset(Logger, processingLogger(logger)));
 
     const communicator = HubTest.formationBuilder.get(Communicator);
-    const unit = new Unit({ tag: 'non-deployed' });
+    const unit = HubTest.run(() => new Unit({ tag: 'non-deployed' }));
     const channel = communicator.connect(unit);
 
     channel.signal('test', {});

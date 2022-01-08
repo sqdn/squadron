@@ -29,9 +29,9 @@ describe('CommLinker', () => {
   });
   it('links formation -> formation', async () => {
 
-    const formation1 = new Formation({ tag: '1' });
-    const formation2 = new Formation({ tag: '2' });
-    const unit2 = new Unit({ tag: '2' });
+    const formation1 = HubTest.run(() => new Formation({ tag: '1' }));
+    const formation2 = HubTest.run(() => new Formation({ tag: '2' }));
+    const unit2 = HubTest.run(() => new Unit({ tag: '2' }));
 
     const fmnTest1 = HubTest.testFormation(formation1);
 

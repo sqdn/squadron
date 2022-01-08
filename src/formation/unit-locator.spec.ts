@@ -36,7 +36,7 @@ describe('UnitLocator', () => {
       expect(location.formations).toHaveLength(0);
       expect(location.isLocal).toBe(false);
 
-      const formation = new Formation();
+      const formation = HubTest.run(() => new Formation());
       const fmnTest = HubTest.testFormation(formation);
 
       fmnTest.deploy(unit);
@@ -69,7 +69,7 @@ describe('UnitLocator', () => {
 
     beforeEach(async () => {
       unit = HubTest.run(() => new Unit());
-      formation = new Formation({ tag: 'consumer' });
+      formation = HubTest.run(() => new Formation({ tag: 'consumer' }));
       fmnTest = HubTest.testFormation(formation);
       fmnTest.init();
       locator = fmnTest.formationBuilder.get(UnitLocator);
@@ -83,7 +83,7 @@ describe('UnitLocator', () => {
       expect(location?.formations).toHaveLength(0);
       expect(location?.isLocal).toBe(false);
 
-      const formation2 = new Formation({ tag: 'other', createdIn: HubTest.createdIn });
+      const formation2 = HubTest.run(() => new Formation({ tag: 'other', createdIn: HubTest.createdIn }));
       const fmnTest2 = HubTest.testFormation(formation2);
 
       fmnTest2.init();
