@@ -4,6 +4,7 @@ import Order from '@sqdn/order';
 import { Formation, FormationContext } from '../formation';
 import { Hub } from '../hub';
 import { Unit, UnitContext } from '../unit';
+import { OrderContext } from './order-context';
 import { OrderTask } from './order-task';
 import { OrderWithdrawalTask } from './order-withdrawal-task';
 
@@ -76,6 +77,17 @@ export interface OrderSubject<TUnit extends Unit = Unit> extends CxValues, CxMod
    * @returns Asset supply. Revokes provided asset once cut off.
    */
   perOrder<TValue, TAsset = TValue>(asset: CxAsset<TValue, TAsset, Order>): Supply;
+
+  /**
+   * Provides an asset for the entry of each order executed by unit {@link formation}.
+   *
+   * @typeParam TValue - Context value type.
+   * @typeParam TAsset - Context value asset type.
+   * @param asset - Context entry asset.
+   *
+   * @returns Asset supply. Revokes provided asset once cut off.
+   */
+  perOrderContext<TValue, TAsset = TValue>(asset: CxAsset<TValue, TAsset, OrderContext>): Supply;
 
   /**
    * Provides an asset for the entry of each unit deployed to the same {@link formation}.

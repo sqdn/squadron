@@ -1,9 +1,13 @@
 import { CxBuilder, cxConstAsset, CxPeerBuilder } from '@proc7ts/context-builder';
 import { CxEntry, cxSingle } from '@proc7ts/context-values';
 import { Logger } from '@proc7ts/logger';
+import { arrayOfElements } from '@proc7ts/primitives';
 import Order from '@sqdn/order';
+import { v4 as uuidv4 } from 'uuid';
 import { Formation, FormationContext } from '../formation';
 import { Hub } from '../hub';
+import { OrderContext } from '../order';
+import { OrderContext$ } from '../order/order-context.impl';
 import { Unit, UnitContext, UnitOrigin } from '../unit';
 import { Unit$Deployment } from '../unit/unit.deployment.impl';
 import { Unit$Host } from '../unit/unit.host.impl';
@@ -28,11 +32,12 @@ export class Formation$Host implements Unit$Host {
   readonly formationBuilder: CxBuilder<FormationContext>;
   readonly context: FormationContext;
   readonly perOrderCxPeer: CxPeerBuilder<Order>;
+  readonly perOrderContextPeer: CxPeerBuilder<OrderContext>;
   readonly perUnitCxPeer: CxPeerBuilder<UnitContext>;
 
   readonly #factory: Formation$Factory;
-  #order?: Order | undefined;
-  #orderBuilder?: CxBuilder<Order> | undefined;
+  #order?: Order;
+  #orderBuilder?: CxBuilder<Order>;
   #_origin?: UnitOrigin | undefined;
   readonly #units = new Map<string, Unit>();
   readonly #deployments = new Map<string, Unit$Deployment<any>>();
@@ -47,6 +52,7 @@ export class Formation$Host implements Unit$Host {
     this.context = this.formationBuilder.context;
 
     this.perOrderCxPeer = new CxPeerBuilder<Order>(this.formationBuilder.boundPeer);
+    this.perOrderContextPeer = new CxPeerBuilder<OrderContext>(this.formationBuilder.boundPeer);
     this.perUnitCxPeer = new CxPeerBuilder<UnitContext>(this.formationBuilder.boundPeer);
   }
 
@@ -119,6 +125,21 @@ export class Formation$Host implements Unit$Host {
     this.#units.set(id, newUnit);
 
     return newUnit;
+  }
+
+  newOrder({ orderId = uuidv4(), peer }: OrderContext.Init = {}): OrderContext {
+    return new CxBuilder<OrderContext>(
+        (getValue, builder) => {
+
+          const context = new OrderContext$(orderId, getValue);
+
+          builder.provide(cxConstAsset(OrderContext, context));
+
+          return context;
+        },
+        this.perOrderContextPeer,
+        ...arrayOfElements(peer),
+    ).context;
   }
 
   deploy(formation: Formation, unit: Unit): void {
