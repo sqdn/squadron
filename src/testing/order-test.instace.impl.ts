@@ -17,7 +17,7 @@ export class OrderTest$Instance implements OrderTest {
 
     const {
       orderId = 'mock-order',
-      newOrigin = createdIn => ({
+      createOrigin = createdIn => ({
         hub: OrderTest$defaultHub(createdIn),
         formation: OrderTest$defaultFormation(createdIn),
       }),
@@ -28,7 +28,7 @@ export class OrderTest$Instance implements OrderTest {
     this.#supply = supply;
     this.#host = new Formation$Host({
       orderId,
-      newOrigin,
+      createOrigin: createOrigin,
       createContext(host, get, builder) {
         builder.provide(cxConstAsset(Logger, logger));
 

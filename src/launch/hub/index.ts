@@ -17,7 +17,7 @@ export default function launchHub(launcher: SqdnLauncher): void {
       launcher,
       {
         orderId: launcher.rootURL,
-        newOrigin(createdIn: OrderContext): UnitOrigin {
+        createOrigin(createdIn: OrderContext): UnitOrigin {
 
           const hub = new Hub({ createdIn });
 

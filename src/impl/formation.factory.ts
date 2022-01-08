@@ -9,7 +9,7 @@ export interface Formation$Factory {
 
   readonly orderId: string;
 
-  newOrigin(this: void, createdIn: OrderContext, builtBy: CxBuilder<OrderContext>): UnitOrigin;
+  createOrigin(this: void, createdIn: OrderContext, builtBy: CxBuilder<OrderContext>): UnitOrigin;
 
   createContext: (
       this: void,

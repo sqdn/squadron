@@ -60,7 +60,7 @@ export class Formation$Host implements Unit$Host {
   }
 
   get #origin(): UnitOrigin {
-    return this.#_origin ||= this.#factory.newOrigin(this.createdIn, this.builtBy);
+    return this.#_origin ||= this.#factory.createOrigin(this.createdIn, this.builtBy);
   }
 
   get createdIn(): OrderContext {

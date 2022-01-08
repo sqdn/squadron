@@ -37,7 +37,7 @@ export namespace OrderTest {
 
     readonly supply?: Supply | undefined;
 
-    newOrigin?: ((this: void, createdIn: OrderContext, builtBy: CxBuilder<OrderContext>) => UnitOrigin) | undefined;
+    createOrigin?: ((this: void, createdIn: OrderContext, builtBy: CxBuilder<OrderContext>) => UnitOrigin) | undefined;
 
   }
 

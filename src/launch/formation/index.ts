@@ -14,7 +14,7 @@ export default function launchFormation(launcher: SqdnLauncher): void {
       launcher,
       {
         orderId: launcher.rootURL,
-        newOrigin: createdIn => ({
+        createOrigin: createdIn => ({
           hub: new Hub({ id: launcher.launchData!.hubUid, createdIn }),
           formation: new Formation({ id: launcher.launchData!.uid, createdIn }),
         }),

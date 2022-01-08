@@ -71,7 +71,7 @@ function HubTest$init(init: HubTest.Init = {}): OrderTest.Init {
 
   return {
     ...init,
-    newOrigin(createdIn, builtBy) {
+    createOrigin(createdIn, builtBy) {
 
       const hub = createHub(createdIn, builtBy);
 

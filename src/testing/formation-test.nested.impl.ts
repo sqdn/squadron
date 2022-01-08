@@ -55,7 +55,7 @@ function FormationTest$init(
   return {
     ...init,
     supply: supply.needs(hubTest),
-    newOrigin(createdIn) {
+    createOrigin(createdIn) {
       return {
         hub: new Hub({ id: hubTest.hub.uid, createdIn }),
         formation: new Formation({ id: formation.uid, createdIn }),
