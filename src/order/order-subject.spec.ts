@@ -25,7 +25,7 @@ describe('OrderSubject', () => {
   describe('hub', () => {
     it('refers the central hub', async () => {
 
-      const unit = new Unit();
+      const unit = OrderTest.run(() => new Unit());
       let unitSubject!: OrderSubject;
 
       unit.instruct(subject => {
@@ -43,7 +43,7 @@ describe('OrderSubject', () => {
   describe('formation', () => {
     it('refers the target formation', async () => {
 
-      const unit = new Unit();
+      const unit = OrderTest.run(() => new Unit());
       let unitSubject!: OrderSubject;
 
       unit.instruct(subject => {
@@ -61,7 +61,7 @@ describe('OrderSubject', () => {
   describe('unit', () => {
     it('refers the unit', async () => {
 
-      const unit = new Unit();
+      const unit = OrderTest.run(() => new Unit());
       let unitSubject!: OrderSubject;
 
       unit.instruct(subject => {
@@ -79,7 +79,7 @@ describe('OrderSubject', () => {
   describe('context', () => {
     it('tracks unit status', async () => {
 
-      const unit = new Unit();
+      const unit = OrderTest.run(() => new Unit());
       const statuses: UnitStatus[] = [];
       let instructionStatus1: UnitStatus | undefined;
       let instructionStatus2: UnitStatus | undefined;
@@ -119,7 +119,7 @@ describe('OrderSubject', () => {
     });
     it('tracks formation status', async () => {
 
-      const unit = new Unit();
+      const unit = OrderTest.run(() => new Unit());
       const statuses: UnitStatus[] = [];
       let instructionStatus1: UnitStatus | undefined;
       let instructionStatus2: UnitStatus | undefined;
@@ -168,7 +168,7 @@ describe('OrderSubject', () => {
         perContext: cxRecent({ byDefault: () => 'default' }),
         toString: () => '[CxEntry test]',
       };
-      const unit = new Unit();
+      const unit = OrderTest.run(() => new Unit());
       let unitSubject!: OrderSubject;
       let unitContext!: UnitContext;
 
@@ -198,7 +198,7 @@ describe('OrderSubject', () => {
         perContext: cxRecent({ byDefault: () => 'default' }),
         toString: () => '[CxEntry test]',
       };
-      const unit = new Unit();
+      const unit = OrderTest.run(() => new Unit());
       let unitSubject!: OrderSubject;
       let unitContext!: UnitContext;
 
@@ -232,7 +232,7 @@ describe('OrderSubject', () => {
         perContext: cxRecent({ byDefault: () => 'default' }),
         toString: () => '[CxEntry test]',
       };
-      const unit = new Unit();
+      const unit = OrderTest.run(() => new Unit());
       let unitSubject!: OrderSubject;
       let unitContext!: UnitContext;
 
@@ -248,13 +248,13 @@ describe('OrderSubject', () => {
 
       const formationContext = unitContext.get(FormationContext);
 
-      expect(OrderTest.order.get(entry)).toBe('provided');
+      expect(OrderTest.createdIn.get(entry)).toBe('provided');
       expect(formationContext.get(entry)).toBe('default');
       expect(unitContext.get(entry)).toBe('default');
       expect(unitSubject.get(entry)).toBe('default');
 
       unitSubject.supply.off();
-      expect(OrderTest.order.get(entry)).toBe('default');
+      expect(OrderTest.createdIn.get(entry)).toBe('default');
     });
   });
 
@@ -265,7 +265,7 @@ describe('OrderSubject', () => {
         perContext: cxRecent({ byDefault: () => 'default' }),
         toString: () => '[CxEntry test]',
       };
-      const unit1 = new Unit();
+      const unit1 = OrderTest.run(() => new Unit());
       let unitSubject1!: OrderSubject;
       let unitContext1!: UnitContext;
 
@@ -277,7 +277,7 @@ describe('OrderSubject', () => {
 
       OrderTest.formation.deploy(unit1);
 
-      const unit2 = new Unit();
+      const unit2 = OrderTest.run(() => new Unit());
       let unitSubject2!: OrderSubject;
       let unitContext2!: UnitContext;
 
@@ -292,7 +292,7 @@ describe('OrderSubject', () => {
 
       const formationContext = unitContext1.get(FormationContext);
 
-      expect(OrderTest.order.get(entry)).toBe('default');
+      expect(OrderTest.createdIn.get(entry)).toBe('default');
       expect(formationContext.get(entry)).toBe('default');
       expect(unitContext1.get(entry)).toBe('provided');
       expect(unitSubject1.get(entry)).toBe('provided');
@@ -311,7 +311,7 @@ describe('OrderSubject', () => {
     it('executes the task', async () => {
 
       const task: OrderTask<Unit> = jest.fn();
-      const unit = new Unit();
+      const unit = OrderTest.run(() => new Unit());
 
       unit.instruct(subject => {
         subject.execute(task);
@@ -325,7 +325,7 @@ describe('OrderSubject', () => {
     });
     it('executes the task added after order evaluation', async () => {
 
-      const unit = new Unit();
+      const unit = OrderTest.run(() => new Unit());
 
       test.formation.deploy(unit);
 
@@ -354,7 +354,7 @@ describe('OrderSubject', () => {
       const task: OrderTask<Unit> = jest.fn(() => {
         throw error;
       });
-      const unit = new Unit();
+      const unit = OrderTest.run(() => new Unit());
       let unitSubject!: OrderSubject;
 
       unit.instruct(subject => {
@@ -381,7 +381,7 @@ describe('OrderSubject', () => {
 
       const error = new Error('test');
       const task: OrderTask<Unit> = jest.fn();
-      const unit = new Unit();
+      const unit = OrderTest.run(() => new Unit());
 
       unit.instruct(subject => {
         subject.supply.off(error);
@@ -398,7 +398,7 @@ describe('OrderSubject', () => {
     describe('after order evaluation', () => {
       it('executes the task after order evaluation', async () => {
 
-        const unit = new Unit();
+        const unit = OrderTest.run(() => new Unit());
         let deploy!: OrderSubject['execute'];
 
         unit.instruct(subject => {
@@ -424,7 +424,7 @@ describe('OrderSubject', () => {
 
         test.formationBuilder.provide(cxConstAsset(Logger, processingLogger(logger)));
 
-        const unit = new Unit();
+        const unit = OrderTest.run(() => new Unit());
         let deploy!: OrderSubject['execute'];
         let subjectSupply!: Supply;
 
@@ -456,7 +456,7 @@ describe('OrderSubject', () => {
   describe('for the task created after order evaluation', () => {
     it('executes the task', async () => {
 
-      const unit = new Unit();
+      const unit = OrderTest.run(() => new Unit());
 
       test.formation.deploy(unit);
 
@@ -481,7 +481,7 @@ describe('OrderSubject', () => {
 
       test.formationBuilder.provide(cxConstAsset(Logger, processingLogger(logger)));
 
-      const unit = new Unit();
+      const unit = OrderTest.run(() => new Unit());
 
       test.formation.deploy(unit);
 
@@ -514,7 +514,7 @@ describe('OrderSubject', () => {
 
       let subj!: OrderSubject;
       const withdrawal = jest.fn<void, []>();
-      const unit = new Unit();
+      const unit = OrderTest.run(() => new Unit());
 
       unit.instruct(subject => {
         subj = subject;
@@ -539,7 +539,7 @@ describe('OrderSubject', () => {
 
       let subj!: OrderSubject;
       const withdrawal = jest.fn<void, []>();
-      const unit = new Unit();
+      const unit = OrderTest.run(() => new Unit());
 
       unit.instruct(subject => {
         subj = subject;
@@ -574,7 +574,7 @@ describe('OrderSubject', () => {
       const failure = new Error('Test failure');
       const withdrawal1 = jest.fn<void, []>();
       const withdrawal2 = jest.fn<void, []>(() => Promise.reject(failure));
-      const unit = new Unit();
+      const unit = OrderTest.run(() => new Unit());
 
       unit.instruct(subject => {
         subj = subject;
@@ -607,7 +607,7 @@ describe('OrderSubject', () => {
 
       const withdrawal = jest.fn<void, []>();
       let subj!: OrderSubject;
-      const unit = new Unit();
+      const unit = OrderTest.run(() => new Unit());
 
       unit.instruct(subject => {
         subj = subject;
@@ -636,7 +636,7 @@ describe('OrderSubject', () => {
       test.formationBuilder.provide(cxConstAsset(Logger, processingLogger(logger)));
 
       let subj!: OrderSubject;
-      const unit = new Unit();
+      const unit = OrderTest.run(() => new Unit());
 
       unit.instruct(subject => {
         subj = subject;

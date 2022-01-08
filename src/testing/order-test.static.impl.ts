@@ -1,9 +1,8 @@
 import { CxBuilder } from '@proc7ts/context-builder';
 import { Supply } from '@proc7ts/supply';
-import Order from '@sqdn/order';
-import MockOrder from '@sqdn/order/mock';
 import { Formation, FormationContext } from '../formation';
 import { Hub } from '../hub';
+import { OrderContext } from '../order';
 import { OrderTest } from './order-test';
 import { OrderTest$get, OrderTest$Instance, OrderTest$reset, OrderTest$set } from './order-test.instace.impl';
 
@@ -31,16 +30,20 @@ export abstract class OrderTest$StaticBase<TTest extends OrderTest> implements O
     return this.test.formationBuilder;
   }
 
-  get order(): MockOrder {
-    return this.test.order;
+  get createdIn(): OrderContext {
+    return this.test.createdIn;
   }
 
-  get orderBuilder(): CxBuilder<Order> {
-    return this.test.orderBuilder;
+  get builtBy(): CxBuilder<OrderContext> {
+    return this.test.builtBy;
   }
 
   get supply(): Supply {
     return this.test.supply;
+  }
+
+  run<TResult>(fn: (this: void, context: OrderContext) => TResult): TResult {
+    return this.test.run(fn);
   }
 
   evaluate(): Promise<void> {

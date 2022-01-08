@@ -1,10 +1,9 @@
 import { CxBuilder } from '@proc7ts/context-builder';
 import { Logger } from '@proc7ts/logger';
 import { Supply } from '@proc7ts/supply';
-import Order from '@sqdn/order';
-import MockOrder from '@sqdn/order/mock';
 import { Formation, FormationContext } from '../formation';
 import { Hub } from '../hub';
+import { OrderContext } from '../order';
 import { UnitOrigin } from '../unit';
 import { OrderTest$Static } from './order-test.static.impl';
 
@@ -16,11 +15,13 @@ export interface OrderTest {
 
   readonly formationBuilder: CxBuilder<FormationContext>;
 
-  readonly order: MockOrder;
+  readonly createdIn: OrderContext;
 
-  readonly orderBuilder: CxBuilder<Order>;
+  readonly builtBy: CxBuilder<OrderContext>;
 
   readonly supply: Supply;
+
+  run<TResult>(fn: (this: void, context: OrderContext) => TResult): TResult;
 
   evaluate(): Promise<void>;
 
@@ -36,7 +37,7 @@ export namespace OrderTest {
 
     readonly supply?: Supply | undefined;
 
-    createOrigin?: ((this: void, order: Order, orderBuilder: CxBuilder<Order>) => UnitOrigin) | undefined;
+    newOrigin?: ((this: void, createdIn: OrderContext, builtBy: CxBuilder<OrderContext>) => UnitOrigin) | undefined;
 
   }
 

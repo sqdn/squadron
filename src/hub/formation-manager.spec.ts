@@ -30,7 +30,7 @@ describe('FormationManager', () => {
     describe('formation', () => {
       it('equals to requested formation', () => {
 
-        const testFmn = new Formation({ tag: 'test-fmn', order: HubTest.order });
+        const testFmn = new Formation({ tag: 'test-fmn', createdIn: HubTest.createdIn });
         const ctl = formationManager.formationCtl(testFmn);
 
         expect(ctl.formation).toBe(testFmn);
@@ -46,7 +46,7 @@ describe('FormationManager', () => {
 
         }
 
-        const testFmn = new Formation({ tag: 'test-fmn', order: HubTest.order });
+        const testFmn = new Formation({ tag: 'test-fmn', createdIn: HubTest.createdIn });
         const fmnTest = HubTest.testFormation(testFmn);
         const responder: CommResponder<TestPacket, TestPacket> = {
           name: 'test',

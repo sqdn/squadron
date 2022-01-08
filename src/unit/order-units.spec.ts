@@ -19,12 +19,12 @@ describe('OrderUnits', () => {
     let orderUnits: OrderUnits;
 
     beforeEach(() => {
-      orderUnits = OrderTest.order.get(OrderUnits);
+      orderUnits = OrderTest.createdIn.get(OrderUnits);
     });
 
     it('returns existing unit', () => {
 
-      const unit = new Unit();
+      const unit = OrderTest.run(() => new Unit());
 
       expect(orderUnits.unitByUid(unit.uid, Unit)).toBe(unit);
     });
@@ -34,7 +34,7 @@ describe('OrderUnits', () => {
 
       class TestUnit2 extends Unit {}
 
-      const unit = new TestUnit1();
+      const unit = OrderTest.run(() => new TestUnit1());
 
       expect(() => orderUnits.unitByUid(unit.uid, TestUnit2)).toThrow(new TypeError(`${unit} is not a TestUnit2`));
     });
@@ -44,7 +44,7 @@ describe('OrderUnits', () => {
 
       class TestUnit2 extends TestUnit1 {}
 
-      const unit = new TestUnit1();
+      const unit = OrderTest.run(() => new TestUnit1());
 
       expect(orderUnits.unitByUid(unit.uid, TestUnit2)).toBeInstanceOf(TestUnit2);
     });
@@ -54,7 +54,7 @@ describe('OrderUnits', () => {
 
       class TestUnit2 extends TestUnit1 {}
 
-      const unit = new TestUnit1();
+      const unit = OrderTest.run(() => new TestUnit1());
 
       unit.instruct(noop);
 
@@ -66,7 +66,7 @@ describe('OrderUnits', () => {
 
       class TestUnit2 extends TestUnit1 {}
 
-      const unit = new TestUnit1();
+      const unit = OrderTest.run(() => new TestUnit1());
 
       OrderTest.formation.deploy(unit);
 

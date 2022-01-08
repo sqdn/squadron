@@ -17,7 +17,7 @@ describe('Formation', () => {
   describe('asFormation', () => {
     it('refers itself', () => {
 
-      const formation = new Formation();
+      const formation = OrderTest.run(() => new Formation());
 
       expect(formation.asFormation).toBe(formation);
     });
@@ -33,7 +33,7 @@ describe('Formation', () => {
 
         OrderTest.formationBuilder.provide(cxConstAsset(Logger, logger));
 
-        const unit = new Unit();
+        const unit = OrderTest.run(() => new Unit());
 
         OrderTest.formation.deploy(unit);
         await OrderTest.evaluate();

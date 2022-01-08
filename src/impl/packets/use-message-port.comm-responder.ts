@@ -33,7 +33,7 @@ export class UseMessagePortCommResponder implements CommResponder<UseMessagePort
 
   private constructor(target: CxEntry.Target<CommProtocol, CommHandler>) {
     this.#fmnContext = target.get(FormationContext);
-    this.#orderUnits = this.#fmnContext.formation.order.get(OrderUnits);
+    this.#orderUnits = this.#fmnContext.formation.createdIn.get(OrderUnits);
   }
 
   get name(): string {

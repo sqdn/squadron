@@ -15,7 +15,7 @@ describe('CommLinker', () => {
 
   it('links hub -> formation', async () => {
 
-    const formation = new Formation();
+    const formation = HubTest.run(() => new Formation());
     const fmnTest = HubTest.testFormation(formation);
 
     fmnTest.init();

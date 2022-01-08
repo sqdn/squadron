@@ -10,7 +10,7 @@ describe('HubTest', () => {
 
   describe('hub', () => {
     it('sets up the test automatically', () => {
-      expect(HubTest.hub).toBe(HubTest.order.get(FormationContext).hub);
+      expect(HubTest.hub).toBe(HubTest.createdIn.get(FormationContext).hub);
     });
   });
 

@@ -10,7 +10,7 @@ import { OrderContext$storage } from './order-context.impl';
  * Context instance is
  * [async-local](https://nodejs.org/dist/latest-v16.x/docs/api/async_context.html#class-asynclocalstorage),
  * so any asynchronous operation initiated within the same order may access its context via
- * {@link OrderContext.Static.current OrderContext.current()} call.
+ * {@link OrderContext.Entry.current OrderContext.current()} call.
  *
  * Exactly one context exists per order.
  *
@@ -26,7 +26,7 @@ export interface OrderContext extends CxValues {
   /**
    * Runs the given function in this order context.
    *
-   * A {@link OrderContext.Static.current OrderContext.current()} method call would return this context instance within
+   * A {@link OrderContext.Entry.current OrderContext.current()} method call would return this context instance within
    * the function, as well as within any asynchronous operation initiated within it.
    *
    * @typeParam TResult - Type of function result.
@@ -34,7 +34,7 @@ export interface OrderContext extends CxValues {
    *
    * @returns The value returned from function call.
    */
-  runInContext<TResult>(fn: (this: void, context: OrderContext) => TResult): TResult;
+  run<TResult>(fn: (this: void, context: OrderContext) => TResult): TResult;
 
 }
 
@@ -60,20 +60,35 @@ export namespace OrderContext {
     readonly peer?: CxPeer<OrderContext> | readonly CxPeer<OrderContext>[] | undefined;
   }
 
-  export interface Static extends CxEntry<OrderContext> {
+  /**
+   * Context entry that serves as a unique key of {@link OrderContext} value.
+   */
+  export interface Entry extends CxEntry<OrderContext> {
+
+    /**
+     * Obtains current order context instance.
+     *
+     * @returns An instance the {@link OrderContext.run} method has been called for.
+     *
+     * @throws ReferenceError when called outside order execution.
+     */
     current(): OrderContext;
+
   }
 
 }
 
-export const OrderContext: OrderContext.Static = {
+/**
+ * Order, formation, or unit context entry containing the order context instance.
+ */
+export const OrderContext: OrderContext.Entry = {
   perContext: (/*#__PURE__*/ cxSingle()),
   current() {
 
     const current = OrderContext$storage.getStore();
 
     if (!current) {
-      throw new ReferenceError('Order is unavailable outside context');
+      throw new ReferenceError('Order unavailable outside context');
     }
 
     return current;

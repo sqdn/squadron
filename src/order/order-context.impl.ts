@@ -22,7 +22,7 @@ export class OrderContext$ implements OrderContext {
     return this.#get(entry, request);
   }
 
-  runInContext<TResult>(fn: (this: void, context: OrderContext) => TResult): TResult {
+  run<TResult>(fn: (this: void, context: OrderContext) => TResult): TResult {
     return OrderContext$storage.run(this, fn, this);
   }
 

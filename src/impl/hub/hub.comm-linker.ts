@@ -56,7 +56,7 @@ export class Hub$CommLinker implements CommLinker {
 
   private constructor(target: CxEntry.Target<CommLinker>) {
     this.#context = target.get(FormationContext);
-    this.#orderUnits = this.#context.formation.order.get(OrderUnits);
+    this.#orderUnits = this.#context.formation.createdIn.get(OrderUnits);
     this.#formationManager = target.get(FormationManager);
   }
 

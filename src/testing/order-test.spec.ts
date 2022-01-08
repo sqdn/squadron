@@ -1,7 +1,6 @@
 import { afterEach, describe, expect, it } from '@jest/globals';
 import { cxConstAsset } from '@proc7ts/context-builder';
 import { CxEntry, cxSingle } from '@proc7ts/context-values';
-import Order from '@sqdn/order';
 import { Formation, FormationContext } from '../formation';
 import { OrderTest } from './order-test';
 
@@ -16,21 +15,21 @@ describe('OrderTest', () => {
 
       const entry: CxEntry<string> = { perContext: cxSingle(), toString: () => '[CxEntry test]' };
 
-      OrderTest.orderBuilder.provide(cxConstAsset(entry, 'test value'));
+      OrderTest.builtBy.provide(cxConstAsset(entry, 'test value'));
 
-      expect(OrderTest.order.get(entry)).toBe('test value');
+      expect(OrderTest.createdIn.get(entry)).toBe('test value');
     });
   });
 
   describe('hub', () => {
     it('sets up the test automatically', () => {
-      expect(OrderTest.hub).toBe(OrderTest.order.get(FormationContext).hub);
+      expect(OrderTest.hub).toBe(OrderTest.createdIn.get(FormationContext).hub);
     });
   });
 
   describe('formation', () => {
     it('sets up the test automatically', () => {
-      expect(OrderTest.formation).toBe(OrderTest.order.get(Formation));
+      expect(OrderTest.formation).toBe(OrderTest.createdIn.get(Formation));
     });
   });
 
@@ -42,23 +41,9 @@ describe('OrderTest', () => {
       expect(test.hub).toBe(OrderTest.hub);
       expect(test.formation).toBe(OrderTest.formation);
       expect(test.formationBuilder).toBe(OrderTest.formationBuilder);
-      expect(test.order).toBe(OrderTest.order);
-      expect(test.order.current).toBe(OrderTest.order);
-      expect(test.orderBuilder).toBe(OrderTest.orderBuilder);
+      expect(test.createdIn).toBe(OrderTest.createdIn);
+      expect(test.builtBy).toBe(OrderTest.builtBy);
       expect(test.supply).toBe(OrderTest.supply);
-    });
-  });
-
-  describe('reset', () => {
-    it('makes order inactive', () => {
-      OrderTest.setup();
-      expect(Order.current.active).toBe(true);
-
-      OrderTest.reset();
-      expect(Order.current.active).toBe(false);
-
-      OrderTest.reset();
-      expect(Order.current.active).toBe(false);
     });
   });
 });

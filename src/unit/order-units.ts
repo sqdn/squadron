@@ -1,6 +1,6 @@
 import { CxEntry, cxScoped, cxSingle } from '@proc7ts/context-values';
-import Order from '@sqdn/order';
 import { Order$Evaluator } from '../impl';
+import { OrderContext } from '../order';
 import { Unit } from './unit';
 
 export interface OrderUnits {
@@ -11,7 +11,7 @@ export interface OrderUnits {
 
 export const OrderUnits: CxEntry<OrderUnits> = {
   perContext: (/*#__PURE__*/ cxScoped(
-      Order.entry,
+      OrderContext,
       (/*#__PURE__*/ cxSingle({
         byDefault: target => new Order$Units(target.get(Order$Evaluator)),
       })),
@@ -28,7 +28,7 @@ class Order$Units implements OrderUnits {
   }
 
   unitByUid<TUnit extends Unit>(uid: string, unitType: new (init?: Unit.Init) => TUnit): TUnit {
-    return this.#evaluator.host.unitByUid(this.#evaluator.order, uid, unitType);
+    return this.#evaluator.host.unitByUid(this.#evaluator.orderContext, uid, unitType);
   }
 
 }

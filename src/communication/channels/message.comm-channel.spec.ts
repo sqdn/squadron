@@ -36,8 +36,8 @@ describe('MessageCommChannel', () => {
   let unit2: Unit;
 
   beforeEach(() => {
-    unit1 = new Unit({ tag: '1' });
-    unit2 = new Unit({ tag: '2' });
+    unit1 = OrderTest.run(() => new Unit({ tag: '1' }));
+    unit2 = OrderTest.run(() => new Unit({ tag: '2' }));
   });
 
   let port1: MessagePort;

@@ -15,17 +15,17 @@ describe('UnitContext', () => {
 
   it('is available in order', () => {
 
-    const context = OrderTest.order.get(UnitContext);
+    const context = OrderTest.createdIn.get(UnitContext);
 
     expect(context.hub).toBe(OrderTest.hub);
     expect(context.formation).toBe(OrderTest.formation);
     expect(context.unit).toBe(OrderTest.formation);
-    expect(context).toBe(OrderTest.order.get(FormationContext));
+    expect(context).toBe(OrderTest.createdIn.get(FormationContext));
   });
   it('is available during unit deployment', async () => {
 
-    const orderFormation = OrderTest.order.get(Formation);
-    const unit = new Unit({ tag: 'test' });
+    const orderFormation = OrderTest.createdIn.get(Formation);
+    const unit = OrderTest.run(() => new Unit({ tag: 'test' }));
     let context!: UnitContext;
 
     unit.instruct(subject => subject.execute(ctx => {

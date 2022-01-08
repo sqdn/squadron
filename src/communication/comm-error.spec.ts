@@ -14,7 +14,7 @@ describe('CommError', () => {
   let unit: Unit;
 
   beforeEach(() => {
-    unit = new Unit();
+    unit = OrderTest.run(() => new Unit());
   });
 
   describe('unit', () => {

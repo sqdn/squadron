@@ -5,7 +5,7 @@ import { Unit$Backend__symbol } from '../unit/unit.backend.impl';
 const Formation$perContext: CxEntry.Definer<Formation> = (/*#__PURE__*/ cxSingle());
 
 /**
- * Executive units formation representation.
+ * Representation of formation able to deploy executive units.
  *
  * A formation created by {@link Hub} per each {@link Formation representation} within order(s).
  *

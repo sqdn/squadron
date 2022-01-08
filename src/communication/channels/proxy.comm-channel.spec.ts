@@ -41,7 +41,7 @@ describe('ProxyCommChannel', () => {
   let unit: Unit;
 
   beforeEach(() => {
-    unit = new Unit();
+    unit = OrderTest.run(() => new Unit());
   });
 
   describe('with single target channel', () => {

@@ -1,19 +1,15 @@
-import Order from '@sqdn/order';
 import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { Module, SyntheticModule } from 'node:vm';
+import { Module } from 'node:vm';
 import { isMainThread, moveMessagePortToContext, workerData } from 'node:worker_threads';
-import { Formation$LaunchData } from '../impl';
+import { Formation$Host, Formation$LaunchData } from '../impl';
 import { SqdnLaunchModule } from './sqdn-launch-module.impl';
-import { SqdnLaunchOrder } from './sqdn-launch-order.impl';
 
 export class SqdnLauncher {
 
   readonly #resolve: RequireResolve;
   readonly #cache = new Map<string, SqdnLaunchModule>();
-  #order!: Order;
   #launchData?: Formation$LaunchData | null | undefined = null;
-  #orderModule?: Promise<Module> | undefined;
 
   constructor(readonly vmContext: object, readonly rootURL: string) {
     this.#resolve = createRequire(rootURL).resolve;
@@ -35,29 +31,6 @@ export class SqdnLauncher {
     };
   }
 
-  get orderModule(): Promise<Module> {
-    return this.#orderModule ||= this.#createOrderModule();
-  }
-
-  async #createOrderModule(): Promise<Module> {
-
-    const order = this.#order || new SqdnLaunchOrder(() => this.#order);
-    const module = new SyntheticModule(
-        ['default'],
-        () => {
-          module.setExport('default', order);
-        },
-        {
-          identifier: '@sqdn/order',
-          context: this.vmContext,
-        },
-    );
-
-    await module.link(this.resolveModule.bind(this));
-
-    return module;
-  }
-
   async launchModule(launchModuleId: string, options?: Parameters<Module['evaluate']>[0]): Promise<void> {
 
     const launchModule = await this.#moduleByURL(this.#moduleIdToURL(launchModuleId)).module;
@@ -69,15 +42,11 @@ export class SqdnLauncher {
     return launch(this);
   }
 
-  initOrder(order: Order): void {
-    this.#order = order;
+  initFormation(_host: Formation$Host): void {
+    // Does nothing
   }
 
   async resolveModule(specifier: string, referencingModule: Module): Promise<Module> {
-    if (specifier === '@sqdn/order') {
-      return this.orderModule;
-    }
-
     return await (this.#moduleByURL(this.#moduleURL(specifier, referencingModule))).module;
   }
 

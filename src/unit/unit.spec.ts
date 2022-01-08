@@ -26,52 +26,64 @@ describe('Unit', () => {
 
   describe('asFormation', () => {
     it('is `undefined`', () => {
-      expect(new TestUnit().asFormation).toBeUndefined();
+
+      const unit = test.run(() => new TestUnit());
+
+      expect(unit.asFormation).toBeUndefined();
     });
   });
 
-  describe('order', () => {
+  describe('createdIn', () => {
     it('equals to original order', () => {
 
-      const unit = new TestUnit();
+      const unit = test.run(() => new TestUnit());
 
-      expect(unit.order).toBe(test.order);
-      expect(unit.order).toBe(OrderTest.order);
+      expect(unit.createdIn).toBe(test.createdIn);
+      expect(unit.createdIn).toBe(OrderTest.createdIn);
 
       OrderTest.reset();
-      expect(unit.order).not.toBe(OrderTest.order);
+      expect(unit.createdIn).not.toBe(OrderTest.createdIn);
     });
   });
 
   describe('uid', () => {
     it('is unique to each source code fragment where the unit has been created', () => {
 
-      const unit1 = new TestUnit();
-      const unit2 = new TestUnit();
+      const { unit1, unit2 } = test.run(() => {
+
+        const unit1 = new TestUnit();
+        const unit2 = new TestUnit();
+
+        return { unit1, unit2 };
+      });
 
       expect(unit1.uid).not.toBe(unit2.uid);
     });
     it('is the same for the units created by the same source code fragment', () => {
+      const [unit1, unit2] = test.run(() => {
 
-      const units: TestUnit[] = [];
+        const units: TestUnit[] = [];
 
-      for (let i = 0; i < 2; ++i) {
-        units.push(new TestUnit());
-      }
+        for (let i = 0; i < 2; ++i) {
+          units.push(new TestUnit());
+        }
 
-      const [unit1, unit2] = units;
+        return units;
+      });
 
       expect(unit1.uid).toBe(unit2.uid);
     });
     it('is unique for the units created by the same source code fragment with different tags', () => {
 
-      const units: TestUnit[] = [];
+      const [unit1, unit2] = test.run(() => {
+        const units: TestUnit[] = [];
 
-      for (let i = 0; i < 2; ++i) {
-        units.push(new TestUnit({ tag: String(i) }));
-      }
+        for (let i = 0; i < 2; ++i) {
+          units.push(new TestUnit({ tag: String(i) }));
+        }
 
-      const [unit1, unit2] = units;
+        return units;
+      });
 
       expect(unit1.uid).not.toBe(unit2.uid);
     });
@@ -80,8 +92,13 @@ describe('Unit', () => {
   describe('supply', () => {
     it('is the same for units with the same UID', () => {
 
-      const unit1 = new TestUnit();
-      const unit2 = new TestUnit({ id: unit1.uid });
+      const { unit1, unit2 } = test.run(() => {
+
+        const unit1 = new TestUnit();
+        const unit2 = new TestUnit({ id: unit1.uid });
+
+        return { unit1, unit2 };
+      });
 
       expect(unit1.supply).toBe(unit2.supply);
     });
@@ -90,7 +107,15 @@ describe('Unit', () => {
   describe('sourceLink', () => {
     it('reflects fragment of source code', () => {
 
-      const unit = new TestUnit();
+      const unit = test.run(() => new TestUnit());
+      const filePath = fileURLToPath(import.meta.url);
+
+      expect(unit.sourceLink).toContain(filePath);
+      expect(unit.sourceLink).toMatch(/:\d+:\d+$/);
+    });
+    it('reflects fragment of source code with function call', () => {
+
+      const unit = new TestUnit({ createdIn: test.formation.createdIn });
       const filePath = fileURLToPath(import.meta.url);
 
       expect(unit.sourceLink).toContain(filePath);
@@ -104,7 +129,7 @@ describe('Unit', () => {
       const logger: Logger = {
         info: jest.fn(),
       } as Partial<Logger> as Logger;
-      const unit = new TestUnit({ tag: 'custom' });
+      const unit = test.run(() => new TestUnit({ tag: 'custom' }));
 
       processingLogger(logger).info(unit);
 
@@ -112,7 +137,7 @@ describe('Unit', () => {
     });
     it('expands to unit details', () => {
 
-      const unit = new TestUnit({ tag: 'custom' });
+      const unit = test.run(() => new TestUnit({ tag: 'custom' }));
 
       expect(dueLogZ({
         line: [unit],
@@ -132,7 +157,7 @@ describe('Unit', () => {
     });
     it('does not expand to unit details on input', () => {
 
-      const unit = new TestUnit({ tag: 'custom' });
+      const unit = test.run(() => new TestUnit({ tag: 'custom' }));
 
       expect(zlogINFO(unit)).toEqual({
         level: ZLogLevel.Info,
@@ -142,7 +167,7 @@ describe('Unit', () => {
     });
     it('converts to string representation if not in the leading position', () => {
 
-      const unit = new TestUnit({ tag: 'custom' });
+      const unit = test.run(() => new TestUnit({ tag: 'custom' }));
 
       expect(dueLogZ({
         line: ['prefix', unit],
@@ -159,7 +184,7 @@ describe('Unit', () => {
   describe('toString', () => {
     it('reflects unit type, UID, and source code fragment', () => {
 
-      const unit = new TestUnit();
+      const unit = test.run(() => new TestUnit());
       const filePath = fileURLToPath(import.meta.url);
       const pattern = new RegExp(`^\\[TestUnit ...${unit.uid.slice(-7)}\\((.+)\\)\\]$`);
 
@@ -172,7 +197,7 @@ describe('Unit', () => {
     });
     it('reflects unit tag', () => {
 
-      const unit = new TestUnit({ tag: 'test' });
+      const unit = test.run(() => new TestUnit({ tag: 'test' }));
       const filePath = fileURLToPath(import.meta.url);
       const pattern = new RegExp(`^\\[TestUnit test...${unit.uid.slice(-7)}\\((.+)\\)\\]$`);
 
@@ -185,56 +210,56 @@ describe('Unit', () => {
     });
     it('reflects short custom id', () => {
 
-      const unit = new TestUnit({ id: '0123456789' });
+      const unit = test.run(() => new TestUnit({ id: '0123456789' }));
       const pattern = new RegExp(`^\\[TestUnit 0123456789\\((.+)\\)\\]$`);
 
       expect(unit.toString()).toMatch(pattern);
     });
     it('reflects short custom id and tag', () => {
 
-      const unit = new TestUnit({ id: '123456789', tag: 'test' });
+      const unit = test.run(() => new TestUnit({ id: '123456789', tag: 'test' }));
       const pattern = new RegExp(`^\\[TestUnit test@123456789\\((.+)\\)\\]$`);
 
       expect(unit.toString()).toMatch(pattern);
     });
     it('reflects custom uid with custom id', () => {
 
-      const unit = new TestUnit({ id: 'test@123456789' });
+      const unit = test.run(() => new TestUnit({ id: 'test@123456789' }));
       const pattern = new RegExp(`^\\[TestUnit test@123456789\\((.+)\\)\\]$`);
 
       expect(unit.toString()).toMatch(pattern);
     });
     it('reflects custom uid with short id and tag', () => {
 
-      const unit = new TestUnit({ id: 'custom@123456789', tag: 'test' });
+      const unit = test.run(() => new TestUnit({ id: 'custom@123456789', tag: 'test' }));
       const pattern = new RegExp(`^\\[TestUnit test@custom@123456789\\((.+)\\)\\]$`);
 
       expect(unit.toString()).toMatch(pattern);
     });
     it('reflects long custom id', () => {
 
-      const unit = new TestUnit({ id: '0123456789a' });
+      const unit = test.run(() => new TestUnit({ id: '0123456789a' }));
       const pattern = new RegExp(`^\\[TestUnit ...456789a\\((.+)\\)\\]$`);
 
       expect(unit.toString()).toMatch(pattern);
     });
     it('reflects long custom id and tag', () => {
 
-      const unit = new TestUnit({ id: '0123456789', tag: 'test' });
+      const unit = test.run(() => new TestUnit({ id: '0123456789', tag: 'test' }));
       const pattern = new RegExp(`^\\[TestUnit test...3456789\\((.+)\\)\\]$`);
 
       expect(unit.toString()).toMatch(pattern);
     });
     it('reflects custom uid with long id', () => {
 
-      const unit = new TestUnit({ id: 'test@0123456789' });
+      const unit = test.run(() => new TestUnit({ id: 'test@0123456789' }));
       const pattern = new RegExp(`^\\[TestUnit test...3456789\\((.+)\\)\\]$`);
 
       expect(unit.toString()).toMatch(pattern);
     });
     it('reflects custom uid with long id and tag', () => {
 
-      const unit = new TestUnit({ id: 'custom@0123456789', tag: 'test' });
+      const unit = test.run(() => new TestUnit({ id: 'custom@0123456789', tag: 'test' }));
       const pattern = new RegExp(`^\\[TestUnit test@custom...3456789\\((.+)\\)\\]$`);
 
       expect(unit.toString()).toMatch(pattern);
@@ -245,7 +270,7 @@ describe('Unit', () => {
     it('records instruction', async () => {
 
       const instruction: OrderInstruction<TestUnit> = jest.fn();
-      const unit = new TestUnit();
+      const unit = test.run(() => new TestUnit());
 
       unit.instruct(instruction);
       test.formation.deploy(unit);
@@ -260,7 +285,7 @@ describe('Unit', () => {
     it('records instruction of already deployed unit', async () => {
 
       const instruction: OrderInstruction<TestUnit> = jest.fn();
-      const unit = new TestUnit();
+      const unit = test.run(() => new TestUnit());
 
       test.formation.deploy(unit);
       unit.instruct(instruction);
@@ -275,7 +300,7 @@ describe('Unit', () => {
     it('does not record instruction when unit withdrawn', async () => {
 
       const instruction: OrderInstruction<TestUnit> = jest.fn();
-      const unit = new TestUnit();
+      const unit = test.run(() => new TestUnit());
 
       unit.instruct(instruction);
       test.formation.deploy(unit);
@@ -287,7 +312,7 @@ describe('Unit', () => {
     });
     it('ignores instructions right after unit withdrawal', async () => {
 
-      const unit = new TestUnit();
+      const unit = test.run(() => new TestUnit());
       const instruction: OrderInstruction<TestUnit> = jest.fn();
 
       test.formation.deploy(unit);
@@ -302,7 +327,7 @@ describe('Unit', () => {
     it('ignores instruction when not deployed', async () => {
 
       const instruction: OrderInstruction<TestUnit> = jest.fn();
-      const unit = new TestUnit();
+      const unit = test.run(() => new TestUnit());
 
       unit.instruct(instruction);
 
@@ -312,9 +337,14 @@ describe('Unit', () => {
     });
     it('ignores instruction when deployed to another formation', async () => {
 
-      const formation2 = new Formation({ tag: 'other' });
       const instruction: OrderInstruction<TestUnit> = jest.fn();
-      const unit = new TestUnit();
+      const { formation2, unit } = test.run(() => {
+
+        const formation2 = new Formation({ tag: 'other' });
+        const unit = new TestUnit();
+
+        return { formation2, unit };
+      });
 
       unit.instruct(instruction);
       formation2.deploy(unit);
@@ -326,7 +356,7 @@ describe('Unit', () => {
     it('ignores instruction to disabled formation', async () => {
 
       const instruction: OrderInstruction<TestUnit> = jest.fn();
-      const unit = new TestUnit();
+      const unit = test.run(() => new TestUnit());
 
       unit.instruct(instruction);
       test.formation.deploy(unit);
@@ -349,7 +379,7 @@ describe('Unit', () => {
       const instruction: OrderInstruction<TestUnit> = jest.fn(() => {
         throw error;
       });
-      const unit = new TestUnit();
+      const unit = test.run(() => new TestUnit());
 
       unit.instruct(instruction);
       test.formation.deploy(unit);
@@ -361,7 +391,7 @@ describe('Unit', () => {
     });
     it('handles recurrent order evaluation', async () => {
 
-      const unit = new TestUnit();
+      const unit = test.run(() => new TestUnit());
       const recurrent = newPromiseResolver();
 
       unit.instruct(() => {
@@ -378,8 +408,13 @@ describe('Unit', () => {
     });
     it('allows to deploy during deployment', async () => {
 
-      const unit1 = new TestUnit();
-      const unit2 = new TestUnit();
+      const { unit1, unit2 } = test.run(() => {
+
+        const unit1 = new TestUnit();
+        const unit2 = new TestUnit();
+
+        return { unit1, unit2 };
+      });
       const instruction2: OrderInstruction = jest.fn();
 
       unit1.instruct(subject => {
@@ -405,7 +440,7 @@ describe('Unit', () => {
         test.formationBuilder.provide(cxConstAsset(Logger, logger));
 
         const error = new Error('test');
-        const unit = new TestUnit();
+        const unit = test.run(() => new TestUnit());
 
         test.formation.deploy(unit);
 
@@ -427,7 +462,7 @@ describe('Unit', () => {
       });
       it('does not apply instruction to withdrawn unit', async () => {
 
-        const unit = new TestUnit();
+        const unit = test.run(() => new TestUnit());
 
         test.formation.deploy(unit);
         await test.evaluate();
@@ -444,7 +479,7 @@ describe('Unit', () => {
       });
       it('does not apply instruction to not deployed unit', async () => {
 
-        const unit = new TestUnit();
+        const unit = test.run(() => new TestUnit());
 
         await test.evaluate();
 

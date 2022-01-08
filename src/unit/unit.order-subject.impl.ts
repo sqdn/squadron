@@ -2,7 +2,6 @@ import { CxAsset, CxEntry, CxRequest } from '@proc7ts/context-values';
 import { logline } from '@proc7ts/logger';
 import { noop } from '@proc7ts/primitives';
 import { Supply } from '@proc7ts/supply';
-import Order from '@sqdn/order';
 import { Formation, FormationContext } from '../formation';
 import { Hub } from '../hub';
 import { Formation$Host } from '../impl';
@@ -72,11 +71,7 @@ export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit
     return this.#host.formationBuilder.provide(asset).needs(this);
   }
 
-  perOrder<TValue, TAsset = TValue>(asset: CxAsset<TValue, TAsset, Order>): Supply {
-    return this.#host.perOrderCxPeer.provide(asset).needs(this);
-  }
-
-  perOrderContext<TValue, TAsset = TValue>(asset: CxAsset<TValue, TAsset, OrderContext>): Supply {
+  perOrder<TValue, TAsset = TValue>(asset: CxAsset<TValue, TAsset, OrderContext>): Supply {
     return this.#host.perOrderContextPeer.provide(asset).needs(this);
   }
 

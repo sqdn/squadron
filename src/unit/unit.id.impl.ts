@@ -73,7 +73,7 @@ const Unit$stack$sourceLinkPattern = /^\s*at\s+(?:.*\((.*)\)|(.*[^)]))$/;
 function Unit$sourceLink(stack: string): string {
 
   const line = stack.split(Unit$stack$nlPattern, 2)[1];
-  const result = Unit$stack$sourceLinkPattern.exec(line);
+  const result = Unit$stack$sourceLinkPattern.exec(line)!;
 
-  return result![1];
+  return result[1] || result[2];
 }

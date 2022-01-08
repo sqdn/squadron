@@ -1,9 +1,8 @@
 import { Supply, SupplyPeer } from '@proc7ts/supply';
-import Order from '@sqdn/order';
 import { Formation } from '../formation';
 import { Formation$Host, Order$Evaluator } from '../impl';
 import { DueSqdnLog, SqdnLoggable } from '../logging';
-import { OrderInstruction } from '../order';
+import { OrderContext, OrderInstruction } from '../order';
 import { Unit$Backend, Unit$Backend__symbol } from './unit.backend.impl';
 import { Unit$Id, Unit$Id__symbol } from './unit.id.impl';
 
@@ -27,7 +26,7 @@ export class Unit implements SqdnLoggable, SupplyPeer {
     return this.name;
   }
 
-  readonly #order: Order;
+  readonly #createdIn: OrderContext;
 
   /**
    * @internal
@@ -43,14 +42,14 @@ export class Unit implements SqdnLoggable, SupplyPeer {
    */
   constructor(init: Unit.Init = {}) {
 
-    const { order = Order.current } = init;
+    const { createdIn = OrderContext.current() } = init;
 
-    this.#order = order;
+    this.#createdIn = createdIn;
     Error.captureStackTrace(
         this[Unit$Id__symbol] = new Unit$Id(this, init),
         new.target,
     );
-    this.order.get(Formation$Host).addUnit(this);
+    this.createdIn.get(Formation$Host).addUnit(this);
   }
 
   /**
@@ -66,7 +65,7 @@ export class Unit implements SqdnLoggable, SupplyPeer {
    * @internal
    */
   get [Unit$Backend__symbol](): Unit$Backend<this> {
-    return this.#backend ||= this.order.get(Order$Evaluator).evalUnit(this);
+    return this.#backend ||= this.createdIn.get(Order$Evaluator).evalUnit(this);
   }
 
   /**
@@ -79,19 +78,17 @@ export class Unit implements SqdnLoggable, SupplyPeer {
   /**
    * A link to fragment of source code that created this unit.
    *
-   * Has format inherent from stack trace: `${file}:${line}:${column}`.
+   * Has a format inherent from stack trace: `${file}:${line}:${column}`.
    */
   get sourceLink(): string {
     return this[Unit$Id__symbol].sourceLink;
   }
 
   /**
-   * The order this unit originated from.
-   *
-   * This is the order the unit constructor has been called in.
+   * A context of the order this context has been created in.
    */
-  get order(): Order {
-    return this.#order;
+  get createdIn(): OrderContext {
+    return this.#createdIn;
   }
 
   /**
@@ -203,11 +200,11 @@ export namespace Unit {
   export interface Init {
 
     /**
-     * The order the unit created in.
+     * A context of the order creating the unit.
      *
-     * Defaults to current order.
+     * Defaults to {@link OrderContext.Entry.current current one}.
      */
-    readonly order?: Order | undefined;
+    readonly createdIn?: OrderContext | undefined;
 
     /**
      * Unit tag to add to its identifier.
