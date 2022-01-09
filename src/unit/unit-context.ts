@@ -6,7 +6,7 @@ import { Unit } from './unit';
 import { UnitStatus } from './unit-status';
 
 /**
- * Unit operations context.
+ * Unit operations' context.
  *
  * Context becomes available within formation the unit arrived to.
  */

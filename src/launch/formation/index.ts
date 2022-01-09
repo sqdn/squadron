@@ -14,9 +14,9 @@ export default function launchFormation(launcher: SqdnLauncher): void {
       launcher,
       {
         orderId: launcher.rootURL,
-        createOrigin: order => ({
-          hub: new Hub({ id: launcher.launchData!.hubUid, order }),
-          formation: new Formation({ id: launcher.launchData!.uid, order }),
+        createOrigin: createdIn => ({
+          hub: new Hub({ id: launcher.launchData!.hubUid, createdIn }),
+          formation: new Formation({ id: launcher.launchData!.uid, createdIn }),
         }),
         createContext(host, get, cxBuilder) {
           cxBuilder.provide(Formation$createAssets(launcher.launchData!));

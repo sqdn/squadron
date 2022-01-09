@@ -42,7 +42,7 @@ export class Communicator$ implements Communicator {
             return new DirectCommChannel({
               to,
               processor: commProcessorBy(
-                  this.#host.unitDeployment(to).context.get(CommProtocol).channelProcessor(this.#unit),
+                  this.#host.deploymentOf(to).context.get(CommProtocol).channelProcessor(this.#unit),
               ),
             });
           }

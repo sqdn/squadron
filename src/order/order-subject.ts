@@ -1,9 +1,9 @@
 import { CxAsset, CxModifier, CxValues } from '@proc7ts/context-values';
 import { Supply, SupplyPeer } from '@proc7ts/supply';
-import Order from '@sqdn/order';
 import { Formation, FormationContext } from '../formation';
 import { Hub } from '../hub';
 import { Unit, UnitContext } from '../unit';
+import { OrderContext } from './order-context';
 import { OrderTask } from './order-task';
 import { OrderWithdrawalTask } from './order-withdrawal-task';
 
@@ -33,6 +33,11 @@ export interface OrderSubject<TUnit extends Unit = Unit> extends CxValues, CxMod
    * IoC context of deployed.
    */
   readonly context: UnitContext<TUnit>;
+
+  /**
+   * Context of order that deployed the unit.
+   */
+  readonly deployedIn: OrderContext;
 
   /**
    * Order subject supply.
@@ -75,7 +80,7 @@ export interface OrderSubject<TUnit extends Unit = Unit> extends CxValues, CxMod
    *
    * @returns Asset supply. Revokes provided asset once cut off.
    */
-  perOrder<TValue, TAsset = TValue>(asset: CxAsset<TValue, TAsset, Order>): Supply;
+  perOrder<TValue, TAsset = TValue>(asset: CxAsset<TValue, TAsset, OrderContext>): Supply;
 
   /**
    * Provides an asset for the entry of each unit deployed to the same {@link formation}.

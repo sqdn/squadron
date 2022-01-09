@@ -1,14 +1,16 @@
 import { CxBuilder, cxConstAsset, CxPeerBuilder } from '@proc7ts/context-builder';
 import { CxEntry, cxSingle } from '@proc7ts/context-values';
 import { Logger } from '@proc7ts/logger';
-import Order from '@sqdn/order';
+import { arrayOfElements } from '@proc7ts/primitives';
+import { v4 as uuidv4 } from 'uuid';
 import { Formation, FormationContext } from '../formation';
 import { Hub } from '../hub';
+import { OrderContext } from '../order';
+import { OrderContext$ } from '../order/order-context.impl';
 import { Unit, UnitContext, UnitOrigin } from '../unit';
 import { Unit$Deployment } from '../unit/unit.deployment.impl';
 import { Unit$Host } from '../unit/unit.host.impl';
 import { Formation$Factory } from './formation.factory';
-import { Formation$Order } from './formation.order';
 import { Order$Workbench } from './order.workbench';
 import { Unit$DeploymentTracker } from './unit.deployment-tracker';
 
@@ -27,12 +29,11 @@ export class Formation$Host implements Unit$Host {
   readonly workbench = new Order$Workbench();
   readonly formationBuilder: CxBuilder<FormationContext>;
   readonly context: FormationContext;
-  readonly perOrderCxPeer: CxPeerBuilder<Order>;
+  readonly perOrderContextPeer: CxPeerBuilder<OrderContext>;
   readonly perUnitCxPeer: CxPeerBuilder<UnitContext>;
 
   readonly #factory: Formation$Factory;
-  #order?: Order | undefined;
-  #orderBuilder?: CxBuilder<Order> | undefined;
+  #builtBy?: CxBuilder<OrderContext>;
   #_origin?: UnitOrigin | undefined;
   readonly #units = new Map<string, Unit>();
   readonly #deployments = new Map<string, Unit$Deployment<any>>();
@@ -46,7 +47,7 @@ export class Formation$Host implements Unit$Host {
     );
     this.context = this.formationBuilder.context;
 
-    this.perOrderCxPeer = new CxPeerBuilder<Order>(this.formationBuilder.boundPeer);
+    this.perOrderContextPeer = new CxPeerBuilder<OrderContext>(this.formationBuilder.boundPeer);
     this.perUnitCxPeer = new CxPeerBuilder<UnitContext>(this.formationBuilder.boundPeer);
   }
 
@@ -59,32 +60,15 @@ export class Formation$Host implements Unit$Host {
   }
 
   get #origin(): UnitOrigin {
-    return this.#_origin ||= this.#factory.createOrigin(this.order, this.orderBuilder);
+    return this.#_origin ||= this.#factory.createOrigin(this.createdIn, this.builtBy);
   }
 
-  get order(): Order {
-    return this.#order ||= this.orderBuilder.context;
+  get createdIn(): OrderContext {
+    return this.builtBy.context;
   }
 
-  get orderBuilder(): CxBuilder<Order> {
-    return this.#orderBuilder ||= this.#newOrderBuilder();
-  }
-
-  #newOrderBuilder(): CxBuilder<Order> {
-    return new CxBuilder<Order>(
-        (get, builder) => {
-
-          const { createOrder } = this.#factory;
-          const order = createOrder
-              ? createOrder(get, builder)
-              : (/* istanbul ignore next */ new Formation$Order(this.#factory.orderId, get));
-
-          builder.provide(cxConstAsset(Order.entry, order));
-
-          return order;
-        },
-        this.perOrderCxPeer,
-    );
+  get builtBy(): CxBuilder<OrderContext> {
+    return this.#builtBy ||= this.#newOrderContextBuilder();
   }
 
   get log(): Logger {
@@ -101,7 +85,7 @@ export class Formation$Host implements Unit$Host {
     this.#units.set(unit.uid, unit);
   }
 
-  unitByUid<TUnit extends Unit>(order: Order, id: string, unitType: new (init?: Unit.Init) => TUnit): TUnit {
+  unitByUid<TUnit extends Unit>(createdIn: OrderContext, id: string, unitType: new (init?: Unit.Init) => TUnit): TUnit {
 
     const unit = this.#units.get(id);
 
@@ -114,11 +98,30 @@ export class Formation$Host implements Unit$Host {
       }
     }
 
-    const newUnit = new unitType({ id, order: order });
+    const newUnit = new unitType({ id, createdIn });
 
     this.#units.set(id, newUnit);
 
     return newUnit;
+  }
+
+  newOrder(init?: OrderContext.Init): OrderContext {
+    return this.#newOrderContextBuilder(init).context;
+  }
+
+  #newOrderContextBuilder({ orderId = uuidv4(), peer }: OrderContext.Init = {}): CxBuilder<OrderContext> {
+    return new CxBuilder<OrderContext>(
+        (getValue, builder) => {
+
+          const context = new OrderContext$(orderId, getValue);
+
+          builder.provide(cxConstAsset(OrderContext, context));
+
+          return context;
+        },
+        this.perOrderContextPeer,
+        ...arrayOfElements(peer),
+    );
   }
 
   deploy(formation: Formation, unit: Unit): void {
@@ -136,7 +139,7 @@ export class Formation$Host implements Unit$Host {
     return tracker as Unit$DeploymentTracker<TUnit>;
   }
 
-  unitDeployment<TUnit extends Unit>(unit: TUnit): Unit$Deployment<TUnit> {
+  deploymentOf<TUnit extends Unit>(unit: TUnit): Unit$Deployment<TUnit> {
 
     let deployment = this.#deployments.get(unit.uid);
 

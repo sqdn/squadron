@@ -3,6 +3,7 @@ import { CxAccessor, CxEntry, CxGlobals, CxRequest } from '@proc7ts/context-valu
 import { AfterEvent } from '@proc7ts/fun-events';
 import { Hub } from '../hub';
 import { Formation$Host } from '../impl';
+import { OrderContext } from '../order';
 import { Unit, UnitContext, UnitStatus } from '../unit';
 import { UnitContext__entry } from '../unit/unit.entries.impl';
 import { Formation } from './formation';
@@ -48,8 +49,12 @@ export class Formation$Context implements FormationContext {
     return this.#get(entry, request);
   }
 
-  unitContext<TUnit extends Unit>(unit: TUnit): UnitContext<TUnit> {
-    return this.#host.unitDeployment(unit).context;
+  contextOf<TUnit extends Unit>(unit: TUnit): UnitContext<TUnit> {
+    return this.#host.deploymentOf(unit).context;
+  }
+
+  newOrder(init?: OrderContext.Init): OrderContext {
+    return this.#host.newOrder(init);
   }
 
 }

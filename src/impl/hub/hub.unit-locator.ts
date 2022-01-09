@@ -32,7 +32,7 @@ export class Hub$UnitLocator implements UnitLocator {
 
   private constructor(target: CxEntry.Target<UnitLocator>) {
     this.#host = target.get(Formation$Host);
-    this.#orderUnits = this.#host.formation.order.get(OrderUnits);
+    this.#orderUnits = this.#host.formation.createdIn.get(OrderUnits);
   }
 
   locateUnit(unit: Unit): OnEvent<[UnitLocation]> {

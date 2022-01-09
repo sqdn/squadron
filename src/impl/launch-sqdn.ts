@@ -4,5 +4,5 @@ import { Formation$Host } from './formation.host';
 
 // istanbul ignore next
 export function launchSqdn(loader: SqdnLauncher, formationFactory: Formation$Factory): void {
-  loader.initOrder(new Formation$Host(formationFactory).order);
+  loader.initFormation(new Formation$Host(formationFactory));
 }

@@ -33,7 +33,9 @@ export class FormationTest$Nested extends OrderTest$Instance implements Formatio
   deploy<TUnit extends Unit>(unit: TUnit): TUnit {
     this.#hubFormation.deploy(unit);
 
-    const fmnUnit = this.order.get(OrderUnits).unitByUid(unit.uid, unit.constructor as new (init?: Unit.Init) => TUnit);
+    const fmnUnit = this.createdIn
+        .get(OrderUnits)
+        .unitByUid(unit.uid, unit.constructor as new (init?: Unit.Init) => TUnit);
 
     this.formation.deploy(fmnUnit);
 
@@ -53,10 +55,10 @@ function FormationTest$init(
   return {
     ...init,
     supply: supply.needs(hubTest),
-    createOrigin(order) {
+    createOrigin(createdIn) {
       return {
-        hub: new Hub({ id: hubTest.hub.uid, order }),
-        formation: new Formation({ id: formation.uid, order }),
+        hub: new Hub({ id: hubTest.hub.uid, createdIn }),
+        formation: new Formation({ id: formation.uid, createdIn }),
       };
     },
   };

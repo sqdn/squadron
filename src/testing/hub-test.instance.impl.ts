@@ -67,13 +67,13 @@ export class HubTest$Instance extends OrderTest$Instance implements HubTest {
 
 function HubTest$init(init: HubTest.Init = {}): OrderTest.Init {
 
-  const { createHub = OrderTest$defaultHub } = init;
+  const { createHub = createdIn => OrderTest$defaultHub(createdIn) } = init;
 
   return {
     ...init,
-    createOrigin(order, orderBuilder) {
+    createOrigin(createdIn, builtBy) {
 
-      const hub = createHub(order, orderBuilder);
+      const hub = createHub(createdIn, builtBy);
 
       return {
         hub,

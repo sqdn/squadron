@@ -28,7 +28,7 @@ describe('DirectCommChannel', () => {
   let unit: Unit;
 
   beforeEach(() => {
-    unit = new Unit();
+    unit = OrderTest.run(() => new Unit());
   });
 
   let channel: DirectCommChannel;

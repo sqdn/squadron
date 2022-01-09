@@ -13,26 +13,28 @@ describe('FormationContext', () => {
     OrderTest.reset();
   });
 
-  it('is available in order', () => {
+  it('is available in creator context', () => {
 
-    const context = OrderTest.order.get(FormationContext);
+    const context = OrderTest.createdIn.get(FormationContext);
 
     expect(context.hub).toBe(OrderTest.hub);
     expect(context.formation).toBe(OrderTest.formation);
     expect(context.unit).toBe(OrderTest.formation);
-    expect(Object.is(context.unit.order, OrderTest.order)).toBe(true);
+    expect(Object.is(context.unit.createdIn, OrderTest.createdIn)).toBe(true);
   });
   it('is available during formation deployment', async () => {
 
     const formation = OrderTest.formation;
-    const orderFormation = OrderTest.order.get(Formation);
+    const orderFormation = OrderTest.createdIn.get(Formation);
     let context!: FormationContext;
 
-    formation.instruct(subject => subject.execute(ctx => {
-      context = ctx as any;
-    }));
+    await OrderTest.run(async () => {
+      formation.instruct(subject => subject.execute(ctx => {
+        context = ctx as any;
+      }));
 
-    await OrderTest.evaluate();
+      await OrderTest.evaluate();
+    });
 
     expect(context.hub).toBe(OrderTest.hub);
     expect(context.formation).toBe(orderFormation);

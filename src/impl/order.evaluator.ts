@@ -1,7 +1,7 @@
 import { CxEntry, cxSingle } from '@proc7ts/context-values';
 import { Logger } from '@proc7ts/logger';
-import Order from '@sqdn/order';
 import { Formation } from '../formation';
+import { OrderContext } from '../order';
 import { Unit } from '../unit';
 import { Unit$Backend } from '../unit/unit.backend.impl';
 import { Unit$Deployment } from '../unit/unit.deployment.impl';
@@ -11,7 +11,7 @@ import { Formation$Host } from './formation.host';
 import { Order$Workbench } from './order.workbench';
 
 const Order$Evaluator$perContext: CxEntry.Definer<Order$Evaluator> = (/*#__PURE__*/ cxSingle({
-  byDefault: target => new Order$Evaluator(target.get(Order.entry)),
+  byDefault: target => new Order$Evaluator(target.get(OrderContext)),
 }));
 
 export class Order$Evaluator implements Unit$Host {
@@ -27,8 +27,8 @@ export class Order$Evaluator implements Unit$Host {
   readonly host: Formation$Host;
   readonly #evaluators = new Map<string, Unit$Evaluator<any>>();
 
-  constructor(readonly order: Order) {
-    this.host = order.get(Formation$Host);
+  constructor(readonly orderContext: OrderContext) {
+    this.host = orderContext.get(Formation$Host);
   }
 
   get workbench(): Order$Workbench {
@@ -36,11 +36,11 @@ export class Order$Evaluator implements Unit$Host {
   }
 
   get log(): Logger {
-    return this.order.get(Logger);
+    return this.orderContext.get(Logger);
   }
 
-  unitDeployment<TUnit extends Unit>(unit: TUnit): Unit$Deployment<TUnit> {
-    return this.host.unitDeployment(unit);
+  deploymentOf<TUnit extends Unit>(unit: TUnit): Unit$Deployment<TUnit> {
+    return this.host.deploymentOf(unit);
   }
 
   deploy(formation: Formation, unit: Unit): void {

@@ -18,19 +18,21 @@ describe('FormationManager', () => {
   let formationManager: FormationManager;
 
   beforeEach(async () => {
-    HubTest.hub.instruct(subject => {
-      subject.execute(context => {
-        formationManager = context.get(FormationManager);
+    await HubTest.run(async () => {
+      HubTest.hub.instruct(subject => {
+        subject.execute(context => {
+          formationManager = context.get(FormationManager);
+        });
       });
+      await HubTest.evaluate();
     });
-    await HubTest.evaluate();
   });
 
   describe('FormationCtl', () => {
     describe('formation', () => {
       it('equals to requested formation', () => {
 
-        const testFmn = new Formation({ tag: 'test-fmn', order: HubTest.order });
+        const testFmn = new Formation({ tag: 'test-fmn', createdIn: HubTest.createdIn });
         const ctl = formationManager.formationCtl(testFmn);
 
         expect(ctl.formation).toBe(testFmn);
@@ -46,7 +48,7 @@ describe('FormationManager', () => {
 
         }
 
-        const testFmn = new Formation({ tag: 'test-fmn', order: HubTest.order });
+        const testFmn = new Formation({ tag: 'test-fmn', createdIn: HubTest.createdIn });
         const fmnTest = HubTest.testFormation(testFmn);
         const responder: CommResponder<TestPacket, TestPacket> = {
           name: 'test',

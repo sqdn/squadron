@@ -19,6 +19,8 @@ describe('HandlerCommProtocol', () => {
       channelProcessor: noop,
     });
 
-    expect(protocol.channelProcessor(new Unit())).toBeUndefined();
+    const unit = OrderTest.run(() => new Unit());
+
+    expect(protocol.channelProcessor(unit)).toBeUndefined();
   });
 });

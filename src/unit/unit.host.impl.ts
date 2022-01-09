@@ -9,7 +9,7 @@ export interface Unit$Host {
   readonly workbench: Order$Workbench;
   readonly log: Logger;
 
-  unitDeployment<TUnit extends Unit>(unit: TUnit): Unit$Deployment<TUnit>;
+  deploymentOf<TUnit extends Unit>(unit: TUnit): Unit$Deployment<TUnit>;
 
   deploy(formation: Formation, unit: Unit): void;
 

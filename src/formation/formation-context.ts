@@ -1,4 +1,5 @@
 import { CxEntry, cxSingle } from '@proc7ts/context-values';
+import { OrderContext } from '../order';
 import { Unit, UnitContext } from '../unit';
 import { Formation } from './formation';
 
@@ -29,7 +30,16 @@ export interface FormationContext extends UnitContext<Formation> {
    *
    * @returns Unit context.
    */
-  unitContext<TUnit extends Unit>(unit: TUnit): UnitContext<TUnit>;
+  contextOf<TUnit extends Unit>(unit: TUnit): UnitContext<TUnit>;
+
+  /**
+   * Creates new order.
+   *
+   * @param init - Order context initialization options.
+   *
+   * @returns New order context instance.
+   */
+  newOrder(init?: OrderContext.Init): OrderContext;
 
 }
 

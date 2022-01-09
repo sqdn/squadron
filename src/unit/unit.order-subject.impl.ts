@@ -2,11 +2,10 @@ import { CxAsset, CxEntry, CxRequest } from '@proc7ts/context-values';
 import { logline } from '@proc7ts/logger';
 import { noop } from '@proc7ts/primitives';
 import { Supply } from '@proc7ts/supply';
-import Order from '@sqdn/order';
 import { Formation, FormationContext } from '../formation';
 import { Hub } from '../hub';
 import { Formation$Host } from '../impl';
-import { OrderSubject, OrderTask, OrderWithdrawalTask } from '../order';
+import { OrderContext, OrderSubject, OrderTask, OrderWithdrawalTask } from '../order';
 import { Unit } from './unit';
 import { UnitContext } from './unit-context';
 import { UnitStatus } from './unit-status';
@@ -14,6 +13,7 @@ import { Unit$Deployment } from './unit.deployment.impl';
 
 export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit> {
 
+  readonly #deployedIn: OrderContext;
   readonly #deployment: Unit$Deployment<TUnit>;
   readonly #supply: Supply;
 
@@ -24,9 +24,10 @@ export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit
   #addWithdrawal = this.#doAddWithdrawal;
   #withdraw = this.#doWithdraw;
 
-  constructor(backend: Unit$Deployment<TUnit>, supply: Supply) {
+  constructor(deployedIn: OrderContext, backend: Unit$Deployment<TUnit>, supply: Supply) {
+    this.#deployedIn = deployedIn;
     this.#deployment = backend;
-    this.#supply = supply.whenOff(reason => {
+    this.#supply = supply.needs(deployedIn).whenOff(reason => {
       this.#execute = this.#rejectExecution(reason);
       this.withdraw(reason).catch(noop);
     });
@@ -46,6 +47,10 @@ export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit
 
   get context(): UnitContext<TUnit> {
     return this.#deployment.context;
+  }
+
+  get deployedIn(): OrderContext {
+    return this.#deployedIn;
   }
 
   get supply(): Supply {
@@ -72,8 +77,8 @@ export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit
     return this.#host.formationBuilder.provide(asset).needs(this);
   }
 
-  perOrder<TValue, TAsset = TValue>(asset: CxAsset<TValue, TAsset, Order>): Supply {
-    return this.#host.perOrderCxPeer.provide(asset).needs(this);
+  perOrder<TValue, TAsset = TValue>(asset: CxAsset<TValue, TAsset, OrderContext>): Supply {
+    return this.#host.perOrderContextPeer.provide(asset).needs(this);
   }
 
   perUnit<TValue, TAsset = TValue>(asset: CxAsset<TValue, TAsset, UnitContext>): Supply {
@@ -91,7 +96,7 @@ export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit
 
     host.workbench.execute(async () => {
       try {
-        await task(host.unitDeployment(this.unit).context);
+        await task(host.deploymentOf(this.unit).context);
       } catch (error) {
         host.log.error(logline`Failed to deploy ${this.unit}`, error);
         this.supply.off(error);
@@ -133,6 +138,7 @@ export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit
         resolve();
       };
 
+      const { deployedIn } = this;
       const host = this.#host;
       const unit = this.unit;
       let withdrawalCount = 0;
@@ -140,15 +146,17 @@ export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit
       const executeWithdrawal = (task: OrderWithdrawalTask): void => {
         ++withdrawalCount;
         host.workbench.withdraw(async function doWithdraw() {
-          try {
-            await task(reason);
-          } catch (error) {
-            host.log.error(logline`Failed to withdraw ${unit}`, error);
-          } finally {
-            if (!--withdrawalCount) {
-              endWithdrawal();
+          await deployedIn.run(async () => {
+            try {
+              await task(reason);
+            } catch (error) {
+              host.log.error(logline`Failed to withdraw ${unit}`, error);
+            } finally {
+              if (!--withdrawalCount) {
+                endWithdrawal();
+              }
             }
-          }
+          });
         });
       };
 

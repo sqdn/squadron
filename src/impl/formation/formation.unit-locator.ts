@@ -49,7 +49,7 @@ class Formation$UnitLocation implements UnitLocation {
       { formations }: UnitLocationCommResponse,
   ) {
 
-    const orderUnits = formation.order.get(OrderUnits);
+    const orderUnits = formation.createdIn.get(OrderUnits);
 
     for (const uid of formations) {
       this.#formations.set(uid, orderUnits.unitByUid(uid, Formation));

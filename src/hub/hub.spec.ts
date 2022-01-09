@@ -12,26 +12,35 @@ describe('Hub', () => {
 
   describe('uid', () => {
     it('is "hub" by default', () => {
-      expect(new Hub().uid).toBe('hub');
+
+      const hub = OrderTest.run(() => new Hub());
+
+      expect(hub.uid).toBe('hub');
     });
     it('can be explicitly specified', () => {
-      expect(new Hub({ id: 'custom' }).uid).toBe('custom');
+
+      const hub = OrderTest.run(() => new Hub({ id: 'custom' }));
+
+      expect(hub.uid).toBe('custom');
     });
     it('includes tag', () => {
-      expect(new Hub({ id: 'custom', tag: 'test' }).uid).toBe('test@custom');
+
+      const hub = OrderTest.run(() => new Hub({ id: 'custom', tag: 'test' }));
+
+      expect(hub.uid).toBe('test@custom');
     });
   });
 
   describe('toString', () => {
     it('provides string representation', () => {
 
-      const hub = new Hub();
+      const hub = OrderTest.run(() => new Hub());
 
       expect(String(hub)).toBe(`[Hub hub(${hub.sourceLink})]`);
     });
     it('provides tagged string representation', () => {
 
-      const hub = new Hub({ tag: 'test' });
+      const hub = OrderTest.run(() => new Hub({ tag: 'test' }));
 
       expect(String(hub)).toBe(`[Hub test@hub(${hub.sourceLink})]`);
     });

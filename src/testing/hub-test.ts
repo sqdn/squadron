@@ -1,9 +1,9 @@
 import { CxBuilder } from '@proc7ts/context-builder';
 import { Logger } from '@proc7ts/logger';
 import { Supply } from '@proc7ts/supply';
-import Order from '@sqdn/order';
 import { Formation } from '../formation';
 import { Hub } from '../hub';
+import { OrderContext } from '../order';
 import { FormationTest } from './formation-test';
 import { HubTest$Static } from './hub-test.static.impl';
 import { OrderTest } from './order-test';
@@ -26,7 +26,7 @@ export namespace HubTest {
 
     readonly supply?: Supply | undefined;
 
-    createHub?: ((this: void, order: Order, orderBuilder: CxBuilder<Order>) => Hub) | undefined;
+    createHub?: ((this: void, createdIn: OrderContext, builtBy: CxBuilder<OrderContext>) => Hub) | undefined;
 
   }
 

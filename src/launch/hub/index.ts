@@ -7,6 +7,8 @@ import { Formation$Context } from '../../formation/formation.context.impl';
 import { FormationStarter, Hub } from '../../hub';
 import { launchSqdn } from '../../impl';
 import { Hub$createAssets } from '../../impl/hub';
+import { OrderContext } from '../../order';
+import { UnitOrigin } from '../../unit';
 import { SqdnLauncher } from '../sqdn-launcher';
 import { Hub$FormationStarter } from './hub.formation-starter';
 
@@ -15,9 +17,9 @@ export default function launchHub(launcher: SqdnLauncher): void {
       launcher,
       {
         orderId: launcher.rootURL,
-        createOrigin(order) {
+        createOrigin(createdIn: OrderContext): UnitOrigin {
 
-          const hub = new Hub({ order });
+          const hub = new Hub({ createdIn });
 
           return {
             hub,
