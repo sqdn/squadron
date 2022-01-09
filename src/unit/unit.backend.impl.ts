@@ -8,9 +8,14 @@ export const Unit$Backend__symbol = (/*#__PURE__*/ Symbol('Unit.backend'));
 
 export abstract class Unit$Backend<TUnit extends Unit, THost extends Unit$Host = Unit$Host> implements SupplyPeer {
 
-  readonly supply = new Supply();
+  readonly #supply = new Supply();
 
   constructor(readonly host: THost, readonly unit: TUnit) {
+    this.#supply.needs(unit.createdIn);
+  }
+
+  get supply(): Supply {
+    return this.#supply;
   }
 
   abstract instruct(instruction: OrderInstruction<TUnit>): void;

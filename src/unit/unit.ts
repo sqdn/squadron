@@ -9,11 +9,11 @@ import { Unit$Id, Unit$Id__symbol } from './unit.id.impl';
 /**
  * Executive unit representation.
  *
- * Unit instances supposed to be constructed within orders.
- *
  * Unit's {@link uid unique identifier} is a hash of its stack trace. So, the identifier would stay the same on each
  * order evaluation. It is also possible to specify a {@link Unit.Init.tag tag} to add to identifier to make a
  * distinction between units created at the same line of source code, e.g. within loops.
+ *
+ * Unit can be instantiated only {@link OrderContext.Entry.current within order}.
  */
 export class Unit implements SqdnLoggable, SupplyPeer {
 
@@ -122,6 +122,8 @@ export class Unit implements SqdnLoggable, SupplyPeer {
    * Records an instruction for this unit to apply later.
    *
    * Once the unit arrives to deployment formation, the recorded instruction will be applied.
+   *
+   * This method can be called only {@link OrderContext.Entry.current within order}.
    *
    * @param instruction - An instruction to record.
    *

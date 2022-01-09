@@ -1,8 +1,9 @@
 import { CxBuilder } from '@proc7ts/context-builder';
 import { AfterEvent, trackValue, ValueTracker } from '@proc7ts/fun-events';
+import { lazyValue } from '@proc7ts/primitives';
 import { Formation } from '../formation';
 import { Formation$Host } from '../impl';
-import { OrderInstruction, OrderSubject } from '../order';
+import { OrderContext, OrderInstruction, OrderSubject } from '../order';
 import { Unit } from './unit';
 import { UnitContext } from './unit-context';
 import { UnitStatus } from './unit-status';
@@ -35,18 +36,34 @@ export class Unit$Deployment<TUnit extends Unit = Unit> extends Unit$Backend<TUn
 
   instruct(instruction: OrderInstruction<TUnit>): void {
 
-    let subject: OrderSubject<TUnit> | null = new Unit$OrderSubject(this, this.supply.derive());
+    const deployedIn = OrderContext.current();
+    let getSubject: (() => OrderSubject<TUnit> | null) | null = lazyValue(() => {
 
-    subject.supply.whenOff(_ => subject = null);
+      let subject: OrderSubject<TUnit> | null = new Unit$OrderSubject(deployedIn, this, this.supply.derive());
+
+      subject.supply.whenOff(_ => {
+        subject = null;
+        getSubject = null;
+      });
+
+      return subject;
+    });
+
 
     this.host.workbench.instruct(async () => {
+
+      const subject = getSubject?.();
+
       if (subject) {
-        try {
-          await instruction(subject);
-        } catch (error) {
-          this.host.log.error(`Instructions for ${this.unit} rejected`, error);
-          subject.supply.off(error);
-        }
+
+        await deployedIn.run(async () => {
+          try {
+            await instruction(subject);
+          } catch (error) {
+            this.host.log.error(`Instructions for ${this.unit} rejected`, error);
+            subject.supply.off(error);
+          }
+        });
       }
     });
   }

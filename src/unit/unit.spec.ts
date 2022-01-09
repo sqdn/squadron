@@ -270,12 +270,17 @@ describe('Unit', () => {
     it('records instruction', async () => {
 
       const instruction: OrderInstruction<TestUnit> = jest.fn();
-      const unit = test.run(() => new TestUnit());
+      const unit = await test.run(async () => {
 
-      unit.instruct(instruction);
-      test.formation.deploy(unit);
+        const unit = new TestUnit();
 
-      await test.evaluate();
+        unit.instruct(instruction);
+        test.formation.deploy(unit);
+
+        await test.evaluate();
+
+        return unit;
+      });
 
       expect(instruction).toHaveBeenCalledWith(expect.objectContaining({
         formation: test.formation,
@@ -285,12 +290,17 @@ describe('Unit', () => {
     it('records instruction of already deployed unit', async () => {
 
       const instruction: OrderInstruction<TestUnit> = jest.fn();
-      const unit = test.run(() => new TestUnit());
+      const unit = await test.run(async () => {
 
-      test.formation.deploy(unit);
-      unit.instruct(instruction);
+        const unit = test.run(() => new TestUnit());
 
-      await test.evaluate();
+        test.formation.deploy(unit);
+        unit.instruct(instruction);
+
+        await test.evaluate();
+
+        return unit;
+      });
 
       expect(instruction).toHaveBeenCalledWith(expect.objectContaining({
         formation: test.formation,
@@ -300,69 +310,87 @@ describe('Unit', () => {
     it('does not record instruction when unit withdrawn', async () => {
 
       const instruction: OrderInstruction<TestUnit> = jest.fn();
-      const unit = test.run(() => new TestUnit());
 
-      unit.instruct(instruction);
-      test.formation.deploy(unit);
-      unit.off();
+      await test.run(async () => {
 
-      await test.evaluate();
+        const unit = new TestUnit();
+
+        unit.instruct(instruction);
+        test.formation.deploy(unit);
+        unit.off();
+
+        await test.evaluate();
+      });
 
       expect(instruction).not.toHaveBeenCalled();
     });
     it('ignores instructions right after unit withdrawal', async () => {
 
-      const unit = test.run(() => new TestUnit());
       const instruction: OrderInstruction<TestUnit> = jest.fn();
 
-      test.formation.deploy(unit);
-      unit.instruct(() => {
-        unit.supply.off();
-        unit.instruct(instruction);
+      await test.run(async () => {
+
+        const unit = new TestUnit();
+
+        test.formation.deploy(unit);
+        unit.instruct(() => {
+          unit.supply.off();
+          unit.instruct(instruction);
+        });
+
+        await test.evaluate();
       });
-      await test.evaluate();
 
       expect(instruction).not.toHaveBeenCalled();
     });
     it('ignores instruction when not deployed', async () => {
 
       const instruction: OrderInstruction<TestUnit> = jest.fn();
-      const unit = test.run(() => new TestUnit());
 
-      unit.instruct(instruction);
+      await test.run(async () => {
 
-      await test.evaluate();
+        const unit = new TestUnit();
+
+        unit.instruct(instruction);
+
+        await test.evaluate();
+      });
 
       expect(instruction).not.toHaveBeenCalled();
     });
     it('ignores instruction when deployed to another formation', async () => {
 
       const instruction: OrderInstruction<TestUnit> = jest.fn();
-      const { formation2, unit } = test.run(() => {
+
+      await test.run(async () => {
 
         const formation2 = new Formation({ tag: 'other' });
         const unit = new TestUnit();
 
-        return { formation2, unit };
+        unit.instruct(instruction);
+        formation2.deploy(unit);
+
+        await test.evaluate();
       });
-
-      unit.instruct(instruction);
-      formation2.deploy(unit);
-
-      await test.evaluate();
 
       expect(instruction).not.toHaveBeenCalled();
     });
     it('ignores instruction to disabled formation', async () => {
 
       const instruction: OrderInstruction<TestUnit> = jest.fn();
-      const unit = test.run(() => new TestUnit());
 
-      unit.instruct(instruction);
-      test.formation.deploy(unit);
-      test.formation.off();
+      const unit = await test.run(async () => {
 
-      await test.evaluate();
+        const unit = new TestUnit();
+
+        unit.instruct(instruction);
+        test.formation.deploy(unit);
+        test.formation.off();
+
+        await test.evaluate();
+
+        return unit;
+      });
 
       expect(instruction).not.toHaveBeenCalled();
       expect(await unit.supply.whenDone()).toBeUndefined();
@@ -379,53 +407,61 @@ describe('Unit', () => {
       const instruction: OrderInstruction<TestUnit> = jest.fn(() => {
         throw error;
       });
-      const unit = test.run(() => new TestUnit());
 
-      unit.instruct(instruction);
-      test.formation.deploy(unit);
+      const unit = await test.run(async () => {
 
-      await test.evaluate();
+        const unit = new TestUnit();
+
+        unit.instruct(instruction);
+        test.formation.deploy(unit);
+
+        await test.evaluate();
+
+        return unit;
+      });
 
       expect(await unit.supply.whenDone().catch(asis)).toBe(error);
       expect(logger.error).toHaveBeenCalledWith(`Instructions for ${unit} rejected`, error);
     });
     it('handles recurrent order evaluation', async () => {
 
-      const unit = test.run(() => new TestUnit());
       const recurrent = newPromiseResolver();
-
-      unit.instruct(() => {
-        recurrent.resolve(test.evaluate());
-      });
-      test.formation.deploy(unit);
-
       let evaluated: unknown;
 
-      test.evaluate().then(() => evaluated = true).catch(error => evaluated = error);
+      test.run(() => {
+
+        const unit = new TestUnit();
+
+        unit.instruct(() => {
+          recurrent.resolve(test.evaluate());
+        });
+        test.formation.deploy(unit);
+
+        test.evaluate().then(() => evaluated = true).catch(error => evaluated = error);
+      });
 
       await recurrent.promise();
       expect(evaluated).toBe(true);
     });
     it('allows to deploy during deployment', async () => {
 
-      const { unit1, unit2 } = test.run(() => {
+      const instruction2: OrderInstruction = jest.fn();
+
+      await test.run(async () => {
 
         const unit1 = new TestUnit();
         const unit2 = new TestUnit();
 
-        return { unit1, unit2 };
-      });
-      const instruction2: OrderInstruction = jest.fn();
-
-      unit1.instruct(subject => {
-        subject.execute(({ formation }) => {
-          formation.deploy(unit2);
+        unit1.instruct(subject => {
+          subject.execute(({ formation }) => {
+            formation.deploy(unit2);
+          });
         });
-      });
-      test.formation.deploy(unit1);
-      unit2.instruct(instruction2);
+        test.formation.deploy(unit1);
+        unit2.instruct(instruction2);
 
-      await test.evaluate();
+        await test.evaluate();
+      });
 
       expect(instruction2).toHaveBeenCalled();
     });
@@ -440,21 +476,27 @@ describe('Unit', () => {
         test.formationBuilder.provide(cxConstAsset(Logger, logger));
 
         const error = new Error('test');
-        const unit = test.run(() => new TestUnit());
-
-        test.formation.deploy(unit);
-
-        await test.evaluate();
-
         let subjectSupply!: Supply;
         const instruction: OrderInstruction<TestUnit> = jest.fn(({ supply }) => {
           subjectSupply = supply;
           throw error;
         });
 
-        unit.instruct(instruction);
+        const unit = await test.run(async () => {
 
-        await test.evaluate();
+          const unit = new TestUnit();
+
+          test.formation.deploy(unit);
+
+          await test.evaluate();
+
+
+          unit.instruct(instruction);
+
+          await test.evaluate();
+
+          return unit;
+        });
 
         expect(unit.supply.isOff).toBe(false);
         expect(await subjectSupply.whenDone().catch(asis)).toBe(error);
@@ -462,32 +504,37 @@ describe('Unit', () => {
       });
       it('does not apply instruction to withdrawn unit', async () => {
 
-        const unit = test.run(() => new TestUnit());
-
-        test.formation.deploy(unit);
-        await test.evaluate();
-
-        unit.off();
-
         const instruction: OrderInstruction<TestUnit> = jest.fn();
 
-        unit.instruct(instruction);
+        await test.run(async () => {
 
-        await test.evaluate();
+          const unit = new TestUnit();
+
+          test.formation.deploy(unit);
+          await test.evaluate();
+
+          unit.off();
+          unit.instruct(instruction);
+
+          await test.evaluate();
+        });
 
         expect(instruction).not.toHaveBeenCalled();
       });
       it('does not apply instruction to not deployed unit', async () => {
 
-        const unit = test.run(() => new TestUnit());
-
-        await test.evaluate();
-
         const instruction: OrderInstruction<TestUnit> = jest.fn();
 
-        unit.instruct(instruction);
+        await test.run(async () => {
 
-        await test.evaluate();
+          const unit = new TestUnit();
+
+          await test.evaluate();
+
+          unit.instruct(instruction);
+
+          await test.evaluate();
+        });
 
         expect(instruction).not.toHaveBeenCalled();
       });

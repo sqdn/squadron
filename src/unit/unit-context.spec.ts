@@ -25,16 +25,21 @@ describe('UnitContext', () => {
   it('is available during unit deployment', async () => {
 
     const orderFormation = OrderTest.createdIn.get(Formation);
-    const unit = OrderTest.run(() => new Unit({ tag: 'test' }));
     let context!: UnitContext;
+    const unit = await OrderTest.run(async () => {
 
-    unit.instruct(subject => subject.execute(ctx => {
-      context = ctx;
-    }));
+      const unit = new Unit({ tag: 'test' });
 
-    OrderTest.formation.deploy(unit);
+      unit.instruct(subject => subject.execute(ctx => {
+        context = ctx;
+      }));
 
-    await OrderTest.evaluate();
+      OrderTest.formation.deploy(unit);
+      await OrderTest.evaluate();
+
+      return unit;
+    });
+
     expect(context.hub).toBe(OrderTest.hub);
     expect(context.formation).toBe(orderFormation);
     expect(context.unit).toBe(unit);

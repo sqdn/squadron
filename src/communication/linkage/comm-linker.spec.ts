@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from '@jest/globals';
 import { Formation } from '../../formation';
-import { HubTest } from '../../testing';
+import { HubTest, OrderTest } from '../../testing';
 import { Unit } from '../../unit';
 import { CommLinker } from './comm-linker';
 
@@ -40,16 +40,18 @@ describe('CommLinker', () => {
     let linker!: CommLinker;
     const fmnTest2 = HubTest.testFormation(formation2);
 
-    fmnTest2.deploy(unit2).instruct(subject => {
-      subject.execute(context => {
-        linker = context.get(CommLinker);
+    await OrderTest.run(async () => {
+      fmnTest2.deploy(unit2).instruct(subject => {
+        subject.execute(context => {
+          linker = context.get(CommLinker);
+        });
       });
+
+      fmnTest2.init();
+
+      await fmnTest1.evaluate();
+      await fmnTest2.evaluate();
     });
-
-    fmnTest2.init();
-
-    await fmnTest1.evaluate();
-    await fmnTest2.evaluate();
 
     const link = linker.link(formation1);
 

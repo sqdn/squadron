@@ -1,5 +1,6 @@
 import { CxPeer } from '@proc7ts/context-builder';
 import { CxEntry, cxSingle, CxValues } from '@proc7ts/context-values';
+import { Supply, SupplyPeer } from '@proc7ts/supply';
 import { OrderContext$storage } from './order-context.impl';
 
 /**
@@ -16,12 +17,19 @@ import { OrderContext$storage } from './order-context.impl';
  *
  * New order can be constructed by calling {@link FormationContext.newOrder} method.
  */
-export interface OrderContext extends CxValues {
+export interface OrderContext extends CxValues, SupplyPeer {
 
   /**
    * Unique order identifier. Either {@link OrderContext.Init.orderId explicitly provided}, or generated automatically.
    */
   readonly orderId: string;
+
+  /**
+   * Order supply.
+   *
+   * The order is revoked once supply cut off.
+   */
+  readonly supply: Supply;
 
   /**
    * Runs the given function in this order context.

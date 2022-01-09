@@ -1,4 +1,5 @@
 import { CxAccessor, CxEntry, CxRequest } from '@proc7ts/context-values';
+import { Supply } from '@proc7ts/supply';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { OrderContext } from './order-context';
 
@@ -6,6 +7,7 @@ export const OrderContext$storage = new AsyncLocalStorage<OrderContext>();
 
 export class OrderContext$ implements OrderContext {
 
+  readonly #supply = new Supply();
   readonly #orderId: string;
   readonly #get: CxAccessor;
 
@@ -16,6 +18,10 @@ export class OrderContext$ implements OrderContext {
 
   get orderId(): string {
     return this.#orderId;
+  }
+
+  get supply(): Supply {
+    return this.#supply;
   }
 
   get<TValue>(entry: CxEntry<TValue, unknown>, request?: CxRequest<TValue>): TValue | null {

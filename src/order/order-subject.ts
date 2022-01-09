@@ -35,6 +35,11 @@ export interface OrderSubject<TUnit extends Unit = Unit> extends CxValues, CxMod
   readonly context: UnitContext<TUnit>;
 
   /**
+   * Context of order that deployed the unit.
+   */
+  readonly deployedIn: OrderContext;
+
+  /**
    * Order subject supply.
    *
    * Once cut off, revokes all context values provided by this subject.

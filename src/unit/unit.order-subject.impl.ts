@@ -13,6 +13,7 @@ import { Unit$Deployment } from './unit.deployment.impl';
 
 export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit> {
 
+  readonly #deployedIn: OrderContext;
   readonly #deployment: Unit$Deployment<TUnit>;
   readonly #supply: Supply;
 
@@ -23,9 +24,10 @@ export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit
   #addWithdrawal = this.#doAddWithdrawal;
   #withdraw = this.#doWithdraw;
 
-  constructor(backend: Unit$Deployment<TUnit>, supply: Supply) {
+  constructor(deployedIn: OrderContext, backend: Unit$Deployment<TUnit>, supply: Supply) {
+    this.#deployedIn = deployedIn;
     this.#deployment = backend;
-    this.#supply = supply.whenOff(reason => {
+    this.#supply = supply.needs(deployedIn).whenOff(reason => {
       this.#execute = this.#rejectExecution(reason);
       this.withdraw(reason).catch(noop);
     });
@@ -45,6 +47,10 @@ export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit
 
   get context(): UnitContext<TUnit> {
     return this.#deployment.context;
+  }
+
+  get deployedIn(): OrderContext {
+    return this.#deployedIn;
   }
 
   get supply(): Supply {
@@ -132,6 +138,7 @@ export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit
         resolve();
       };
 
+      const { deployedIn } = this;
       const host = this.#host;
       const unit = this.unit;
       let withdrawalCount = 0;
@@ -139,15 +146,17 @@ export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit
       const executeWithdrawal = (task: OrderWithdrawalTask): void => {
         ++withdrawalCount;
         host.workbench.withdraw(async function doWithdraw() {
-          try {
-            await task(reason);
-          } catch (error) {
-            host.log.error(logline`Failed to withdraw ${unit}`, error);
-          } finally {
-            if (!--withdrawalCount) {
-              endWithdrawal();
+          await deployedIn.run(async () => {
+            try {
+              await task(reason);
+            } catch (error) {
+              host.log.error(logline`Failed to withdraw ${unit}`, error);
+            } finally {
+              if (!--withdrawalCount) {
+                endWithdrawal();
+              }
             }
-          }
+          });
         });
       };
 

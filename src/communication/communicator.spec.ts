@@ -72,40 +72,46 @@ describe('Communicator', () => {
   });
   it('connects unit -> unit', async () => {
 
-    const formation1 = HubTest.run(() => new Formation({ tag: '1' }));
-    const unit1 = HubTest.run(() => new Unit({ tag: '1' }));
-    const formation2 = HubTest.run(() => new Formation({ tag: '2' }));
-    const unit2 = HubTest.run(() => new Unit({ tag: '2' }));
-
-    const fmnTest1 = HubTest.testFormation(formation1);
-
-    fmnTest1.deploy(unit1).instruct(subject => {
-
-      const responder: CommResponder<TestRequest, TestResponse> = {
-        name: 'test',
-        respond: ({ payload }) => onEventBy(receiver => {
-          onPromise<TestResponse>({ re: payload })(receiver);
-        }),
-      };
-
-      subject.provide(cxConstAsset(CommProtocol, responder));
-    });
-
-    fmnTest1.init();
-
     let communicator!: Communicator;
-    const fmnTest2 = HubTest.testFormation(formation2);
 
-    fmnTest2.deploy(unit2).instruct(subject => {
-      subject.execute(context => {
-        communicator = context.get(Communicator);
+    const { unit1 } = await HubTest.run(async () => {
+
+      const formation1 = new Formation({ tag: '1' });
+      const unit1 = new Unit({ tag: '1' });
+      const formation2 = new Formation({ tag: '2' });
+      const unit2 = new Unit({ tag: '2' });
+
+      const fmnTest1 = HubTest.testFormation(formation1);
+
+      fmnTest1.deploy(unit1).instruct(subject => {
+
+        const responder: CommResponder<TestRequest, TestResponse> = {
+          name: 'test',
+          respond: ({ payload }) => onEventBy(receiver => {
+            onPromise<TestResponse>({ re: payload })(receiver);
+          }),
+        };
+
+        subject.provide(cxConstAsset(CommProtocol, responder));
       });
+
+      fmnTest1.init();
+
+      const fmnTest2 = HubTest.testFormation(formation2);
+
+      fmnTest2.deploy(unit2).instruct(subject => {
+        subject.execute(context => {
+          communicator = context.get(Communicator);
+        });
+      });
+
+      fmnTest2.init();
+
+      await fmnTest1.evaluate();
+      await fmnTest2.evaluate();
+
+      return { unit1 };
     });
-
-    fmnTest2.init();
-
-    await fmnTest1.evaluate();
-    await fmnTest2.evaluate();
 
     const channel = communicator.connect(unit1);
 
@@ -118,33 +124,38 @@ describe('Communicator', () => {
   });
   it('connects unit -> unit directly', async () => {
 
-    const formation = HubTest.run(() => new Formation());
-    const unit1 = HubTest.run(() => new Unit({ tag: '1' }));
-    const unit2 = HubTest.run(() => new Unit({ tag: '2' }));
-
     let communicator!: Communicator;
-    const fmnTest = HubTest.testFormation(formation);
 
-    fmnTest.deploy(unit1).instruct(subject => {
+    const { unit1 } = await HubTest.run(async () => {
 
-      const responder: CommResponder<TestRequest, TestResponse> = {
-        name: 'test',
-        respond: ({ payload }) => onEventBy(receiver => {
-          onPromise<TestResponse>({ re: payload })(receiver);
-        }),
-      };
+      const formation = new Formation();
+      const unit1 = new Unit({ tag: '1' });
+      const unit2 = new Unit({ tag: '2' });
+      const fmnTest = HubTest.testFormation(formation);
 
-      subject.provide(cxConstAsset(CommProtocol, responder));
-    });
-    fmnTest.deploy(unit2).instruct(subject => {
-      subject.execute(context => {
-        communicator = context.get(Communicator);
+      fmnTest.deploy(unit1).instruct(subject => {
+
+        const responder: CommResponder<TestRequest, TestResponse> = {
+          name: 'test',
+          respond: ({ payload }) => onEventBy(receiver => {
+            onPromise<TestResponse>({ re: payload })(receiver);
+          }),
+        };
+
+        subject.provide(cxConstAsset(CommProtocol, responder));
       });
+      fmnTest.deploy(unit2).instruct(subject => {
+        subject.execute(context => {
+          communicator = context.get(Communicator);
+        });
+      });
+
+      fmnTest.init();
+
+      await fmnTest.evaluate();
+
+      return { unit1 };
     });
-
-    fmnTest.init();
-
-    await fmnTest.evaluate();
 
     const channel = communicator.connect(unit1);
 

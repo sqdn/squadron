@@ -28,11 +28,13 @@ describe('FormationContext', () => {
     const orderFormation = OrderTest.createdIn.get(Formation);
     let context!: FormationContext;
 
-    formation.instruct(subject => subject.execute(ctx => {
-      context = ctx as any;
-    }));
+    await OrderTest.run(async () => {
+      formation.instruct(subject => subject.execute(ctx => {
+        context = ctx as any;
+      }));
 
-    await OrderTest.evaluate();
+      await OrderTest.evaluate();
+    });
 
     expect(context.hub).toBe(OrderTest.hub);
     expect(context.formation).toBe(orderFormation);

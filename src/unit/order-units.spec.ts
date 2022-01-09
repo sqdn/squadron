@@ -54,9 +54,14 @@ describe('OrderUnits', () => {
 
       class TestUnit2 extends TestUnit1 {}
 
-      const unit = OrderTest.run(() => new TestUnit1());
+      const unit = OrderTest.run(() => {
 
-      unit.instruct(noop);
+        const unit = new TestUnit1();
+
+        unit.instruct(noop);
+
+        return unit;
+      });
 
       expect(() => orderUnits.unitByUid(unit.uid, TestUnit2)).toThrow(new TypeError(`${unit} is not a TestUnit2`));
     });

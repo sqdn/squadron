@@ -18,12 +18,14 @@ describe('FormationManager', () => {
   let formationManager: FormationManager;
 
   beforeEach(async () => {
-    HubTest.hub.instruct(subject => {
-      subject.execute(context => {
-        formationManager = context.get(FormationManager);
+    await HubTest.run(async () => {
+      HubTest.hub.instruct(subject => {
+        subject.execute(context => {
+          formationManager = context.get(FormationManager);
+        });
       });
+      await HubTest.evaluate();
     });
-    await HubTest.evaluate();
   });
 
   describe('FormationCtl', () => {

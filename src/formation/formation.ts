@@ -14,7 +14,7 @@ const Formation$perContext: CxEntry.Definer<Formation> = (/*#__PURE__*/ cxSingle
  * Each formation is able to evaluate and execute orders. A formation executes only parts of the order related to it
  * and ignores the rest of the order.
  *
- * The primary formation duty is to {@link deploy} executive units.
+ * The primary duty of formation is to {@link deploy} executive units.
  */
 export class Formation extends Unit {
 
@@ -41,6 +41,8 @@ export class Formation extends Unit {
    * Instructs to deploy the given executive unit to target formation.
    *
    * The unit will be actually deployed when the order executed by target formation.
+   *
+   * This method can be called only {@link OrderContext.Entry.current within order}.
    *
    * @param unit - An executive unit to deploy.
    *
