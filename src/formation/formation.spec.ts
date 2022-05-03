@@ -28,7 +28,7 @@ describe('Formation', () => {
       it('does not deploy the unit', async () => {
 
         const logger = {
-          warn: jest.fn<void, any[]>(),
+          warn: jest.fn<(...message: unknown[]) => void>(),
         } as Partial<Logger> as Logger;
 
         OrderTest.formationBuilder.provide(cxConstAsset(Logger, logger));

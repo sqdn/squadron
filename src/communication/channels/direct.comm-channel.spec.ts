@@ -74,11 +74,11 @@ describe('DirectCommChannel', () => {
 
       const receiver1: CommReceiver<TestPacket> = {
         name: 'ping',
-        receive: jest.fn(),
+        receive: jest.fn<(signal: TestPacket) => boolean>(),
       };
       const receiver2: CommReceiver<TestPacket> = {
         name: 'ping',
-        receive: jest.fn(() => true),
+        receive: jest.fn<(signal: TestPacket) => boolean>(() => true),
       };
 
       processor = new HandlerCommProcessor(receiver1, receiver2);
@@ -93,7 +93,7 @@ describe('DirectCommChannel', () => {
 
       const receiver1: CommReceiver<TestPacket> = {
         name: 'ping',
-        receive: jest.fn(),
+        receive: jest.fn<(signal: TestPacket) => boolean>(),
       };
       const receiver2: CommReceiver<TestPacket> = {
         name: 'ping',

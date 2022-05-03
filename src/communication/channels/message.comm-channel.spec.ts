@@ -21,7 +21,7 @@ interface TestPacket extends CommPacket {
 
 describe('MessageCommChannel', () => {
 
-  let errorSpy: SpyInstance<void, unknown[]>;
+  let errorSpy: SpyInstance<(...args: unknown[]) => void>;
 
   beforeEach(() => {
     errorSpy = spyOn(consoleLogger, 'error');

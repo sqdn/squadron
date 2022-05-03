@@ -24,8 +24,8 @@ interface TestPacket extends CommPacket {
 
 describe('ProxyCommChannel', () => {
 
-  let errorSpy: SpyInstance<void, unknown[]>;
-  let warnSpy: SpyInstance<void, unknown[]>;
+  let errorSpy: SpyInstance<(...args: unknown[]) => void>;
+  let warnSpy: SpyInstance<(...args: unknown[]) => void>;
 
   beforeEach(() => {
     errorSpy = spyOn(consoleLogger, 'error').mockImplementation(noop);
@@ -152,7 +152,7 @@ describe('ProxyCommChannel', () => {
 
         const handler: CommReceiver<TestPacket> = {
           name: 'test',
-          receive: jest.fn(),
+          receive: jest.fn<(signal: TestPacket) => boolean>(),
         };
         const signal: TestPacket = {
           payload: 'test payload',
@@ -324,7 +324,7 @@ describe('ProxyCommChannel', () => {
       beforeEach(() => {
         handler = {
           name: 'test',
-          receive: jest.fn(),
+          receive: jest.fn<(signal: TestPacket) => boolean>(),
         };
         processor = new HandlerCommProcessor(handler);
       });

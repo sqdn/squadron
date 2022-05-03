@@ -4,7 +4,6 @@ import { CxEntry, cxRecent } from '@proc7ts/context-values';
 import { Logger, processingLogger } from '@proc7ts/logger';
 import { asis } from '@proc7ts/primitives';
 import { Supply } from '@proc7ts/supply';
-import { Mock } from 'jest-mock';
 import { FormationContext } from '../formation';
 import { OrderTest } from '../testing';
 import { Unit, UnitContext, UnitStatus } from '../unit';
@@ -349,7 +348,7 @@ describe('OrderSubject', () => {
   describe('execute', () => {
     it('executes the task', async () => {
 
-      const task: OrderTask<Unit> = jest.fn();
+      const task = jest.fn<OrderTask<Unit>>();
       const unit = await OrderTest.run(async () => {
 
         const unit = new Unit();
@@ -377,7 +376,7 @@ describe('OrderSubject', () => {
 
         await test.evaluate();
 
-        const task: Mock<void, [UnitContext<Unit>]> = jest.fn();
+        const task = jest.fn<OrderTask<Unit>>();
 
         unit.instruct(subject => {
           subject.execute(task);
@@ -394,13 +393,13 @@ describe('OrderSubject', () => {
     it('withdraws the subject if task execution fails', async () => {
 
       const logger = {
-        error: jest.fn<void, any[]>(),
+        error: jest.fn<(...message: unknown[]) => void>(),
       } as Partial<Logger> as Logger;
 
       test.formationBuilder.provide(cxConstAsset(Logger, processingLogger(logger)));
 
       const error = new Error('test');
-      const task: OrderTask<Unit> = jest.fn(() => {
+      const task = jest.fn<OrderTask<Unit>>(() => {
         throw error;
       });
       let unitSubject!: OrderSubject;
@@ -428,13 +427,13 @@ describe('OrderSubject', () => {
     it('rejects the task for withdrawn subject', async () => {
 
       const logger = {
-        warn: jest.fn<void, any[]>(),
+        warn: jest.fn<(...message: unknown[]) => void>(),
       } as Partial<Logger> as Logger;
 
       test.formationBuilder.provide(cxConstAsset(Logger, processingLogger(logger)));
 
       const error = new Error('test');
-      const task: OrderTask<Unit> = jest.fn();
+      const task = jest.fn<OrderTask<Unit>>();
 
       const unit = await OrderTest.run(async () => {
 
@@ -459,7 +458,7 @@ describe('OrderSubject', () => {
       it('executes the task after order evaluation', async () => {
 
         let deploy!: OrderSubject['execute'];
-        const task: Mock<void, [UnitContext<Unit>]> = jest.fn();
+        const task = jest.fn<OrderTask<Unit>>();
 
         const unit = await OrderTest.run(async () => {
 
@@ -484,7 +483,7 @@ describe('OrderSubject', () => {
       it('does not withdraw the subject if task execution fails', async () => {
 
         const logger = {
-          error: jest.fn<void, any[]>(),
+          error: jest.fn<(...message: unknown[]) => void>(),
         } as Partial<Logger> as Logger;
 
         test.formationBuilder.provide(cxConstAsset(Logger, processingLogger(logger)));
@@ -492,7 +491,7 @@ describe('OrderSubject', () => {
         let deploy!: OrderSubject['execute'];
         let subjectSupply!: Supply;
         const error = new Error('Test');
-        const task = jest.fn<void, [UnitContext<Unit>]>(() => {
+        const task = jest.fn<OrderTask<Unit>>(() => {
           throw error;
         });
 
@@ -526,7 +525,7 @@ describe('OrderSubject', () => {
   describe('for the task created after order evaluation', () => {
     it('executes the task', async () => {
 
-      const task: Mock<void, [UnitContext<Unit>]> = jest.fn();
+      const task = jest.fn<OrderTask<Unit>>();
 
       const unit = await OrderTest.run(async () => {
 
@@ -551,14 +550,14 @@ describe('OrderSubject', () => {
     it('does not withdraw the subject if deployment fails', async () => {
 
       const logger = {
-        error: jest.fn<void, any[]>(),
+        error: jest.fn<(...message: unknown[]) => void>(),
       } as Partial<Logger> as Logger;
 
       test.formationBuilder.provide(cxConstAsset(Logger, processingLogger(logger)));
 
       let subjectSupply!: Supply;
       const error = new Error('Test');
-      const task = jest.fn<void, [UnitContext<Unit>]>(() => {
+      const task = jest.fn<OrderTask<Unit>>(() => {
         throw error;
       });
 
@@ -593,7 +592,7 @@ describe('OrderSubject', () => {
     it('executes withdrawal task', async () => {
 
       let subj!: OrderSubject;
-      const withdrawal = jest.fn<void, []>();
+      const withdrawal = jest.fn<() => void>();
 
       await OrderTest.run(async () => {
 
@@ -622,7 +621,7 @@ describe('OrderSubject', () => {
     it('executes withdrawal task added by execution task', async () => {
 
       let subj!: OrderSubject;
-      const withdrawal = jest.fn<void, []>();
+      const withdrawal = jest.fn<() => void>();
 
       const unit = await OrderTest.run(async () => {
 
@@ -655,15 +654,15 @@ describe('OrderSubject', () => {
     it('logs withdrawal failure', async () => {
 
       const logger = {
-        error: jest.fn<void, any[]>(),
+        error: jest.fn<(...message: unknown[]) => void>(),
       } as Partial<Logger> as Logger;
 
       test.formationBuilder.provide(cxConstAsset(Logger, processingLogger(logger)));
 
       let subj!: OrderSubject;
       const failure = new Error('Test failure');
-      const withdrawal1 = jest.fn<void, []>();
-      const withdrawal2 = jest.fn<void, []>(() => Promise.reject(failure));
+      const withdrawal1 = jest.fn<() => void>();
+      const withdrawal2 = jest.fn<() => void>(() => Promise.reject(failure));
 
       const unit = await OrderTest.run(async () => {
 
@@ -701,7 +700,7 @@ describe('OrderSubject', () => {
   describe('executeUponWithdrawal', () => {
     it('schedules withdrawal task during withdrawal', async () => {
 
-      const withdrawal = jest.fn<void, []>();
+      const withdrawal = jest.fn<() => void>();
       let subj!: OrderSubject;
 
       await OrderTest.run(async () => {
@@ -730,7 +729,7 @@ describe('OrderSubject', () => {
     it('rejects withdrawal task after subject withdrawal', async () => {
 
       const logger = {
-        warn: jest.fn<void, any[]>(),
+        warn: jest.fn<(...message: unknown[]) => void>(),
       } as Partial<Logger> as Logger;
 
       test.formationBuilder.provide(cxConstAsset(Logger, processingLogger(logger)));
@@ -755,7 +754,7 @@ describe('OrderSubject', () => {
 
       await subj.withdraw(reason);
 
-      const withdrawal = jest.fn<void, []>();
+      const withdrawal = jest.fn<() => void>();
 
       subj.executeUponWithdrawal(withdrawal);
 

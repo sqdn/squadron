@@ -269,7 +269,7 @@ describe('Unit', () => {
   describe('instruct', () => {
     it('records instruction', async () => {
 
-      const instruction: OrderInstruction<TestUnit> = jest.fn();
+      const instruction = jest.fn<OrderInstruction<TestUnit>>();
       const unit = await test.run(async () => {
 
         const unit = new TestUnit();
@@ -289,7 +289,7 @@ describe('Unit', () => {
     });
     it('records instruction of already deployed unit', async () => {
 
-      const instruction: OrderInstruction<TestUnit> = jest.fn();
+      const instruction = jest.fn<OrderInstruction<TestUnit>>();
       const unit = await test.run(async () => {
 
         const unit = test.run(() => new TestUnit());
@@ -309,7 +309,7 @@ describe('Unit', () => {
     });
     it('does not record instruction when unit withdrawn', async () => {
 
-      const instruction: OrderInstruction<TestUnit> = jest.fn();
+      const instruction = jest.fn<OrderInstruction<TestUnit>>();
 
       await test.run(async () => {
 
@@ -326,7 +326,7 @@ describe('Unit', () => {
     });
     it('ignores instructions right after unit withdrawal', async () => {
 
-      const instruction: OrderInstruction<TestUnit> = jest.fn();
+      const instruction = jest.fn<OrderInstruction<TestUnit>>();
 
       await test.run(async () => {
 
@@ -345,7 +345,7 @@ describe('Unit', () => {
     });
     it('ignores instruction when not deployed', async () => {
 
-      const instruction: OrderInstruction<TestUnit> = jest.fn();
+      const instruction = jest.fn<OrderInstruction<TestUnit>>();
 
       await test.run(async () => {
 
@@ -360,7 +360,7 @@ describe('Unit', () => {
     });
     it('ignores instruction when deployed to another formation', async () => {
 
-      const instruction: OrderInstruction<TestUnit> = jest.fn();
+      const instruction = jest.fn<OrderInstruction<TestUnit>>();
 
       await test.run(async () => {
 
@@ -377,7 +377,7 @@ describe('Unit', () => {
     });
     it('ignores instruction to disabled formation', async () => {
 
-      const instruction: OrderInstruction<TestUnit> = jest.fn();
+      const instruction = jest.fn<OrderInstruction<TestUnit>>();
 
       const unit = await test.run(async () => {
 
@@ -398,13 +398,13 @@ describe('Unit', () => {
     it('withdraws the unit when instruction rejected', async () => {
 
       const logger = {
-        error: jest.fn<void, any[]>(),
+        error: jest.fn<(...message: unknown[]) => void>(),
       } as Partial<Logger> as Logger;
 
       test.formationBuilder.provide(cxConstAsset(Logger, logger));
 
       const error = new Error('test');
-      const instruction: OrderInstruction<TestUnit> = jest.fn(() => {
+      const instruction = jest.fn<OrderInstruction<TestUnit>>(() => {
         throw error;
       });
 
@@ -445,7 +445,7 @@ describe('Unit', () => {
     });
     it('allows to deploy during deployment', async () => {
 
-      const instruction2: OrderInstruction = jest.fn();
+      const instruction2 = jest.fn<OrderInstruction>();
 
       await test.run(async () => {
 
@@ -470,14 +470,14 @@ describe('Unit', () => {
       it('does not withdraw the unit when instructions rejected', async () => {
 
         const logger = {
-          error: jest.fn<void, any[]>(),
+          error: jest.fn<(...message: unknown[]) => void>(),
         } as Partial<Logger> as Logger;
 
         test.formationBuilder.provide(cxConstAsset(Logger, logger));
 
         const error = new Error('test');
         let subjectSupply!: Supply;
-        const instruction: OrderInstruction<TestUnit> = jest.fn(({ supply }) => {
+        const instruction = jest.fn<OrderInstruction<TestUnit>>(({ supply }) => {
           subjectSupply = supply;
           throw error;
         });
@@ -504,7 +504,7 @@ describe('Unit', () => {
       });
       it('does not apply instruction to withdrawn unit', async () => {
 
-        const instruction: OrderInstruction<TestUnit> = jest.fn();
+        const instruction = jest.fn<OrderInstruction<TestUnit>>();
 
         await test.run(async () => {
 
@@ -523,7 +523,7 @@ describe('Unit', () => {
       });
       it('does not apply instruction to not deployed unit', async () => {
 
-        const instruction: OrderInstruction<TestUnit> = jest.fn();
+        const instruction = jest.fn<OrderInstruction<TestUnit>>();
 
         await test.run(async () => {
 
