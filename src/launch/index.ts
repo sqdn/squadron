@@ -36,7 +36,7 @@ declare module 'vm' {
     readonly context?: object | undefined;
     readonly lineOffset?: number | undefined;
     readonly columnOffset?: number | undefined;
-    initializeImportMeta?(meta: any, module: SourceTextModule): void;
+    initializeImportMeta?(meta: unknown, module: SourceTextModule): void;
     importModuleDynamically?(
         specifier: string,
         module: Module,
