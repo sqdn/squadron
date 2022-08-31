@@ -1,4 +1,4 @@
-import { EventEmitter, OnEvent, onEventBy } from '@proc7ts/fun-events';
+import { EventEmitter, EventReceiver, OnEvent, onEventBy } from '@proc7ts/fun-events';
 import { consoleLogger, Logger } from '@proc7ts/logger';
 import { Supply } from '@proc7ts/supply';
 import { v4 as UUIDv4 } from 'uuid';
@@ -38,19 +38,17 @@ export class MessageCommChannel implements CommChannel {
    * @param processor - Inbound commands processor. Processes nothing by default.
    * @param logger - Logger to report communication issues to.
    */
-  constructor(
-      {
-        to,
-        port,
-        processor = new HandlerCommProcessor(),
-        logger = consoleLogger,
-      }: {
-        to: Unit;
-        port: MessagePort;
-        processor?: CommProcessor | undefined;
-        logger?: Logger | undefined;
-      },
-  ) {
+  constructor({
+    to,
+    port,
+    processor = new HandlerCommProcessor(),
+    logger = consoleLogger,
+  }: {
+    to: Unit;
+    port: MessagePort;
+    processor?: CommProcessor | undefined;
+    logger?: Logger | undefined;
+  }) {
     this.#to = to;
     this.#supply = new Supply(() => {
       port.close();
@@ -74,7 +72,6 @@ export class MessageCommChannel implements CommChannel {
   }
 
   signal<TSignal extends CommPacket>(name: string, signal: TSignal): void {
-
     const [body, transferList] = MessageComm$extractTransferList(signal);
     const wrapper: MessageComm$Wrapper = {
       sqdn: {
@@ -88,11 +85,10 @@ export class MessageCommChannel implements CommChannel {
   }
 
   request<TRequest extends CommPacket, TResponse = CommPacket>(
-      name: string,
-      request: TRequest,
+    name: string,
+    request: TRequest,
   ): OnEvent<[TResponse]> {
     return onEventBy(receiver => {
-
       const streamId = `${name}#${UUIDv4()}`;
       const [message, transferList] = MessageComm$extractTransferList(request);
       const { meta = {} } = message;
@@ -113,26 +109,22 @@ export class MessageCommChannel implements CommChannel {
 
       this.#streams.set(streamId, stream);
       receiver.supply.whenOff(reason => this.#closeStream(name, streamId, reason));
-      stream.on(receiver);
+      stream.on(receiver as EventReceiver.Generic<[CommPacket]>);
 
       this.#port.postMessage(wrapper, transferList);
     });
   }
 
   #openStream(streamId: string): EventEmitter<[CommPacket]> {
-
     const stream = new EventEmitter<[CommPacket]>();
 
     this.#streams.set(streamId, stream);
-    stream.supply
-        .needs(this)
-        .whenOff(() => this.#streams.delete(streamId));
+    stream.supply.needs(this).whenOff(() => this.#streams.delete(streamId));
 
     return stream;
   }
 
   #closeStream(name: string, streamId: string, reason: unknown): void {
-
     const stream = this.#streams.get(streamId);
 
     if (!stream) {
@@ -154,23 +146,21 @@ export class MessageCommChannel implements CommChannel {
   }
 
   #onCommand(wrapper: MessageComm$Wrapper): void | boolean {
-
     const { sqdn } = wrapper;
 
     if (sqdn) {
-
       const { type, name, body } = sqdn;
 
       if (typeof body === 'object' && body) {
         switch (type) {
-        case MessageComm$Type.Signal:
-          return this.#processor.receive(name, body);
-        case MessageComm$Type.Request:
-          return this.#onRequest(name, body);
-        case MessageComm$Type.Response:
-          return this.#onResponse(body);
-        case MessageComm$Type.EndRequest:
-          return this.#onEndRequest(body);
+          case MessageComm$Type.Signal:
+            return this.#processor.receive(name, body);
+          case MessageComm$Type.Request:
+            return this.#onRequest(name, body);
+          case MessageComm$Type.Response:
+            return this.#onResponse(body);
+          case MessageComm$Type.EndRequest:
+            return this.#onEndRequest(body);
         }
       }
     }
@@ -179,7 +169,6 @@ export class MessageCommChannel implements CommChannel {
   }
 
   #onRequest(name: string, request: CommPacket): void {
-
     const streamId = request.meta?.streamId;
 
     if (!streamId) {
@@ -194,7 +183,6 @@ export class MessageCommChannel implements CommChannel {
     onResponse({
       supply: stream.supply.derive().whenOff(reason => this.#closeStream(name, streamId, reason)),
       receive: (_, response) => {
-
         const [body, transferList] = MessageComm$extractTransferList(response);
         const responseWrapper: MessageComm$Wrapper = {
           sqdn: {
@@ -216,7 +204,6 @@ export class MessageCommChannel implements CommChannel {
   }
 
   #onResponse(response: CommPacket): void {
-
     const { meta: { streamId = '' } = {} } = response;
     const stream = this.#streams.get(streamId);
 
@@ -228,7 +215,6 @@ export class MessageCommChannel implements CommChannel {
   }
 
   #onEndRequest(response: CommPacket): void {
-
     const { meta: { streamId, reason } = {} } = response;
     const stream = this.#streams.get(streamId!);
 
@@ -247,12 +233,12 @@ interface MessageComm$Wrapper {
   };
 }
 
-function MessageComm$extractTransferList(packet: CommPacket): [CommPacket, (readonly TransferListItem[] | undefined)?] {
-
+function MessageComm$extractTransferList(
+  packet: CommPacket,
+): [CommPacket, (readonly TransferListItem[] | undefined)?] {
   const { meta } = packet;
 
   if (meta && meta.transferList) {
-
     const { transferList, ...rest } = meta;
 
     return [{ ...packet, meta: rest }, transferList];
