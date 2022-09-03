@@ -4,9 +4,10 @@ import { OrderInstruction } from '../order';
 import { Unit } from './unit';
 import { Unit$Host } from './unit.host.impl';
 
-export const Unit$Backend__symbol = (/*#__PURE__*/ Symbol('Unit.backend'));
+export const Unit$Backend__symbol = /*#__PURE__*/ Symbol('Unit.backend');
 
-export abstract class Unit$Backend<TUnit extends Unit, THost extends Unit$Host = Unit$Host> implements SupplyPeer {
+export abstract class Unit$Backend<TUnit extends Unit, THost extends Unit$Host = Unit$Host>
+  implements SupplyPeer {
 
   readonly #supply = new Supply();
 

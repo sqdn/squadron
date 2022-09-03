@@ -28,7 +28,6 @@ export class Communicator$ implements Communicator {
   }
 
   connect(to: Unit): CommChannel {
-
     const existing = this.#channels.get(to.uid);
 
     if (existing) {
@@ -37,27 +36,27 @@ export class Communicator$ implements Communicator {
 
     const onLocation = this.#locator.locateUnit(to);
     const target: OnEvent<[CommChannel?]> = onLocation.do(
-        mapOn_(location => {
-          if (location.isLocal) {
-            return new DirectCommChannel({
-              to,
-              processor: commProcessorBy(
-                  this.#host.deploymentOf(to).context.get(CommProtocol).channelProcessor(this.#unit),
-              ),
-            });
-          }
+      mapOn_(location => {
+        if (location.isLocal) {
+          return new DirectCommChannel({
+            to,
+            processor: commProcessorBy(
+              this.#host.deploymentOf(to).context.get(CommProtocol).channelProcessor(this.#unit),
+            ),
+          });
+        }
 
-          const { formations } = location;
+        const { formations } = location;
 
-          if (!formations.length) {
-            return;
-          }
+        if (!formations.length) {
+          return;
+        }
 
-          const formation = formations[Math.floor(Math.random() * formations.length)];
-          const link = this.#linker.link(formation);
+        const formation = formations[Math.floor(Math.random() * formations.length)];
+        const link = this.#linker.link(formation);
 
-          return link.connect(to);
-        }),
+        return link.connect(to);
+      }),
     );
 
     const channel = new ProxyCommChannel({ to, target, logger: this.#logger });

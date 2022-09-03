@@ -15,11 +15,7 @@ import { CommProtocol } from './comm-protocol';
  *
  * A {@link Communicator} processes incoming commands by handlers available in unit context as {@link CommProtocol}.
  */
-export type CommHandler =
-    | CommReceiver
-    | CommResponder
-    | CommProcessor
-    | CommProtocol;
+export type CommHandler = CommReceiver | CommResponder | CommProcessor | CommProtocol;
 
 /**
  * Inbound {@link CommChannel.signal signal} receiver.
@@ -27,7 +23,6 @@ export type CommHandler =
  * @typeParam TSignal - Supported signal packet type.
  */
 export interface CommReceiver<TSignal extends CommPacket = CommPacket> {
-
   /**
    * Signal name to handle by this receiver.
    */
@@ -44,7 +39,6 @@ export interface CommReceiver<TSignal extends CommPacket = CommPacket> {
    * @returns Either `true` if the signal processed, or `false` otherwise.
    */
   receive(signal: TSignal): boolean;
-
 }
 
 /**
@@ -53,8 +47,10 @@ export interface CommReceiver<TSignal extends CommPacket = CommPacket> {
  * @typeParam TRequest - Supported request packet type.
  * @typeParam TResponse - Supported response packet type.
  */
-export interface CommResponder<TRequest extends CommPacket = CommPacket, TResponse extends CommPacket = CommPacket> {
-
+export interface CommResponder<
+  TRequest extends CommPacket = CommPacket,
+  TResponse extends CommPacket = CommPacket,
+> {
   /**
    * Request name to respond.
    */
@@ -71,5 +67,4 @@ export interface CommResponder<TRequest extends CommPacket = CommPacket, TRespon
    * @returns Either `OnEvent` sender of response data packets, or falsy value if the request can not be responded.
    */
   respond(request: TRequest): OnEvent<[TResponse]> | false | null | undefined;
-
 }

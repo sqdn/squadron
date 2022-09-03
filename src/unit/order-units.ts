@@ -4,18 +4,16 @@ import { OrderContext } from '../order';
 import { Unit } from './unit';
 
 export interface OrderUnits {
-
   unitByUid<TUnit extends Unit>(uid: string, unitType: new (init?: Unit.Init) => TUnit): TUnit;
-
 }
 
 export const OrderUnits: CxEntry<OrderUnits> = {
-  perContext: (/*#__PURE__*/ cxScoped(
-      OrderContext,
-      (/*#__PURE__*/ cxSingle({
-        byDefault: target => new Order$Units(target.get(Order$Evaluator)),
-      })),
-  )),
+  perContext: /*#__PURE__*/ cxScoped(
+    OrderContext,
+    /*#__PURE__*/ cxSingle({
+      byDefault: target => new Order$Units(target.get(Order$Evaluator)),
+    }),
+  ),
   toString: () => '[OrderUnits]',
 };
 

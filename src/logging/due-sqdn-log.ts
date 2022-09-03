@@ -10,7 +10,6 @@ import { SqdnLoggable } from './sqdn-loggable';
  * [@run-z/log-z]: https://www.npmjs.com/package/@run-z/log-z
  */
 export interface DueSqdnLog extends DueLog {
-
   /**
    * Log message details to process and log.
    *
@@ -22,18 +21,15 @@ export interface DueSqdnLog extends DueLog {
    * [@run-z/log-z]: https://www.npmjs.com/package/@run-z/log-z
    */
   zDetails?: SqdnLoggable.Details;
-
 }
 
 export namespace DueSqdnLog {
-
   /**
    * A message to process before being logged by logger.
    *
    * Has the same structure as {@link DueSqdnLog} but some properties may be initially omitted.
    */
   export interface Target extends DueLog.Target {
-
     /**
      * Log message details to process and log.
      *
@@ -43,7 +39,5 @@ export namespace DueSqdnLog {
      * `log-z`- specific processing in this case.
      */
     zDetails?: Record<string | symbol, unknown>;
-
   }
-
 }

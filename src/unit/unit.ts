@@ -41,14 +41,10 @@ export class Unit implements SqdnLoggable, SupplyPeer {
    * @param init - Unit initialization options.
    */
   constructor(init: Unit.Init = {}) {
-
     const { createdIn = OrderContext.current() } = init;
 
     this.#createdIn = createdIn;
-    Error.captureStackTrace(
-        this[Unit$Id__symbol] = new Unit$Id(this, init),
-        new.target,
-    );
+    Error.captureStackTrace((this[Unit$Id__symbol] = new Unit$Id(this, init)), new.target);
     this.createdIn.get(Formation$Host).addUnit(this);
   }
 
@@ -65,7 +61,7 @@ export class Unit implements SqdnLoggable, SupplyPeer {
    * @internal
    */
   get [Unit$Backend__symbol](): Unit$Backend<this> {
-    return this.#backend ||= this.createdIn.get(Order$Evaluator).evalUnit(this);
+    return (this.#backend ||= this.createdIn.get(Order$Evaluator).evalUnit(this));
   }
 
   /**
@@ -145,7 +141,6 @@ export class Unit implements SqdnLoggable, SupplyPeer {
   }
 
   toLog(target: DueSqdnLog.Target): void | unknown {
-
     const { on = 'out', index, zDetails } = target;
 
     if (!zDetails || index) {
@@ -165,7 +160,6 @@ export class Unit implements SqdnLoggable, SupplyPeer {
   }
 
   toString(): string {
-
     const { prefix, suffix } = this[Unit$Id__symbol];
     let uid: string;
 
@@ -189,18 +183,14 @@ export class Unit implements SqdnLoggable, SupplyPeer {
 }
 
 export interface Unit {
-
   constructor: Unit.Class<this>;
-
 }
 
 export namespace Unit {
-
   /**
    * Executive order initialization options.
    */
   export interface Init {
-
     /**
      * A context of the order creating the unit.
      *
@@ -221,7 +211,6 @@ export namespace Unit {
      * When missing or empty, the identifier will be generated based on the stack trace of its constructor invocation.
      */
     readonly id?: string | undefined;
-
   }
 
   /**
@@ -230,7 +219,6 @@ export namespace Unit {
    * @typeParam TUnit - Unit type.
    */
   export interface Class<TUnit extends Unit = Unit> extends Function {
-
     prototype: TUnit;
 
     /**
@@ -241,7 +229,5 @@ export namespace Unit {
     unitName: string;
 
     new (init?: Init): TUnit;
-
   }
-
 }

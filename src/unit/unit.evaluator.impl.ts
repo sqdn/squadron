@@ -10,7 +10,11 @@ import { Unit$OrderSubject } from './unit.order-subject.impl';
 
 export class Unit$Evaluator<TUnit extends Unit> extends Unit$Backend<TUnit, Order$Evaluator> {
 
-  readonly #instructions: (readonly [instruction: OrderInstruction<TUnit>, deployedIn: OrderContext])[] = [];
+  readonly #instructions: (readonly [
+    instruction: OrderInstruction<TUnit>,
+    deployedIn: OrderContext,
+  ])[] = [];
+
   backend: Unit$Backend<TUnit> = this;
   #deliver = this.#doDeliver;
 
@@ -25,15 +29,10 @@ export class Unit$Evaluator<TUnit extends Unit> extends Unit$Backend<TUnit, Orde
     const deployment = host.deploymentOf(this.unit);
     const subjects = new Map<OrderContext, Unit$OrderSubject<TUnit> | null>();
     const getSubject = (deployedIn: OrderContext): OrderSubject<TUnit> | null => {
-
       let subject = subjects.get(deployedIn);
 
       if (subject === undefined) {
-        subject = new Unit$OrderSubject(
-            deployedIn,
-            deployment,
-            this.supply.derive(),
-        );
+        subject = new Unit$OrderSubject(deployedIn, deployment, this.supply.derive());
         subjects.set(deployedIn, subject);
         subject.supply.whenOff(() => {
           subjects.set(deployedIn, null);
@@ -49,7 +48,6 @@ export class Unit$Evaluator<TUnit extends Unit> extends Unit$Backend<TUnit, Orde
       ++numInstructions;
 
       host.workbench.instruct(async () => {
-
         const subject = getSubject(deployedIn);
 
         if (subject) {
@@ -89,7 +87,6 @@ export class Unit$Evaluator<TUnit extends Unit> extends Unit$Backend<TUnit, Orde
   }
 
   #doDeliver(): void {
-
     const deployment = this.host.host.deploymentOf(this.unit);
 
     // Reuse the same `Unit$Id` instance to potentially free some memory.

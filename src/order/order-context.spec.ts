@@ -19,13 +19,11 @@ describe('OrderContext', () => {
 
   describe('orderId', () => {
     it('can be explicitly specified', () => {
-
       const orderContext = test.newOrder({ orderId: 'test' });
 
       expect(orderContext.orderId).toBe('test');
     });
     it('assigned automatically', () => {
-
       const orderContext = test.newOrder();
 
       expect(orderContext.orderId).toMatch(/^[0-9a-f-]+/);
@@ -44,14 +42,16 @@ describe('OrderContext', () => {
     it('returns current context asynchronously', async () => {
       const orderContext = test.newOrder();
 
-      expect(await orderContext.run(async () => await Promise.resolve().then(() => OrderContext.current())))
-          .toBe(orderContext);
+      expect(
+        await orderContext.run(
+          async () => await Promise.resolve().then(() => OrderContext.current()),
+        ),
+      ).toBe(orderContext);
     });
     it('returns current context when bound', () => {
       const orderContext = test.newOrder();
 
-      expect(orderContext.run(() => AsyncResource.bind(OrderContext.current))())
-          .toBe(orderContext);
+      expect(orderContext.run(() => AsyncResource.bind(OrderContext.current))()).toBe(orderContext);
     });
   });
 

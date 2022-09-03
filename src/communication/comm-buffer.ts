@@ -9,7 +9,6 @@ import { CommPacket } from './comm-packet';
  * @typeParam T - A type of value associated with command.
  */
 export interface CommBuffer<T = unknown> {
-
   /**
    * A `OnEvent` sender of command eviction events.
    *
@@ -41,5 +40,4 @@ export interface CommBuffer<T = unknown> {
    * @returns The value associated with the earliest command, or `undefined` if there is no commands in the buffer.
    */
   pull(): T | undefined;
-
 }

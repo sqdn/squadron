@@ -12,9 +12,8 @@ export class Formation$UnitLocator implements UnitLocator {
   }
 
   static buildAsset(
-      target: CxEntry.Target<UnitLocator>,
+    target: CxEntry.Target<UnitLocator>,
   ): (this: void, collector: CxAsset.Collector<UnitLocator>) => void {
-
     const locator = new Formation$UnitLocator(target);
 
     return collector => collector(locator);
@@ -29,12 +28,11 @@ export class Formation$UnitLocator implements UnitLocator {
   }
 
   locateUnit(unit: Unit): OnEvent<[UnitLocation]> {
-    return this.#ctlChannel.request<UnitLocationCommRequest, UnitLocationCommResponse>(
-        UnitLocationCommRequest,
-        { unit: unit.uid },
-    ).do(
-        mapOn_(response => new Formation$UnitLocation(this.#formation, response)),
-    );
+    return this.#ctlChannel
+      .request<UnitLocationCommRequest, UnitLocationCommResponse>(UnitLocationCommRequest, {
+        unit: unit.uid,
+      })
+      .do(mapOn_(response => new Formation$UnitLocation(this.#formation, response)));
   }
 
 }
@@ -44,11 +42,7 @@ class Formation$UnitLocation implements UnitLocation {
   readonly #formations = new Map<string, Formation>();
   readonly #isLocal: boolean;
 
-  constructor(
-      formation: Formation,
-      { formations }: UnitLocationCommResponse,
-  ) {
-
+  constructor(formation: Formation, { formations }: UnitLocationCommResponse) {
     const orderUnits = formation.createdIn.get(OrderUnits);
 
     for (const uid of formations) {

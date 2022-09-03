@@ -6,12 +6,10 @@ import { TransferListItem } from 'node:worker_threads';
  * Command meta is stored in {@link meta} property. Other properties contain command body.
  */
 export interface CommPacket {
-
   /**
    * Command meta, if present.
    */
   readonly meta?: CommPacketMeta | undefined;
-
 }
 
 /**
@@ -20,7 +18,6 @@ export interface CommPacket {
  * This is an object containing arbitrary fields. Some of them reserved.
  */
 export interface CommPacketMeta {
-
   /**
    * Array of objects to transfer with [postMessage] call.
    *
@@ -36,5 +33,4 @@ export interface CommPacketMeta {
   readonly streamId?: string | undefined;
 
   readonly [name: string]: unknown | undefined;
-
 }

@@ -41,29 +41,25 @@ export class ProxyCommChannel implements CommChannel {
    * used.
    * @param logger - Logger to report buffered commands send failures.
    */
-  constructor(
-      {
-        to,
-        supply = new Supply(),
-        target,
-        closeTarget = true,
-        buffer,
-        logger = consoleLogger,
-      }: {
-        to: Unit;
-        supply?: Supply | undefined;
-        target: CommChannel | OnEvent<[CommChannel?]>;
-        closeTarget?: boolean | undefined;
-        buffer?: number | CommBuffer | undefined;
-        logger?: Logger | undefined;
-      },
-  ) {
+  constructor({
+    to,
+    supply = new Supply(),
+    target,
+    closeTarget = true,
+    buffer,
+    logger = consoleLogger,
+  }: {
+    to: Unit;
+    supply?: Supply | undefined;
+    target: CommChannel | OnEvent<[CommChannel?]>;
+    closeTarget?: boolean | undefined;
+    buffer?: number | CommBuffer | undefined;
+    logger?: Logger | undefined;
+  }) {
     this.#to = to;
     this.#supply = supply;
     this.#logger = logger;
-    this.#closeTarget = closeTarget
-        ? (channel, reason) => channel.supply.off(reason)
-        : noop;
+    this.#closeTarget = closeTarget ? (channel, reason) => channel.supply.off(reason) : noop;
     this.#targetsSupply = supply.derive().whenOff(reason => this.#target.endChannels(reason));
 
     if (isOnEvent(target)) {
@@ -94,7 +90,10 @@ export class ProxyCommChannel implements CommChannel {
     this.#target.signal(name, signal);
   }
 
-  request<TRequest extends CommPacket, TResponse = CommPacket>(name: string, request: TRequest): OnEvent<[TResponse]> {
+  request<TRequest extends CommPacket, TResponse = CommPacket>(
+    name: string,
+    request: TRequest,
+  ): OnEvent<[TResponse]> {
     return this.#target.request(name, request);
   }
 
@@ -105,8 +104,7 @@ export class ProxyCommChannel implements CommChannel {
     const { to } = this;
 
     this.supply.whenOff(reason => {
-      for (; ;) {
-
+      for (;;) {
         const command = buffer.pull();
 
         if (!command) {
@@ -119,60 +117,49 @@ export class ProxyCommChannel implements CommChannel {
 
     return {
       signal<TSignal extends CommPacket>(name: string, signal: TSignal): void {
-        buffer.addSignal(
-            name,
-            signal,
-            {
-              exec(channel) {
-                try {
-                  channel.signal(name, signal);
-                } catch (error) {
-                  logger.error(logline`Failed to send signal "${name}" to ${channel.to}`, error);
-                }
-              },
-              abort(reason) {
-                logger.warn(logline`Signal "${name}" to ${to} aborted`, reason);
-              },
-            },
-        );
+        buffer.addSignal(name, signal, {
+          exec(channel) {
+            try {
+              channel.signal(name, signal);
+            } catch (error) {
+              logger.error(logline`Failed to send signal "${name}" to ${channel.to}`, error);
+            }
+          },
+          abort(reason) {
+            logger.warn(logline`Signal "${name}" to ${to} aborted`, reason);
+          },
+        });
       },
       request<TRequest extends CommPacket, TResponse = CommPacket>(
-          name: string,
-          request: TRequest,
+        name: string,
+        request: TRequest,
       ): OnEvent<[TResponse]> {
-
         const responseTracker = trackValue<OnEvent<[TResponse]>>();
         let exec = (channel: CommChannel): void => {
           try {
             responseTracker.it = channel.request(name, request);
           } catch (error) {
             responseTracker.supply.off(
-                new CommError(to, `Failed to send request "${name}" to ${channel.to}`, error),
+              new CommError(to, `Failed to send request "${name}" to ${channel.to}`, error),
             );
           }
         };
 
-        responseTracker.supply.whenOff(() => exec = noop);
+        responseTracker.supply.whenOff(() => (exec = noop));
 
-        buffer.addRequest(
-            name,
-            request,
-            {
-              exec: channel => exec(channel),
-              abort: reason => responseTracker.supply.off(
-                  new CommError(to, `Request "${name}" to ${to} aborted`, reason),
-              ),
-            },
-        );
+        buffer.addRequest(name, request, {
+          exec: channel => exec(channel),
+          abort: reason => responseTracker.supply.off(
+              new CommError(to, `Request "${name}" to ${to} aborted`, reason),
+            ),
+        });
 
-        return responseTracker.read.do(
-            digOn_(asis),
-        );
+        return responseTracker.read.do(digOn_(asis));
       },
       channelTo: (channel: CommChannel) => {
         this.#channelTo(channel);
 
-        for (; ;) {
+        for (;;) {
           if (channel.supply.isOff) {
             break;
           }
@@ -198,14 +185,13 @@ export class ProxyCommChannel implements CommChannel {
   }
 
   #channelTo(channel: CommChannel): void {
-
-    const target = this.#target = {
+    const target = (this.#target = {
       signal<TSignal extends CommPacket>(name: string, signal: TSignal): void {
         channel.signal(name, signal);
       },
       request<TRequest extends CommPacket, TResponse = CommPacket>(
-          name: string,
-          request: TRequest,
+        name: string,
+        request: TRequest,
       ): OnEvent<[TResponse]> {
         return channel.request(name, request);
       },
@@ -221,7 +207,7 @@ export class ProxyCommChannel implements CommChannel {
       endProxy: reason => {
         this.#closeTarget(channel, reason);
       },
-    };
+    });
 
     channel.supply.whenOff(_ => {
       if (this.#target === target && !this.#targetsSupply.isOff) {
@@ -236,15 +222,17 @@ export class ProxyCommChannel implements CommChannel {
 
 function ProxyComm$buffer(buffer?: CommBuffer | number): CommBuffer<ProxyComm$Command> {
   return buffer && typeof buffer !== 'number'
-      ? buffer as CommBuffer<ProxyComm$Command>
-      : new FIFOCommBuffer(buffer);
+    ? (buffer as CommBuffer<ProxyComm$Command>)
+    : new FIFOCommBuffer(buffer);
 }
 
 interface ProxyComm$Target {
-
   signal<TSignal extends CommPacket>(name: string, signal: TSignal): void;
 
-  request<TRequest extends CommPacket, TResponse = CommPacket>(name: string, request: TRequest): OnEvent<[TResponse]>;
+  request<TRequest extends CommPacket, TResponse = CommPacket>(
+    name: string,
+    request: TRequest,
+  ): OnEvent<[TResponse]>;
 
   channelTo(nextChannel: CommChannel): void;
 
@@ -253,13 +241,10 @@ interface ProxyComm$Target {
   endChannels(reason: unknown): void;
 
   endProxy(reason: unknown): void;
-
 }
 
 interface ProxyComm$Command {
-
   exec(channel: CommChannel): void;
 
   abort(reason: unknown): void;
-
 }

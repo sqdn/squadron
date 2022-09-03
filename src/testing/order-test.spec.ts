@@ -5,14 +5,12 @@ import { Formation, FormationContext } from '../formation';
 import { OrderTest } from './order-test';
 
 describe('OrderTest', () => {
-
   afterEach(() => {
     OrderTest.reset();
   });
 
   describe('orderBuilder', () => {
     it('sets up the test automatically', () => {
-
       const entry: CxEntry<string> = { perContext: cxSingle(), toString: () => '[CxEntry test]' };
 
       OrderTest.builtBy.provide(cxConstAsset(entry, 'test value'));
@@ -35,7 +33,6 @@ describe('OrderTest', () => {
 
   describe('setup', () => {
     it('sets up the test', () => {
-
       const test = OrderTest.setup();
 
       expect(test.hub).toBe(OrderTest.hub);

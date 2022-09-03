@@ -8,13 +8,8 @@ export class SqdnLaunchModule {
   #getModule: () => Promise<Module>;
   readonly id: string;
 
-  constructor(
-      readonly resolver: SqdnLauncher,
-      readonly sourceURL: URL,
-      specifier?: string,
-  ) {
+  constructor(readonly resolver: SqdnLauncher, readonly sourceURL: URL, specifier?: string) {
     this.#getModule = () => {
-
       const promise = this.#readSource().then(src => this.#createModule(src));
 
       this.#getModule = () => promise;
@@ -29,21 +24,14 @@ export class SqdnLaunchModule {
   }
 
   async #readSource(): Promise<string> {
-    return await fs.readFile(
-        fileURLToPath(this.sourceURL.href),
-        { encoding: 'utf8' },
-    );
+    return await fs.readFile(fileURLToPath(this.sourceURL.href), { encoding: 'utf8' });
   }
 
   async #createModule(source: string): Promise<Module> {
-
-    const module = new SourceTextModule(
-        source,
-        {
-          identifier: this.id,
-          context: this.resolver.vmContext,
-        },
-    );
+    const module = new SourceTextModule(source, {
+      identifier: this.id,
+      context: this.resolver.vmContext,
+    });
 
     await module.link(this.resolver.resolveModule.bind(this.resolver));
 

@@ -13,11 +13,7 @@ export class FormationTest$Nested extends OrderTest$Instance implements Formatio
   readonly #hubTest: HubTest;
   readonly #hubFormation: Formation;
 
-  constructor(
-      hubTest: HubTest$Instance,
-      formation: Formation,
-      init?: FormationTest.Init,
-  ) {
+  constructor(hubTest: HubTest$Instance, formation: Formation, init?: FormationTest.Init) {
     super(FormationTest$init(hubTest, formation, init));
     this.#hubTest = hubTest;
     this.#hubFormation = formation;
@@ -25,7 +21,8 @@ export class FormationTest$Nested extends OrderTest$Instance implements Formatio
 
   init(): this {
     // Establish communication.
-    void this.#hubTest.formationBuilder.get(FormationManager).formationCtl(this.#hubFormation).channel;
+    void this.#hubTest.formationBuilder.get(FormationManager).formationCtl(this.#hubFormation)
+      .channel;
 
     return this;
   }
@@ -34,8 +31,8 @@ export class FormationTest$Nested extends OrderTest$Instance implements Formatio
     this.#hubFormation.deploy(unit);
 
     const fmnUnit = this.createdIn
-        .get(OrderUnits)
-        .unitByUid(unit.uid, unit.constructor as new (init?: Unit.Init) => TUnit);
+      .get(OrderUnits)
+      .unitByUid(unit.uid, unit.constructor as new (init?: Unit.Init) => TUnit);
 
     this.formation.deploy(fmnUnit);
 
@@ -45,11 +42,10 @@ export class FormationTest$Nested extends OrderTest$Instance implements Formatio
 }
 
 function FormationTest$init(
-    hubTest: HubTest$Instance,
-    formation: Formation,
-    init: FormationTest.Init = {},
+  hubTest: HubTest$Instance,
+  formation: Formation,
+  init: FormationTest.Init = {},
 ): OrderTest.Init {
-
   const { supply = new Supply() } = init;
 
   return {

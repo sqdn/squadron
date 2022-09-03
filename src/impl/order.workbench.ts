@@ -31,28 +31,28 @@ export class Order$Workbench {
 
   constructor() {
     this.#instructionStage = new Order$Stage(
-        this,
-        Order$StageId.Instruction,
-        UnitStatus.Instructed,
-        'instruction',
+      this,
+      Order$StageId.Instruction,
+      UnitStatus.Instructed,
+      'instruction',
     );
     this.#withdrawalStage = new Order$Stage(
-        this,
-        Order$StageId.Withdrawal,
-        UnitStatus.Instructed,
-        'withdrawal',
+      this,
+      Order$StageId.Withdrawal,
+      UnitStatus.Instructed,
+      'withdrawal',
     );
     this.#executionStage = new Order$Stage(
-        this,
-        Order$StageId.Execution,
-        UnitStatus.Executed,
-        'execution',
+      this,
+      Order$StageId.Execution,
+      UnitStatus.Executed,
+      'execution',
     );
     this.#readinessStage = new Order$Stage(
-        this,
-        Order$StageId.Readiness,
-        UnitStatus.Ready,
-        'readiness',
+      this,
+      Order$StageId.Readiness,
+      UnitStatus.Ready,
+      'readiness',
     );
   }
 
@@ -62,14 +62,14 @@ export class Order$Workbench {
 
   executeOrder(): Promise<void> {
     return this.#runningStageId
-        ? this.#whenExecuted.promise().then(() => this.executeOrder())
-        : this.#startExecution().promise();
+      ? this.#whenExecuted.promise().then(() => this.executeOrder())
+      : this.#startExecution().promise();
   }
 
   #startExecution(): PromiseResolver {
     this.#startStage(Order$StageId.First);
 
-    return this.#whenExecuted = newPromiseResolver();
+    return (this.#whenExecuted = newPromiseResolver());
   }
 
   addStage(stage: Order$Stage): void {
@@ -81,7 +81,7 @@ export class Order$Workbench {
   }
 
   #stageStarter(stageId: Order$StageId): PromiseResolver {
-    return this.#stageStarters[stageId] ||= newPromiseResolver();
+    return (this.#stageStarters[stageId] ||= newPromiseResolver());
   }
 
   #startStage(stageId: Order$StageId): void {
@@ -107,7 +107,6 @@ export class Order$Workbench {
   }
 
   #run(stage: Order$Stage, task: Workbench.Task<void>): void {
-
     const { stageId } = stage;
 
     if (stageId < this.#runningStageId) {
@@ -163,10 +162,10 @@ export class Order$Workbench {
 class Order$Stage extends WorkStage {
 
   constructor(
-      workbench: Order$Workbench,
-      readonly stageId: Order$StageId,
-      readonly endStatus: UnitStatus,
-      name: string,
+    workbench: Order$Workbench,
+    readonly stageId: Order$StageId,
+    readonly endStatus: UnitStatus,
+    name: string,
   ) {
     super(name, { start: _ => workbench.canStartStage(stageId) });
     workbench.addStage(this);

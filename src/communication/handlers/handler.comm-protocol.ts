@@ -22,15 +22,15 @@ export class HandlerCommProtocol implements CommProtocol {
   }
 
   channelProcessor(source: Unit): CommReceiver | CommResponder | CommProcessor | undefined {
-
-    const handlers = this.#handlers.map(handler => CommProcessor$forUnit(source, handler))
-        .filter<CommReceiver | CommResponder | CommProcessor>(isPresent);
+    const handlers = this.#handlers
+      .map(handler => CommProcessor$forUnit(source, handler))
+      .filter<CommReceiver | CommResponder | CommProcessor>(isPresent);
 
     return handlers.length
-        ? (handlers.length > 1
-            ? new HandlerCommProcessor(...handlers)
-            : handlers[0])
-        : undefined;
+      ? handlers.length > 1
+        ? new HandlerCommProcessor(...handlers)
+        : handlers[0]
+      : undefined;
   }
 
 }
@@ -40,8 +40,8 @@ function isCommProtocol(handler: CommHandler): handler is CommProtocol {
 }
 
 function CommProcessor$forUnit(
-    source: Unit,
-    handler: CommHandler,
+  source: Unit,
+  handler: CommHandler,
 ): CommReceiver | CommResponder | CommProcessor | undefined {
   return isCommProtocol(handler) ? handler.channelProcessor(source) : handler;
 }

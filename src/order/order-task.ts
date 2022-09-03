@@ -12,5 +12,7 @@ import { Unit, UnitContext } from '../unit';
  * @returns Either none when the task executed synchronously, or a promise-like instance resolved when the task
  * execution completes asynchronously.
  */
-export type OrderTask<TUnit extends Unit> =
-    (this: void, context: UnitContext<TUnit>) => void | PromiseLike<unknown>;
+export type OrderTask<TUnit extends Unit> = (
+  this: void,
+  context: UnitContext<TUnit>,
+) => void | PromiseLike<unknown>;

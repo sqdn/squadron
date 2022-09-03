@@ -19,7 +19,6 @@ describe('ClosedCommChannel', () => {
 
   describe('supply', () => {
     it('reflects why channel closed', () => {
-
       const reason = new Error('Reason');
       const channel = new ClosedCommChannel(unit, reason);
       const whenOff = jest.fn();

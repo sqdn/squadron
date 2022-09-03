@@ -15,11 +15,7 @@ export class Formation$Context implements FormationContext {
   readonly #host: Formation$Host;
   readonly #get: CxAccessor;
 
-  constructor(
-      host: Formation$Host,
-      get: CxAccessor,
-      cxBuilder: CxBuilder<FormationContext>,
-  ) {
+  constructor(host: Formation$Host, get: CxAccessor, cxBuilder: CxBuilder<FormationContext>) {
     this.#host = host;
     this.#get = get;
     cxBuilder.provide(cxConstAsset(CxGlobals, this));

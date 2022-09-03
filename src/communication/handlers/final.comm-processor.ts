@@ -51,9 +51,12 @@ export class FinalCommProcessor implements CommProcessor {
    * with `TypeError` as its reason.
    */
   respond(name: string, request: CommPacket): OnEvent<[CommPacket]> {
-    return this.#processor.respond(name, request) || onEventBy(({ supply }) => {
-      supply.off(new TypeError(`Unknown request received: "${name}"`));
-    });
+    return (
+      this.#processor.respond(name, request)
+      || onEventBy(({ supply }) => {
+        supply.off(new TypeError(`Unknown request received: "${name}"`));
+      })
+    );
   }
 
 }

@@ -5,7 +5,6 @@ import { Hub } from '../hub';
  * An origin of the unit.
  */
 export interface UnitOrigin {
-
   /**
    * The hub reference the unit created by.
    */
@@ -15,5 +14,4 @@ export interface UnitOrigin {
    * The formation reference the unit created in.
    */
   readonly formation: Formation;
-
 }

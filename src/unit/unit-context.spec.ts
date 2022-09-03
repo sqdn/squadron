@@ -5,7 +5,6 @@ import { Unit } from './unit';
 import { UnitContext } from './unit-context';
 
 describe('UnitContext', () => {
-
   beforeEach(() => {
     OrderTest.setup();
   });
@@ -14,7 +13,6 @@ describe('UnitContext', () => {
   });
 
   it('is available in order', () => {
-
     const context = OrderTest.createdIn.get(UnitContext);
 
     expect(context.hub).toBe(OrderTest.hub);
@@ -23,16 +21,14 @@ describe('UnitContext', () => {
     expect(context).toBe(OrderTest.createdIn.get(FormationContext));
   });
   it('is available during unit deployment', async () => {
-
     const orderFormation = OrderTest.createdIn.get(Formation);
     let context!: UnitContext;
     const unit = await OrderTest.run(async () => {
-
       const unit = new Unit({ tag: 'test' });
 
       unit.instruct(subject => subject.execute(ctx => {
-        context = ctx;
-      }));
+          context = ctx;
+        }));
 
       OrderTest.formation.deploy(unit);
       await OrderTest.evaluate();

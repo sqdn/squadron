@@ -11,13 +11,10 @@ import { HandlerCommProcessor, ProxyCommProcessor } from '../handlers';
 import { DirectCommChannel } from './direct.comm-channel';
 
 interface TestPacket extends CommPacket {
-
   readonly payload: unknown;
-
 }
 
 describe('DirectCommChannel', () => {
-
   beforeEach(() => {
     OrderTest.setup();
   });
@@ -43,7 +40,6 @@ describe('DirectCommChannel', () => {
 
   describe('signal', () => {
     it('processes signal', () => {
-
       const receiver: CommReceiver<TestPacket> = {
         name: 'ping',
         receive: jest.fn(() => true),
@@ -57,7 +53,6 @@ describe('DirectCommChannel', () => {
       expect(receiver.receive).toHaveBeenCalledWith(signal);
     });
     it('processes signal with command processor', () => {
-
       const handler: CommReceiver<TestPacket> = {
         name: 'ping',
         receive: jest.fn(() => true),
@@ -71,7 +66,6 @@ describe('DirectCommChannel', () => {
       expect(handler.receive).toHaveBeenCalledWith(signal);
     });
     it('processes signal with fallback handler', () => {
-
       const receiver1: CommReceiver<TestPacket> = {
         name: 'ping',
         receive: jest.fn<(signal: TestPacket) => boolean>(),
@@ -90,7 +84,6 @@ describe('DirectCommChannel', () => {
       expect(receiver2.receive).toHaveBeenCalledWith(signal);
     });
     it('processes signal with fallback processor', () => {
-
       const receiver1: CommReceiver<TestPacket> = {
         name: 'ping',
         receive: jest.fn<(signal: TestPacket) => boolean>(),
@@ -109,22 +102,18 @@ describe('DirectCommChannel', () => {
       expect(receiver2.receive).toHaveBeenCalledWith(signal);
     });
     it('does not send signal when channel closed', () => {
-
       const reason = new Error('Reason');
 
       channel.supply.off(reason);
 
-      expect(() => channel.signal('test', {})).toThrow(new CommError(
-          unit,
-          `Can not send signal "test" to ${unit} over closed channel`,
-          reason,
-      ));
+      expect(() => channel.signal('test', {})).toThrow(
+        new CommError(unit, `Can not send signal "test" to ${unit} over closed channel`, reason),
+      );
     });
   });
 
   describe('request', () => {
     it('responds to request', async () => {
-
       const responder: CommResponder<TestPacket, TestPacket> = {
         name: 'ping',
         respond: jest.fn(request => onPromise({ ...request, payload: { re: request.payload } })),
@@ -132,11 +121,11 @@ describe('DirectCommChannel', () => {
 
       processor = commProcessorBy(responder);
 
-      expect(await channel.request<TestPacket, TestPacket>('ping', { payload: 'test' }))
-          .toEqual({ payload: { re: 'test' } });
+      expect(await channel.request<TestPacket, TestPacket>('ping', { payload: 'test' })).toEqual({
+        payload: { re: 'test' },
+      });
     });
     it('responds to request by command processor', async () => {
-
       const responder: CommResponder<TestPacket, TestPacket> = {
         name: 'ping',
         respond: jest.fn(request => onPromise({ ...request, payload: { re: request.payload } })),
@@ -144,11 +133,11 @@ describe('DirectCommChannel', () => {
 
       processor = new HandlerCommProcessor(new HandlerCommProcessor(responder));
 
-      expect(await channel.request<TestPacket, TestPacket>('ping', { payload: 'test' }))
-          .toEqual({ payload: { re: 'test' } });
+      expect(await channel.request<TestPacket, TestPacket>('ping', { payload: 'test' })).toEqual({
+        payload: { re: 'test' },
+      });
     });
     it('responds to request with fallback responder', async () => {
-
       const responder1: CommResponder<TestPacket, TestPacket> = {
         name: 'ping',
         respond: noop,
@@ -160,11 +149,11 @@ describe('DirectCommChannel', () => {
 
       processor = new HandlerCommProcessor(responder1, responder2);
 
-      expect(await channel.request<TestPacket, TestPacket>('ping', { payload: 'test' }))
-          .toEqual({ payload: { re: 'test' } });
+      expect(await channel.request<TestPacket, TestPacket>('ping', { payload: 'test' })).toEqual({
+        payload: { re: 'test' },
+      });
     });
     it('responds to request with fallback processor', async () => {
-
       const responder1: CommResponder<TestPacket, TestPacket> = {
         name: 'ping',
         respond: noop,
@@ -176,11 +165,11 @@ describe('DirectCommChannel', () => {
 
       processor = new HandlerCommProcessor(responder1, new HandlerCommProcessor(responder2));
 
-      expect(await channel.request<TestPacket, TestPacket>('ping', { payload: 'test' }))
-          .toEqual({ payload: { re: 'test' } });
+      expect(await channel.request<TestPacket, TestPacket>('ping', { payload: 'test' })).toEqual({
+        payload: { re: 'test' },
+      });
     });
     it('does not send request when channel closed', () => {
-
       const reason = new Error('Reason');
 
       channel.supply.off(reason);
@@ -188,11 +177,9 @@ describe('DirectCommChannel', () => {
       const whenOff = jest.fn();
 
       channel.request('test', {})(noop).whenOff(whenOff);
-      expect(whenOff).toHaveBeenCalledWith(new CommError(
-          unit,
-          `Can not send request "test" to ${unit} over closed channel`,
-          reason,
-      ));
+      expect(whenOff).toHaveBeenCalledWith(
+        new CommError(unit, `Can not send request "test" to ${unit} over closed channel`, reason),
+      );
     });
   });
 });

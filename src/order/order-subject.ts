@@ -12,8 +12,10 @@ import { OrderWithdrawalTask } from './order-withdrawal-task';
  *
  * @typeParam TUnit - Type of deployed unit.
  */
-export interface OrderSubject<TUnit extends Unit = Unit> extends CxValues, CxModifier<UnitContext<TUnit>>, SupplyPeer {
-
+export interface OrderSubject<TUnit extends Unit = Unit>
+  extends CxValues,
+    CxModifier<UnitContext<TUnit>>,
+    SupplyPeer {
   /**
    * Central hub the formation controlled by.
    */
@@ -120,5 +122,4 @@ export interface OrderSubject<TUnit extends Unit = Unit> extends CxValues, CxMod
    * @returns A promise resolved when the subject withdrawn.
    */
   withdraw(reason?: unknown): Promise<void>;
-
 }

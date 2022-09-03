@@ -25,14 +25,12 @@ describe('CommError', () => {
 
   describe('reason', () => {
     it('is undefined by default', () => {
-
       const error = new CommError(unit, 'Error');
 
       expect(error.reason).toBeUndefined();
       expect(String(error)).toBe(`CommError: Error`);
     });
     it('reflects failure reason', () => {
-
       const reason = new Error('Reason');
       const error = new CommError(unit, undefined, reason);
 

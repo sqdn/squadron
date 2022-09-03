@@ -11,7 +11,6 @@ import { OrderSubject } from './order-subject';
 import { OrderTask } from './order-task';
 
 describe('OrderSubject', () => {
-
   let test: OrderTest;
 
   beforeEach(() => {
@@ -23,11 +22,9 @@ describe('OrderSubject', () => {
 
   describe('hub', () => {
     it('refers the central hub', async () => {
-
       let unitSubject!: OrderSubject;
 
       await OrderTest.run(async () => {
-
         const unit = new Unit();
 
         unit.instruct(subject => {
@@ -45,11 +42,9 @@ describe('OrderSubject', () => {
 
   describe('formation', () => {
     it('refers the target formation', async () => {
-
       let unitSubject!: OrderSubject;
 
       await OrderTest.run(async () => {
-
         const unit = new Unit();
 
         unit.instruct(subject => {
@@ -67,11 +62,9 @@ describe('OrderSubject', () => {
 
   describe('unit', () => {
     it('refers the unit', async () => {
-
       let unitSubject!: OrderSubject;
 
       const unit = await OrderTest.run(async () => {
-
         const unit = new Unit();
 
         unit.instruct(subject => {
@@ -91,7 +84,6 @@ describe('OrderSubject', () => {
 
   describe('context', () => {
     it('tracks unit status', async () => {
-
       const statuses: UnitStatus[] = [];
       let instructionStatus1: UnitStatus | undefined;
       let instructionStatus2: UnitStatus | undefined;
@@ -99,7 +91,6 @@ describe('OrderSubject', () => {
       let taskStatus2: UnitStatus | undefined;
 
       await OrderTest.run(async () => {
-
         const unit = new Unit();
 
         unit.instruct(async subject => {
@@ -135,7 +126,6 @@ describe('OrderSubject', () => {
       ]);
     });
     it('tracks formation status', async () => {
-
       const statuses: UnitStatus[] = [];
       let instructionStatus1: UnitStatus | undefined;
       let instructionStatus2: UnitStatus | undefined;
@@ -147,7 +137,6 @@ describe('OrderSubject', () => {
       fmnContext.readStatus(status => statuses.push(status));
 
       await OrderTest.run(async () => {
-
         const unit = new Unit();
 
         unit.instruct(async subject => {
@@ -185,7 +174,6 @@ describe('OrderSubject', () => {
 
   describe('provide', () => {
     it('provides unit context value', async () => {
-
       const entry: CxEntry<string> = {
         perContext: cxRecent({ byDefault: () => 'default' }),
         toString: () => '[CxEntry test]',
@@ -194,7 +182,6 @@ describe('OrderSubject', () => {
       let unitContext!: UnitContext;
 
       await OrderTest.run(async () => {
-
         const unit = new Unit();
 
         unit.instruct(subject => {
@@ -219,7 +206,6 @@ describe('OrderSubject', () => {
 
   describe('perFormation', () => {
     it('provides formation context value', async () => {
-
       const entry: CxEntry<string> = {
         perContext: cxRecent({ byDefault: () => 'default' }),
         toString: () => '[CxEntry test]',
@@ -228,7 +214,6 @@ describe('OrderSubject', () => {
       let unitContext!: UnitContext;
 
       await OrderTest.run(async () => {
-
         const unit = new Unit();
 
         unit.instruct(subject => {
@@ -257,7 +242,6 @@ describe('OrderSubject', () => {
 
   describe('perOrder', () => {
     it('provides order value', async () => {
-
       const entry: CxEntry<string> = {
         perContext: cxRecent({ byDefault: () => 'default' }),
         toString: () => '[CxEntry test]',
@@ -266,7 +250,6 @@ describe('OrderSubject', () => {
       let unitContext!: UnitContext;
 
       await OrderTest.run(async () => {
-
         const unit = new Unit();
 
         unit.instruct(subject => {
@@ -294,7 +277,6 @@ describe('OrderSubject', () => {
 
   describe('perUnit', () => {
     it('provides values for each unit', async () => {
-
       const entry: CxEntry<string> = {
         perContext: cxRecent({ byDefault: () => 'default' }),
         toString: () => '[CxEntry test]',
@@ -305,7 +287,6 @@ describe('OrderSubject', () => {
       let unitContext2!: UnitContext;
 
       await OrderTest.run(async () => {
-
         const unit1 = new Unit();
 
         unit1.instruct(subject => {
@@ -347,10 +328,8 @@ describe('OrderSubject', () => {
 
   describe('execute', () => {
     it('executes the task', async () => {
-
       const task = jest.fn<OrderTask<Unit>>();
       const unit = await OrderTest.run(async () => {
-
         const unit = new Unit();
 
         unit.instruct(subject => {
@@ -367,9 +346,7 @@ describe('OrderSubject', () => {
       expect(unit.supply.isOff).toBe(false);
     });
     it('executes the task added after order evaluation', async () => {
-
       const { unit, task } = await OrderTest.run(async () => {
-
         const unit = new Unit();
 
         test.formation.deploy(unit);
@@ -391,7 +368,6 @@ describe('OrderSubject', () => {
       expect(unit.supply.isOff).toBe(false);
     });
     it('withdraws the subject if task execution fails', async () => {
-
       const logger = {
         error: jest.fn<(...message: unknown[]) => void>(),
       } as Partial<Logger> as Logger;
@@ -425,7 +401,6 @@ describe('OrderSubject', () => {
       expect(logger.error).toHaveBeenCalledWith('Failed to deploy', String(unit), error);
     });
     it('rejects the task for withdrawn subject', async () => {
-
       const logger = {
         warn: jest.fn<(...message: unknown[]) => void>(),
       } as Partial<Logger> as Logger;
@@ -436,7 +411,6 @@ describe('OrderSubject', () => {
       const task = jest.fn<OrderTask<Unit>>();
 
       const unit = await OrderTest.run(async () => {
-
         const unit = new Unit();
 
         unit.instruct(subject => {
@@ -456,12 +430,10 @@ describe('OrderSubject', () => {
 
     describe('after order evaluation', () => {
       it('executes the task after order evaluation', async () => {
-
         let deploy!: OrderSubject['execute'];
         const task = jest.fn<OrderTask<Unit>>();
 
         const unit = await OrderTest.run(async () => {
-
           const unit = new Unit();
 
           unit.instruct(subject => {
@@ -481,7 +453,6 @@ describe('OrderSubject', () => {
         expect(unit.supply.isOff).toBe(false);
       });
       it('does not withdraw the subject if task execution fails', async () => {
-
         const logger = {
           error: jest.fn<(...message: unknown[]) => void>(),
         } as Partial<Logger> as Logger;
@@ -496,7 +467,6 @@ describe('OrderSubject', () => {
         });
 
         const unit = await OrderTest.run(async () => {
-
           const unit = OrderTest.run(() => new Unit());
 
           unit.instruct(subject => {
@@ -524,11 +494,9 @@ describe('OrderSubject', () => {
 
   describe('for the task created after order evaluation', () => {
     it('executes the task', async () => {
-
       const task = jest.fn<OrderTask<Unit>>();
 
       const unit = await OrderTest.run(async () => {
-
         const unit = new Unit();
 
         test.formation.deploy(unit);
@@ -548,7 +516,6 @@ describe('OrderSubject', () => {
       expect(unit.supply.isOff).toBe(false);
     });
     it('does not withdraw the subject if deployment fails', async () => {
-
       const logger = {
         error: jest.fn<(...message: unknown[]) => void>(),
       } as Partial<Logger> as Logger;
@@ -562,7 +529,6 @@ describe('OrderSubject', () => {
       });
 
       const unit = await OrderTest.run(async () => {
-
         const unit = new Unit();
 
         test.formation.deploy(unit);
@@ -590,12 +556,10 @@ describe('OrderSubject', () => {
 
   describe('withdraw', () => {
     it('executes withdrawal task', async () => {
-
       let subj!: OrderSubject;
       const withdrawal = jest.fn<() => void>();
 
       await OrderTest.run(async () => {
-
         const unit = new Unit();
 
         unit.instruct(subject => {
@@ -619,12 +583,10 @@ describe('OrderSubject', () => {
       expect(await subj.supply.whenDone().catch(asis)).toBe(reason);
     });
     it('executes withdrawal task added by execution task', async () => {
-
       let subj!: OrderSubject;
       const withdrawal = jest.fn<() => void>();
 
       const unit = await OrderTest.run(async () => {
-
         const unit = new Unit();
 
         unit.instruct(subject => {
@@ -652,7 +614,6 @@ describe('OrderSubject', () => {
       expect(await subj.supply.whenDone().catch(asis)).toBe(reason);
     });
     it('logs withdrawal failure', async () => {
-
       const logger = {
         error: jest.fn<(...message: unknown[]) => void>(),
       } as Partial<Logger> as Logger;
@@ -665,7 +626,6 @@ describe('OrderSubject', () => {
       const withdrawal2 = jest.fn<() => void>(() => Promise.reject(failure));
 
       const unit = await OrderTest.run(async () => {
-
         const unit = new Unit();
 
         unit.instruct(subject => {
@@ -699,12 +659,10 @@ describe('OrderSubject', () => {
 
   describe('executeUponWithdrawal', () => {
     it('schedules withdrawal task during withdrawal', async () => {
-
       const withdrawal = jest.fn<() => void>();
       let subj!: OrderSubject;
 
       await OrderTest.run(async () => {
-
         const unit = new Unit();
 
         unit.instruct(subject => {
@@ -727,7 +685,6 @@ describe('OrderSubject', () => {
       expect(await subj.supply.whenDone().catch(asis)).toBe(reason);
     });
     it('rejects withdrawal task after subject withdrawal', async () => {
-
       const logger = {
         warn: jest.fn<(...message: unknown[]) => void>(),
       } as Partial<Logger> as Logger;
@@ -737,7 +694,6 @@ describe('OrderSubject', () => {
       let subj!: OrderSubject;
 
       const unit = await OrderTest.run(async () => {
-
         const unit = new Unit();
 
         unit.instruct(subject => {

@@ -18,7 +18,6 @@ import { OrderContext$storage } from './order-context.impl';
  * New order can be constructed by calling {@link FormationContext.newOrder} method.
  */
 export interface OrderContext extends CxValues, SupplyPeer {
-
   /**
    * Unique order identifier. Either {@link OrderContext.Init.orderId explicitly provided}, or generated automatically.
    */
@@ -43,18 +42,15 @@ export interface OrderContext extends CxValues, SupplyPeer {
    * @returns The value returned from function call.
    */
   run<TResult>(fn: (this: void, context: OrderContext) => TResult): TResult;
-
 }
 
 export namespace OrderContext {
-
   /**
    * Order context initialization options.
    *
    * Passed to {@link FormationContext.newOrder} to create new order.
    */
   export interface Init {
-
     /**
      * New order identifier.
      *
@@ -72,7 +68,6 @@ export namespace OrderContext {
    * Context entry that serves as a unique key of {@link OrderContext} value.
    */
   export interface Entry extends CxEntry<OrderContext> {
-
     /**
      * Obtains current order context instance.
      *
@@ -81,18 +76,15 @@ export namespace OrderContext {
      * @throws ReferenceError when called outside order execution.
      */
     current(): OrderContext;
-
   }
-
 }
 
 /**
  * Order, formation, or unit context entry containing the order context instance.
  */
 export const OrderContext: OrderContext.Entry = {
-  perContext: (/*#__PURE__*/ cxSingle()),
+  perContext: /*#__PURE__*/ cxSingle(),
   current() {
-
     const current = OrderContext$storage.getStore();
 
     if (!current) {

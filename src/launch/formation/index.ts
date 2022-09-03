@@ -10,19 +10,16 @@ import { Formation$createAssets } from '../../impl/formation';
 import { SqdnLauncher } from '../sqdn-launcher';
 
 export default function launchFormation(launcher: SqdnLauncher): void {
-  launchSqdn(
-      launcher,
-      {
-        orderId: launcher.rootURL,
-        createOrigin: createdIn => ({
-          hub: new Hub({ id: launcher.launchData!.hubUid, createdIn }),
-          formation: new Formation({ id: launcher.launchData!.uid, createdIn }),
-        }),
-        createContext(host, get, cxBuilder) {
-          cxBuilder.provide(Formation$createAssets(launcher.launchData!));
+  launchSqdn(launcher, {
+    orderId: launcher.rootURL,
+    createOrigin: createdIn => ({
+      hub: new Hub({ id: launcher.launchData!.hubUid, createdIn }),
+      formation: new Formation({ id: launcher.launchData!.uid, createdIn }),
+    }),
+    createContext(host, get, cxBuilder) {
+      cxBuilder.provide(Formation$createAssets(launcher.launchData!));
 
-          return new Formation$Context(host, get, cxBuilder);
-        },
-      },
-  );
+      return new Formation$Context(host, get, cxBuilder);
+    },
+  });
 }

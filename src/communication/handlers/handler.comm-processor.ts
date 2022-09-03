@@ -41,7 +41,6 @@ export class HandlerCommProcessor implements CommProcessor {
   }
 
   #receiversOf(name: string): CommProcessor['receive'][] {
-
     let receivers = this.#receivers.get(name);
 
     if (!receivers) {
@@ -53,7 +52,6 @@ export class HandlerCommProcessor implements CommProcessor {
   }
 
   #respondersOf(name: string): CommProcessor['respond'][] {
-
     let responders = this.#responders.get(name);
 
     if (!responders) {
@@ -69,7 +67,6 @@ export class HandlerCommProcessor implements CommProcessor {
   }
 
   respond(name: string, request: CommPacket): OnEvent<[CommPacket]> | false | null | undefined {
-
     let response: OnEvent<[CommPacket]> | false | null | undefined;
 
     for (const responder of this.#respondersOf(name)) {

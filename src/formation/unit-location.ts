@@ -4,7 +4,6 @@ import { Formation } from './formation';
  * A location of the unit consists of formations the unit is deployed at.
  */
 export interface UnitLocation {
-
   /**
    * Array of formations the unit deployed at.
    */
@@ -23,5 +22,4 @@ export interface UnitLocation {
    * @returns `true` if the unit deployed at target `formation`, or `false`otherwise.
    */
   isDeployedAt(formation: Formation): boolean;
-
 }

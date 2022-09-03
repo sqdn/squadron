@@ -15,11 +15,7 @@ export class CommError extends TypeError {
    * @param message - Optional error message.
    * @param reason - Optional communication failure reason.
    */
-  constructor(
-      unit: Unit,
-      message = `Error communicating with ${unit}`,
-      reason?: unknown,
-  ) {
+  constructor(unit: Unit, message = `Error communicating with ${unit}`, reason?: unknown) {
     super(reason === undefined ? message : `${message}. ${reason}`);
     this.#unit = unit;
     this.#reason = reason;

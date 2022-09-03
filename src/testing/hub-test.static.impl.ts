@@ -8,7 +8,7 @@ import { OrderTest$StaticBase } from './order-test.static.impl';
 export class HubTest$Static extends OrderTest$StaticBase<HubTest> implements HubTest.Static {
 
   constructor() {
-    super(() => OrderTest$get() as HubTest$Instance || HubTest$setup());
+    super(() => (OrderTest$get() as HubTest$Instance) || HubTest$setup());
   }
 
   setup(init?: HubTest.Init): HubTest {

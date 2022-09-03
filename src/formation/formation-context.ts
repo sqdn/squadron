@@ -9,7 +9,6 @@ import { Formation } from './formation';
  * Exactly one formation context instance available per formation worker.
  */
 export interface FormationContext extends UnitContext<Formation> {
-
   /**
    * The formation instance.
    */
@@ -40,13 +39,12 @@ export interface FormationContext extends UnitContext<Formation> {
    * @returns New order context instance.
    */
   newOrder(init?: OrderContext.Init): OrderContext;
-
 }
 
 /**
  * Order, formation, or unit context entry containing the formation context instance.
  */
 export const FormationContext: CxEntry<FormationContext> = {
-  perContext: (/*#__PURE__*/ cxSingle()),
+  perContext: /*#__PURE__*/ cxSingle(),
   toString: () => '[FormationContext]',
 };

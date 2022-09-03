@@ -9,7 +9,6 @@ export const LinkMessagePortCommRequest = 'link-message-port' as const;
  * Responded with {@link LinkMessagePortCommResponse}.
  */
 export interface LinkMessagePortCommRequest extends CommPacket {
-
   /**
    * Identifier of formation that opens link.
    */
@@ -19,17 +18,14 @@ export interface LinkMessagePortCommRequest extends CommPacket {
    * Identifier of formation to open link to.
    */
   readonly toFormation: string;
-
 }
 
 /**
  * Response on {@link LinkMessagePortCommRequest} containing communication port to use.
  */
 export interface LinkMessagePortCommResponse extends CommPacket {
-
   /**
    * Message port to use by established communication link.
    */
   readonly port: MessagePort;
-
 }

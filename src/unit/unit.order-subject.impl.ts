@@ -129,9 +129,7 @@ export class Unit$OrderSubject<TUnit extends Unit> implements OrderSubject<TUnit
   }
 
   #doWithdraw(reason?: unknown): Promise<void> {
-
     const whenWithdrawn = new Promise<void>(resolve => {
-
       const endWithdrawal = (): void => {
         this.#addWithdrawal = this.#rejectWithdrawal(reason);
         this.supply.off(reason);

@@ -4,7 +4,12 @@ import { Formation, FormationContext } from '../formation';
 import { Hub } from '../hub';
 import { OrderContext } from '../order';
 import { OrderTest } from './order-test';
-import { OrderTest$get, OrderTest$Instance, OrderTest$reset, OrderTest$set } from './order-test.instace.impl';
+import {
+  OrderTest$get,
+  OrderTest$Instance,
+  OrderTest$reset,
+  OrderTest$set,
+} from './order-test.instace.impl';
 
 export abstract class OrderTest$StaticBase<TTest extends OrderTest> implements OrderTest {
 

@@ -20,9 +20,8 @@ export class UseMessagePortCommResponder implements CommResponder<UseMessagePort
   }
 
   static buildAsset(
-      target: CxEntry.Target<CommProtocol, CommHandler>,
+    target: CxEntry.Target<CommProtocol, CommHandler>,
   ): (collector: CxAsset.Collector<CommHandler>) => void {
-
     const responder = new UseMessagePortCommResponder(target);
 
     return collector => collector(responder);
@@ -42,25 +41,24 @@ export class UseMessagePortCommResponder implements CommResponder<UseMessagePort
 
   respond(request: UseMessagePortCommRequest): OnEvent<[CommPacket]> {
     return afterThe(request).do(
-        digOn_(({ fromFormation, toUnit, port }) => {
+      digOn_(({ fromFormation, toUnit, port }) => {
+        const from = this.#orderUnits.unitByUid(fromFormation, Formation);
+        const to = this.#orderUnits.unitByUid(toUnit, Unit);
+        const context = this.#fmnContext.contextOf(to);
+        const processor = commProcessorBy(context.get(CommProtocol).channelProcessor(from));
 
-          const from = this.#orderUnits.unitByUid(fromFormation, Formation);
-          const to = this.#orderUnits.unitByUid(toUnit, Unit);
-          const context = this.#fmnContext.contextOf(to);
-          const processor = commProcessorBy(context.get(CommProtocol).channelProcessor(from));
+        new MessageCommChannel({
+          to: from,
+          port,
+          processor,
+          logger: context.get(Logger),
+        });
 
-          new MessageCommChannel({
-            to: from,
-            port,
-            processor,
-            logger: context.get(Logger),
-          });
-
-          return context.readStatus.do(
-              valueOn_(status => status >= UnitStatus.Ready && {}),
-              onceOn,
-          );
-        }),
+        return context.readStatus.do(
+          valueOn_(status => status >= UnitStatus.Ready && {}),
+          onceOn,
+        );
+      }),
     );
   }
 

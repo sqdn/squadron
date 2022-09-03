@@ -7,7 +7,6 @@ import { HubTest } from '../testing/hub-test';
 import { FormationManager } from './formation-manager';
 
 describe('FormationManager', () => {
-
   beforeEach(() => {
     HubTest.setup();
   });
@@ -31,7 +30,6 @@ describe('FormationManager', () => {
   describe('FormationCtl', () => {
     describe('formation', () => {
       it('equals to requested formation', () => {
-
         const testFmn = new Formation({ tag: 'test-fmn', createdIn: HubTest.createdIn });
         const ctl = formationManager.formationCtl(testFmn);
 
@@ -41,11 +39,8 @@ describe('FormationManager', () => {
     });
     describe('channel', () => {
       it('connected to started formation', async () => {
-
         interface TestPacket extends CommPacket {
-
           payload: unknown;
-
         }
 
         const testFmn = new Formation({ tag: 'test-fmn', createdIn: HubTest.createdIn });
@@ -67,8 +62,9 @@ describe('FormationManager', () => {
         const channel = ctl.channel;
 
         expect(ctl.channel).toBe(channel);
-        expect(await channel.request<TestPacket, TestPacket>('test', { payload: 'test payload' }))
-            .toMatchObject({ payload: { re: 'test payload' } });
+        expect(
+          await channel.request<TestPacket, TestPacket>('test', { payload: 'test payload' }),
+        ).toMatchObject({ payload: { re: 'test payload' } });
       });
     });
   });

@@ -11,7 +11,6 @@ export const UseMessagePortCommRequest = 'use-message-port' as const;
  * Responded with empty packet confirming the port accepted.
  */
 export interface UseMessagePortCommRequest extends CommPacket {
-
   /**
    * Unique identifier of formation that establishes communication.
    */
@@ -26,5 +25,4 @@ export interface UseMessagePortCommRequest extends CommPacket {
    * Message port to use by established connection.
    */
   readonly port: MessagePort;
-
 }

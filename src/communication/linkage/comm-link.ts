@@ -10,7 +10,6 @@ import { CommChannel } from '../comm-channel';
  * Communication links obtained via {@link CommLinker communication linker}.
  */
 export interface CommLink {
-
   /**
    * Target formation the link is established to.
    */
@@ -26,5 +25,4 @@ export interface CommLink {
    * @returns New communication channel.
    */
   connect(to: Unit): CommChannel;
-
 }

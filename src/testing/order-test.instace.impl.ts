@@ -14,7 +14,6 @@ export class OrderTest$Instance implements OrderTest {
   readonly #supply: Supply;
 
   constructor(init: OrderTest.Init = {}) {
-
     const {
       orderId = 'mock-order',
       createOrigin = createdIn => ({
@@ -92,7 +91,6 @@ export function OrderTest$set<TTest extends OrderTest$Instance>(this: void, test
 }
 
 export function OrderTest$reset(): void {
-
   const test = OrderTest$instance;
 
   if (test) {

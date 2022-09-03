@@ -8,7 +8,6 @@ import { UnitOrigin } from '../unit';
 import { OrderTest$Static } from './order-test.static.impl';
 
 export interface OrderTest {
-
   readonly hub: Hub;
 
   readonly formation: Formation;
@@ -26,31 +25,26 @@ export interface OrderTest {
   newOrder(init?: OrderContext.Init): OrderContext;
 
   evaluate(): Promise<void>;
-
 }
 
 export namespace OrderTest {
-
   export interface Init {
-
     readonly orderId?: string | undefined;
 
     readonly logger?: Logger | undefined;
 
     readonly supply?: Supply | undefined;
 
-    createOrigin?: ((this: void, createdIn: OrderContext, builtBy: CxBuilder<OrderContext>) => UnitOrigin) | undefined;
-
+    createOrigin?:
+      | ((this: void, createdIn: OrderContext, builtBy: CxBuilder<OrderContext>) => UnitOrigin)
+      | undefined;
   }
 
   export interface Static extends OrderTest {
-
     setup(init?: OrderTest.Init): OrderTest;
 
     reset(): void;
-
   }
-
 }
 
-export const OrderTest: OrderTest.Static = (/* #_ _PURE__ */ new OrderTest$Static());
+export const OrderTest: OrderTest.Static = /* #_ _PURE__ */ new OrderTest$Static();

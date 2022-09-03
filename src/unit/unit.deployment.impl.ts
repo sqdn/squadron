@@ -11,7 +11,10 @@ import { Unit$Backend } from './unit.backend.impl';
 import { UnitContext$createBuilder } from './unit.context.impl';
 import { Unit$OrderSubject } from './unit.order-subject.impl';
 
-export class Unit$Deployment<TUnit extends Unit = Unit> extends Unit$Backend<TUnit, Formation$Host> {
+export class Unit$Deployment<TUnit extends Unit = Unit> extends Unit$Backend<
+  TUnit,
+  Formation$Host
+> {
 
   readonly builder: CxBuilder<UnitContext<TUnit>>;
   readonly #status: ValueTracker<UnitStatus>;
@@ -35,11 +38,13 @@ export class Unit$Deployment<TUnit extends Unit = Unit> extends Unit$Backend<TUn
   }
 
   instruct(instruction: OrderInstruction<TUnit>): void {
-
     const deployedIn = OrderContext.current();
     let getSubject: (() => OrderSubject<TUnit> | null) | null = lazyValue(() => {
-
-      let subject: OrderSubject<TUnit> | null = new Unit$OrderSubject(deployedIn, this, this.supply.derive());
+      let subject: OrderSubject<TUnit> | null = new Unit$OrderSubject(
+        deployedIn,
+        this,
+        this.supply.derive(),
+      );
 
       subject.supply.whenOff(_ => {
         subject = null;
@@ -49,13 +54,10 @@ export class Unit$Deployment<TUnit extends Unit = Unit> extends Unit$Backend<TUn
       return subject;
     });
 
-
     this.host.workbench.instruct(async () => {
-
       const subject = getSubject?.();
 
       if (subject) {
-
         await deployedIn.run(async () => {
           try {
             await instruction(subject);

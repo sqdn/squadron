@@ -13,5 +13,7 @@ import { OrderSubject } from './order-subject';
  * @returns Either none when instruction applied synchronously, or a promise-like instance resolved when the instruction
  * applied asynchronously.
  */
-export type OrderInstruction<TUnit extends Unit = Unit> =
-    <T extends TUnit>(this: void, subject: OrderSubject<T>) => void | PromiseLike<unknown>;
+export type OrderInstruction<TUnit extends Unit = Unit> = <T extends TUnit>(
+  this: void,
+  subject: OrderSubject<T>,
+) => void | PromiseLike<unknown>;

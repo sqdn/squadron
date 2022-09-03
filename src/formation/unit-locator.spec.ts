@@ -7,7 +7,6 @@ import { UnitLocation } from './unit-location';
 import { UnitLocator } from './unit-locator';
 
 describe('UnitLocator', () => {
-
   beforeEach(() => {
     HubTest.setup();
   });
@@ -16,7 +15,6 @@ describe('UnitLocator', () => {
   });
 
   describe('at hub', () => {
-
     let unit: Unit;
     let locator: UnitLocator;
 
@@ -27,7 +25,7 @@ describe('UnitLocator', () => {
       unit = HubTest.run(() => new Unit());
       locator = HubTest.formationBuilder.get(UnitLocator);
       onLocation = locator.locateUnit(unit);
-      onLocation(l => location = l);
+      onLocation(l => (location = l));
       location ||= await onLocation;
     });
 
@@ -58,7 +56,6 @@ describe('UnitLocator', () => {
   });
 
   describe('at formation', () => {
-
     let unit: Unit;
     let formation: Formation;
     let fmnTest: FormationTest;
@@ -74,7 +71,7 @@ describe('UnitLocator', () => {
       fmnTest.init();
       locator = fmnTest.formationBuilder.get(UnitLocator);
       onLocation = locator.locateUnit(unit);
-      onLocation(l => location = l);
+      onLocation(l => (location = l));
       location ||= await onLocation;
     });
 
@@ -83,7 +80,9 @@ describe('UnitLocator', () => {
       expect(location?.formations).toHaveLength(0);
       expect(location?.isLocal).toBe(false);
 
-      const formation2 = HubTest.run(() => new Formation({ tag: 'other', createdIn: HubTest.createdIn }));
+      const formation2 = HubTest.run(
+        () => new Formation({ tag: 'other', createdIn: HubTest.createdIn }),
+      );
       const fmnTest2 = HubTest.testFormation(formation2);
 
       fmnTest2.init();

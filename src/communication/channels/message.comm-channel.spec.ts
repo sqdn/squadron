@@ -14,13 +14,10 @@ import { HandlerCommProcessor, ProxyCommProcessor } from '../handlers';
 import { MessageCommChannel } from './message.comm-channel';
 
 interface TestPacket extends CommPacket {
-
   readonly payload: unknown;
-
 }
 
 describe('MessageCommChannel', () => {
-
   let errorSpy: SpyInstance<(...args: unknown[]) => void>;
 
   beforeEach(() => {
@@ -85,15 +82,14 @@ describe('MessageCommChannel', () => {
 
   describe('signal', () => {
     it('sends signal', async () => {
-
       const resolver = newPromiseResolver();
       const receiver: CommReceiver<TestPacket> = {
         name: 'ping',
         receive: jest.fn(() => {
- resolver.resolve();
+          resolver.resolve();
 
- return true;
-}),
+          return true;
+        }),
       };
 
       remoteProcessor = new HandlerCommProcessor(receiver);
@@ -104,15 +100,14 @@ describe('MessageCommChannel', () => {
       expect(receiver.receive).toHaveBeenCalledWith(expect.objectContaining({ payload: 'test' }));
     });
     it('transfers objects', async () => {
-
       const resolver = newPromiseResolver();
       const receiver: CommReceiver<TestPacket> = {
         name: 'ping',
         receive: jest.fn(() => {
- resolver.resolve();
+          resolver.resolve();
 
- return true;
-}),
+          return true;
+        }),
       };
 
       remoteProcessor = new HandlerCommProcessor(receiver);
@@ -128,7 +123,6 @@ describe('MessageCommChannel', () => {
 
   describe('request', () => {
     it('sends request', async () => {
-
       const handler: CommResponder<TestPacket, TestPacket> = {
         name: 'ping',
         respond: jest.fn(request => onPromise({ ...request, payload: { re: request.payload } })),
@@ -136,17 +130,17 @@ describe('MessageCommChannel', () => {
 
       remoteProcessor = new HandlerCommProcessor(handler);
 
-      expect(await channel.request<TestPacket, TestPacket>('ping', { payload: 'test' }))
-          .toMatchObject({ payload: { re: 'test' } });
+      expect(
+        await channel.request<TestPacket, TestPacket>('ping', { payload: 'test' }),
+      ).toMatchObject({ payload: { re: 'test' } });
     });
     it('ends remote request processing', async () => {
-
       const remoteSupplyResolver = newPromiseResolver<Supply>();
       const handler: CommResponder<TestPacket, TestPacket> = {
         name: 'ping',
         respond: () => onEventBy(({ supply }) => {
-          remoteSupplyResolver.resolve(supply);
-        }),
+            remoteSupplyResolver.resolve(supply);
+          }),
       };
 
       remoteProcessor = new HandlerCommProcessor(handler);
@@ -160,13 +154,12 @@ describe('MessageCommChannel', () => {
       expect(await remoteSupply.whenDone().catch(asis)).toMatchObject({ message: 'Test' });
     });
     it('is closed by remote party', async () => {
-
       const reason = new Error('Test');
       const handler: CommResponder<TestPacket, TestPacket> = {
         name: 'ping',
         respond: () => onEventBy(({ supply }) => {
-          supply.off(reason);
-        }),
+            supply.off(reason);
+          }),
       };
 
       remoteProcessor = new HandlerCommProcessor(handler);
@@ -179,7 +172,6 @@ describe('MessageCommChannel', () => {
 
   describe('processing', () => {
     it('fails to process unrecognized message', async () => {
-
       const resolver = newPromiseResolver();
       const message = 'unknown';
 
@@ -190,7 +182,6 @@ describe('MessageCommChannel', () => {
       expect(errorSpy).toHaveBeenCalledWith('Unrecognized message received', message);
     });
     it('fails to process message of unrecognized type', async () => {
-
       const resolver = newPromiseResolver();
       const message = { sqdn: { type: Infinity } };
 
@@ -201,7 +192,6 @@ describe('MessageCommChannel', () => {
       expect(errorSpy).toHaveBeenCalledWith('Unrecognized message received', message);
     });
     it('fails to process message without body', async () => {
-
       const resolver = newPromiseResolver();
       const message = { sqdn: { type: 0, name: 'test' } };
 
@@ -212,7 +202,6 @@ describe('MessageCommChannel', () => {
       expect(errorSpy).toHaveBeenCalledWith('Unrecognized message received', message);
     });
     it('fails to process request without stream ID', async () => {
-
       const resolver = newPromiseResolver();
       const message = { sqdn: { type: 1, name: 'test', body: { data: 'test' } } };
 
@@ -223,7 +212,6 @@ describe('MessageCommChannel', () => {
       expect(errorSpy).toHaveBeenCalledWith('Unrecognized request received', message.sqdn.body);
     });
     it('fails to process unexpected response', async () => {
-
       const resolver = newPromiseResolver();
       const message = { sqdn: { type: 2, name: 'test', body: { data: 'test' } } };
 
@@ -234,17 +222,16 @@ describe('MessageCommChannel', () => {
       expect(errorSpy).toHaveBeenCalledWith('Unexpected response received', message.sqdn.body);
     });
     it('ignores unexpected end request', async () => {
-
       const resolver = newPromiseResolver();
       const message = { sqdn: { type: 3, name: 'test', body: { data: 'test' } } };
 
       const handler: CommReceiver = {
         name: 'test',
         receive: () => {
- resolver.resolve();
+          resolver.resolve();
 
- return true;
-},
+          return true;
+        },
       };
 
       remoteProcessor = new HandlerCommProcessor(handler);

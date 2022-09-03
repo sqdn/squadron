@@ -4,7 +4,6 @@ import { FIFOCommBuffer } from './fifo.comm-buffer';
 
 describe('FIFOCommBuffer', () => {
   it('evicts commands on overflow', () => {
-
     const onEvict = jest.fn();
     const buffer = new FIFOCommBuffer<number>(2);
 
@@ -27,7 +26,6 @@ describe('FIFOCommBuffer', () => {
     expect(onEvict).toHaveBeenLastCalledWith(3);
   });
   it('evicts commands from one-element buffer on overflow', () => {
-
     const onEvict = jest.fn();
     const buffer = new FIFOCommBuffer<number>(0);
 
@@ -50,7 +48,6 @@ describe('FIFOCommBuffer', () => {
     expect(onEvict).toHaveBeenLastCalledWith(4);
   });
   it('has `256` commands capacity by default', () => {
-
     const onEvict = jest.fn();
     const buffer = new FIFOCommBuffer<number>();
 
@@ -64,7 +61,6 @@ describe('FIFOCommBuffer', () => {
   });
 
   describe('pull', () => {
-
     let buffer: CommBuffer;
 
     beforeEach(() => {

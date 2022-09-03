@@ -10,9 +10,9 @@ import { Unit$Host } from '../unit/unit.host.impl';
 import { Formation$Host } from './formation.host';
 import { Order$Workbench } from './order.workbench';
 
-const Order$Evaluator$perContext: CxEntry.Definer<Order$Evaluator> = (/*#__PURE__*/ cxSingle({
+const Order$Evaluator$perContext: CxEntry.Definer<Order$Evaluator> = /*#__PURE__*/ cxSingle({
   byDefault: target => new Order$Evaluator(target.get(OrderContext)),
-}));
+});
 
 export class Order$Evaluator implements Unit$Host {
 
@@ -48,7 +48,6 @@ export class Order$Evaluator implements Unit$Host {
   }
 
   evalUnit<TUnit extends Unit>(unit: TUnit): Unit$Backend<TUnit> {
-
     let evaluator = this.#evaluators.get(unit.uid);
 
     if (!evaluator) {

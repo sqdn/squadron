@@ -10,7 +10,6 @@ import { CommPacket } from './comm-packet';
  * it can be used to send {@link CommPacket data packets} to target unit.
  */
 export interface CommChannel extends SupplyPeer {
-
   /**
    * Remote unit the channel is opened to.
    */
@@ -48,6 +47,8 @@ export interface CommChannel extends SupplyPeer {
    *
    * @returns An `OnEvent` sender of responses.
    */
-  request<TRequest extends CommPacket, TResponse = CommPacket>(name: string, request: TRequest): OnEvent<[TResponse]>;
-
+  request<TRequest extends CommPacket, TResponse = CommPacket>(
+    name: string,
+    request: TRequest,
+  ): OnEvent<[TResponse]>;
 }

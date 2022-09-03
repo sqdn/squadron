@@ -5,7 +5,6 @@ import { Unit } from '../../unit';
 import { CommLinker } from './comm-linker';
 
 describe('CommLinker', () => {
-
   beforeEach(() => {
     HubTest.setup();
   });
@@ -14,7 +13,6 @@ describe('CommLinker', () => {
   });
 
   it('links hub -> formation', async () => {
-
     const formation = HubTest.run(() => new Formation());
     const fmnTest = HubTest.testFormation(formation);
 
@@ -28,7 +26,6 @@ describe('CommLinker', () => {
     expect(linker.link(formation)).toBe(link);
   });
   it('links formation -> formation', async () => {
-
     const formation1 = HubTest.run(() => new Formation({ tag: '1' }));
     const formation2 = HubTest.run(() => new Formation({ tag: '2' }));
     const unit2 = HubTest.run(() => new Unit({ tag: '2' }));

@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { Unit } from './unit';
 
-export const Unit$Id__symbol = (/*#__PURE__*/ Symbol('Unit.id'));
+export const Unit$Id__symbol = /*#__PURE__*/ Symbol('Unit.id');
 
 export class Unit$Id {
 
@@ -13,7 +13,6 @@ export class Unit$Id {
 
   constructor(readonly unit: Unit, { tag = '', id }: Unit.Init) {
     if (id) {
-
       const atIdx = id.lastIndexOf('@');
 
       if (tag) {
@@ -45,21 +44,20 @@ export class Unit$Id {
   }
 
   get suffix(): string {
-    return this.#suffix ??= Unit$Id$suffix(this.stack);
+    return (this.#suffix ??= Unit$Id$suffix(this.stack));
   }
 
   get uid(): string {
-    return this.#uid ??= `${this.prefix}${this.suffix}`;
+    return (this.#uid ??= `${this.prefix}${this.suffix}`);
   }
 
   get sourceLink(): string {
-    return this.#sourceLink ??= Unit$sourceLink(this.stack);
+    return (this.#sourceLink ??= Unit$sourceLink(this.stack));
   }
 
 }
 
 function Unit$Id$suffix(stack: string): string {
-
   const hash = createHash('sha256');
 
   hash.update(stack);
@@ -71,7 +69,6 @@ const Unit$stack$nlPattern = /\n/;
 const Unit$stack$sourceLinkPattern = /^\s*at\s+(?:.*\((.*)\)|(.*[^)]))$/;
 
 function Unit$sourceLink(stack: string): string {
-
   const line = stack.split(Unit$stack$nlPattern, 2)[1];
   const result = Unit$stack$sourceLinkPattern.exec(line)!;
 

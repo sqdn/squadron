@@ -8,7 +8,6 @@ import { UnitLocation } from './unit-location';
  * Unit locator helps detect the formation(s) the unit deployed at.
  */
 export interface UnitLocator {
-
   /**
    * Detects the location of the unit.
    *
@@ -17,16 +16,12 @@ export interface UnitLocator {
    * @returns `OnEvent` sender of unit location.
    */
   locateUnit(unit: Unit): OnEvent<[UnitLocation]>;
-
 }
 
 /**
  * Formation context entry containing unit locator instance.
  */
 export const UnitLocator: CxEntry<UnitLocator> = {
-  perContext: (/*#__PURE__*/ cxScoped(
-      FormationContext,
-      (/*#__PURE__*/ cxSingle()),
-  )),
+  perContext: /*#__PURE__*/ cxScoped(FormationContext, /*#__PURE__*/ cxSingle()),
   toString: () => '[UnitLocator]',
 };

@@ -19,16 +19,14 @@ export class HubTest$Instance extends OrderTest$Instance implements HubTest {
   constructor(init?: HubTest.Init) {
     super(HubTest$init(init));
     this.formationBuilder.provide(Hub$createAssets());
-    this.formationBuilder.provide(cxConstAsset(
-        FormationStarter,
-        {
-          startFormation: this.#startFormation.bind(this),
-        },
-    ));
+    this.formationBuilder.provide(
+      cxConstAsset(FormationStarter, {
+        startFormation: this.#startFormation.bind(this),
+      }),
+    );
   }
 
   testFormation(formation: Formation, init?: FormationTest.Init): FormationTest {
-
     let fmnTest = this.#fmnTests.get(formation.uid);
 
     if (!fmnTest) {
@@ -41,7 +39,6 @@ export class HubTest$Instance extends OrderTest$Instance implements HubTest {
   }
 
   #startFormation(formation: Formation, { processor }: FormationStartOptions): CommChannel {
-
     const fmnTest = this.testFormation(formation);
     const { port1, port2 } = new MessageChannel();
 
@@ -49,11 +46,13 @@ export class HubTest$Instance extends OrderTest$Instance implements HubTest {
       port1.close();
       port2.close();
     });
-    fmnTest.formationBuilder.provide(Formation$createAssets({
-      uid: fmnTest.formation.uid,
-      hubUid: fmnTest.hub.uid,
-      hubPort: port2,
-    }));
+    fmnTest.formationBuilder.provide(
+      Formation$createAssets({
+        uid: fmnTest.formation.uid,
+        hubUid: fmnTest.hub.uid,
+        hubPort: port2,
+      }),
+    );
 
     return new MessageCommChannel({
       to: formation,
@@ -66,13 +65,11 @@ export class HubTest$Instance extends OrderTest$Instance implements HubTest {
 }
 
 function HubTest$init(init: HubTest.Init = {}): OrderTest.Init {
-
   const { createHub = createdIn => OrderTest$defaultHub(createdIn) } = init;
 
   return {
     ...init,
     createOrigin(createdIn, builtBy) {
-
       const hub = createHub(createdIn, builtBy);
 
       return {

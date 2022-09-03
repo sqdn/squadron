@@ -6,16 +6,14 @@ import { UnitOrigin } from '../unit';
 import { Formation$Host } from './formation.host';
 
 export interface Formation$Factory {
-
   readonly orderId: string;
 
   createOrigin(this: void, createdIn: OrderContext, builtBy: CxBuilder<OrderContext>): UnitOrigin;
 
   createContext: (
-      this: void,
-      host: Formation$Host,
-      get: CxAccessor,
-      builder: CxBuilder<FormationContext>,
+    this: void,
+    host: Formation$Host,
+    get: CxAccessor,
+    builder: CxBuilder<FormationContext>,
   ) => FormationContext;
-
 }

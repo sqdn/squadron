@@ -2,7 +2,7 @@ import { CxEntry, cxSingle } from '@proc7ts/context-values';
 import { Unit } from '../unit';
 import { Unit$Backend__symbol } from '../unit/unit.backend.impl';
 
-const Formation$perContext: CxEntry.Definer<Formation> = (/*#__PURE__*/ cxSingle());
+const Formation$perContext: CxEntry.Definer<Formation> = /*#__PURE__*/ cxSingle();
 
 /**
  * Representation of formation able to deploy executive units.

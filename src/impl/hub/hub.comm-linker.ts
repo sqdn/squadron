@@ -35,18 +35,16 @@ export class Hub$CommLinker implements CommLinker {
   }
 
   static setupAsset(target: CxEntry.Target<CommLinker>): void {
-
     const linker = new Hub$CommLinker(target);
 
     target.provide(cxConstAsset(CommLinker, linker));
     target.provide(UseMessagePortCommResponder);
-    target.provide(cxConstAsset(
-        CommProtocol,
-        {
-          name: LinkMessagePortCommRequest,
-          respond: (request: LinkMessagePortCommRequest) => linker.#link(request),
-        },
-    ));
+    target.provide(
+      cxConstAsset(CommProtocol, {
+        name: LinkMessagePortCommRequest,
+        respond: (request: LinkMessagePortCommRequest) => linker.#link(request),
+      }),
+    );
   }
 
   readonly #context: FormationContext;
@@ -61,14 +59,10 @@ export class Hub$CommLinker implements CommLinker {
   }
 
   link(formation: Formation): CommLink {
-
     let link = this.#links.get(formation.uid);
 
     if (!link) {
-      link = new Hub$CommLink(
-          this.#context,
-          this.#formationManager.formationCtl(formation),
-      );
+      link = new Hub$CommLink(this.#context, this.#formationManager.formationCtl(formation));
       this.#links.set(formation.uid, link);
     }
 
@@ -76,27 +70,28 @@ export class Hub$CommLinker implements CommLinker {
   }
 
   #link(request: LinkMessagePortCommRequest): OnEvent<[LinkMessagePortCommResponse]> {
-    return afterThe(request)
-        .do(
-            digOn_(({ toFormation }) => {
-
-              const ctl = this.#formationManager.formationCtl(this.#orderUnits.unitByUid(toFormation, Formation));
-              const { port1, port2 } = new MessageChannel();
-
-              return ctl.channel.request<UseMessagePortCommRequest>(
-                  UseMessagePortCommRequest,
-                  {
-                    meta: { transferList: [port2] },
-                    fromFormation: request.fromFormation,
-                    toUnit: request.toFormation,
-                    port: port2,
-                  },
-              ).do(mapOn_(() => ({
-                meta: { transferList: [port1] },
-                port: port1,
-              })));
-            }),
+    return afterThe(request).do(
+      digOn_(({ toFormation }) => {
+        const ctl = this.#formationManager.formationCtl(
+          this.#orderUnits.unitByUid(toFormation, Formation),
         );
+        const { port1, port2 } = new MessageChannel();
+
+        return ctl.channel
+          .request<UseMessagePortCommRequest>(UseMessagePortCommRequest, {
+            meta: { transferList: [port2] },
+            fromFormation: request.fromFormation,
+            toUnit: request.toFormation,
+            port: port2,
+          })
+          .do(
+            mapOn_(() => ({
+              meta: { transferList: [port1] },
+              port: port1,
+            })),
+          );
+      }),
+    );
   }
 
 }
@@ -116,28 +111,29 @@ class Hub$CommLink implements CommLink {
   }
 
   connect(to: Unit): CommChannel {
-
     const logger = this.#context.get(Logger);
     const { port1, port2 } = new MessageChannel();
     const onPortAccepted = this.#ctl.channel.request<UseMessagePortCommRequest>(
-        UseMessagePortCommRequest,
-        {
-          meta: { transferList: [port2] },
-          fromFormation: this.#context.formation.uid,
-          toUnit: to.uid,
-          port: port2,
-        },
+      UseMessagePortCommRequest,
+      {
+        meta: { transferList: [port2] },
+        fromFormation: this.#context.formation.uid,
+        toUnit: to.uid,
+        port: port2,
+      },
     );
 
     return new ProxyCommChannel({
       to,
       target: onPortAccepted.do(
-          mapOn_(() => new MessageCommChannel({
-            to,
-            port: port1,
-            processor: commProcessorBy(this.#context.get(CommProtocol).channelProcessor(to)),
-            logger,
-          })),
+        mapOn_(
+          () => new MessageCommChannel({
+              to,
+              port: port1,
+              processor: commProcessorBy(this.#context.get(CommProtocol).channelProcessor(to)),
+              logger,
+            }),
+        ),
       ),
       logger,
     });

@@ -11,7 +11,6 @@ import { CommLink } from './comm-link';
  * The linker is used by {@link Communicator communicator} internally.
  */
 export interface CommLinker {
-
   /**
    * Links to another formation.
    *
@@ -20,16 +19,12 @@ export interface CommLinker {
    * @returns Either new link, or already established one.
    */
   link(formation: Formation): CommLink;
-
 }
 
 /**
  * Formation context entry containing communication linker instance.
  */
 export const CommLinker: CxEntry<CommLinker> = {
-  perContext: (/*#__PURE__*/ cxScoped(
-      FormationContext,
-      (/*#__PURE__*/ cxSingle()),
-  )),
+  perContext: /*#__PURE__*/ cxScoped(FormationContext, /*#__PURE__*/ cxSingle()),
   toString: () => '[CommLinker]',
 };

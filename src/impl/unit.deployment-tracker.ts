@@ -10,19 +10,15 @@ export class Unit$DeploymentTracker<TUnit extends Unit = Unit> {
   readonly #tracker: ValueTracker<[Map<string, Formation>]>;
 
   constructor(readonly host: Formation$Host, readonly unit: TUnit) {
-
     const { asFormation } = unit;
 
     this.#tracker = trackValue([
-        asFormation ? new Map([[asFormation.uid, asFormation]]) : new Map(),
+      asFormation ? new Map([[asFormation.uid, asFormation]]) : new Map(),
     ]);
-    this.read = this.#tracker.read.do(
-        mapAfter(([formations]) => formations),
-    );
+    this.read = this.#tracker.read.do(mapAfter(([formations]) => formations));
   }
 
   deployTo(formation: Formation): void {
-
     const [formations] = this.#tracker.it;
 
     this.#tracker.it = [formations.set(formation.uid, formation)];

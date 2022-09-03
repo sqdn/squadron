@@ -13,25 +13,23 @@ import { SqdnLauncher } from '../sqdn-launcher';
 import { Hub$FormationStarter } from './hub.formation-starter';
 
 export default function launchHub(launcher: SqdnLauncher): void {
-  launchSqdn(
-      launcher,
-      {
-        orderId: launcher.rootURL,
-        createOrigin(createdIn: OrderContext): UnitOrigin {
+  launchSqdn(launcher, {
+    orderId: launcher.rootURL,
+    createOrigin(createdIn: OrderContext): UnitOrigin {
+      const hub = new Hub({ createdIn });
 
-          const hub = new Hub({ createdIn });
+      return {
+        hub,
+        formation: hub,
+      };
+    },
+    createContext(host, get, cxBuilder) {
+      cxBuilder.provide(Hub$createAssets());
+      cxBuilder.provide(
+        cxBuildAsset(FormationStarter, target => new Hub$FormationStarter(host, target)),
+      );
 
-          return {
-            hub,
-            formation: hub,
-          };
-        },
-        createContext(host, get, cxBuilder) {
-          cxBuilder.provide(Hub$createAssets());
-          cxBuilder.provide(cxBuildAsset(FormationStarter, target => new Hub$FormationStarter(host, target)));
-
-          return new Formation$Context(host, get, cxBuilder);
-        },
-      },
-  );
+      return new Formation$Context(host, get, cxBuilder);
+    },
+  });
 }

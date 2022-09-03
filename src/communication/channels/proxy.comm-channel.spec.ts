@@ -17,13 +17,10 @@ import { DirectCommChannel } from './direct.comm-channel';
 import { ProxyCommChannel } from './proxy.comm-channel';
 
 interface TestPacket extends CommPacket {
-
   readonly payload: unknown;
-
 }
 
 describe('ProxyCommChannel', () => {
-
   let errorSpy: SpyInstance<(...args: unknown[]) => void>;
   let warnSpy: SpyInstance<(...args: unknown[]) => void>;
 
@@ -45,13 +42,15 @@ describe('ProxyCommChannel', () => {
   });
 
   describe('with single target channel', () => {
-
     let target: CommChannel;
     let processor: CommProcessor;
     let channel: ProxyCommChannel;
 
     beforeEach(() => {
-      target = new DirectCommChannel({ to: unit, processor: new ProxyCommProcessor(() => processor) });
+      target = new DirectCommChannel({
+        to: unit,
+        processor: new ProxyCommProcessor(() => processor),
+      });
       channel = new ProxyCommChannel({ to: unit, target });
     });
 
@@ -63,7 +62,6 @@ describe('ProxyCommChannel', () => {
 
     describe('signal', () => {
       it('proxies signal to target', () => {
-
         const handler: CommReceiver<TestPacket> = {
           name: 'test',
           receive: jest.fn(() => true),
@@ -81,7 +79,6 @@ describe('ProxyCommChannel', () => {
 
     describe('request', () => {
       it('proxies request to target', async () => {
-
         const handler: CommResponder<TestPacket, TestPacket> = {
           name: 'test',
           respond: jest.fn(({ payload }) => onPromise({ payload: { re: payload } })),
@@ -92,13 +89,14 @@ describe('ProxyCommChannel', () => {
 
         processor = new HandlerCommProcessor(handler);
 
-        expect(await channel.request('test', request)).toEqual({ payload: { re: request.payload } });
+        expect(await channel.request('test', request)).toEqual({
+          payload: { re: request.payload },
+        });
       });
     });
 
     describe('supply', () => {
       it('closes target channel', async () => {
-
         const reason = new Error('Reason');
 
         channel.supply.off(reason);
@@ -116,7 +114,6 @@ describe('ProxyCommChannel', () => {
   });
 
   describe('with target channel sender', () => {
-
     let targets: EventEmitter<[CommChannel?]>;
     let channel: ProxyCommChannel;
 
@@ -126,7 +123,6 @@ describe('ProxyCommChannel', () => {
     });
 
     it('closes target channel when switches to another one', () => {
-
       const target1 = new DirectCommChannel({ to: unit, processor: new HandlerCommProcessor() });
       const target2 = new DirectCommChannel({ to: unit, processor: new HandlerCommProcessor() });
 
@@ -138,7 +134,6 @@ describe('ProxyCommChannel', () => {
     });
 
     describe('signal', () => {
-
       beforeEach(() => {
         channel = new ProxyCommChannel({
           to: unit,
@@ -149,7 +144,6 @@ describe('ProxyCommChannel', () => {
       });
 
       it('buffers signal', () => {
-
         const handler: CommReceiver<TestPacket> = {
           name: 'test',
           receive: jest.fn<(signal: TestPacket) => boolean>(),
@@ -160,7 +154,10 @@ describe('ProxyCommChannel', () => {
 
         channel.signal('test', signal);
 
-        const target = new DirectCommChannel({ to: unit, processor: new HandlerCommProcessor(handler) });
+        const target = new DirectCommChannel({
+          to: unit,
+          processor: new HandlerCommProcessor(handler),
+        });
 
         targets.send(target);
         expect(handler.receive).toHaveBeenCalledWith(signal);
@@ -172,9 +169,9 @@ describe('ProxyCommChannel', () => {
 
         targets.send(target);
         expect(errorSpy).toHaveBeenCalledWith(
-            'Failed to send signal "test" to',
-            String(unit),
-            new TypeError(`Unknown signal received: "test"`),
+          'Failed to send signal "test" to',
+          String(unit),
+          new TypeError(`Unknown signal received: "test"`),
         );
       });
       it('warns when buffered signal aborted', () => {
@@ -184,15 +181,9 @@ describe('ProxyCommChannel', () => {
 
         channel.supply.off(reason);
 
-        expect(warnSpy).toHaveBeenCalledWith(
-            'Signal "test" to',
-            String(unit),
-            'aborted',
-            reason,
-        );
+        expect(warnSpy).toHaveBeenCalledWith('Signal "test" to', String(unit), 'aborted', reason);
       });
       it('warns on eviction', () => {
-
         const signal1: TestPacket = {
           payload: 'test payload 1',
         };
@@ -204,16 +195,15 @@ describe('ProxyCommChannel', () => {
         channel.signal('test', signal2);
 
         expect(warnSpy).toHaveBeenLastCalledWith(
-            'Signal "test" to',
-            String(unit),
-            'aborted',
-            'Command buffer overflow',
+          'Signal "test" to',
+          String(unit),
+          'aborted',
+          'Command buffer overflow',
         );
       });
     });
 
     describe('request', () => {
-
       beforeEach(() => {
         channel = new ProxyCommChannel({
           to: unit,
@@ -224,12 +214,11 @@ describe('ProxyCommChannel', () => {
       });
 
       it('buffers request', async () => {
-
         const handler: CommResponder<TestPacket, TestPacket> = {
           name: 'test',
           respond: ({ payload }) => onEventBy(receiver => {
-            onPromise({ payload: { re: payload } })(receiver);
-          }),
+              onPromise({ payload: { re: payload } })(receiver);
+            }),
         };
         const request: TestPacket = {
           payload: 'test payload',
@@ -237,54 +226,53 @@ describe('ProxyCommChannel', () => {
 
         const onResponse = channel.request('test', request);
 
-        const target = new DirectCommChannel({ to: unit, processor: new HandlerCommProcessor(handler) });
+        const target = new DirectCommChannel({
+          to: unit,
+          processor: new HandlerCommProcessor(handler),
+        });
 
         targets.send(target);
         expect(await onResponse).toEqual({ payload: { re: request.payload } });
       });
       it('aborts response when buffered request errors', async () => {
-
         const onResponse = channel.request('test', {})(noop);
         const target = new DirectCommChannel({ to: unit, processor: new HandlerCommProcessor() });
 
         targets.send(target);
 
-        expect(await onResponse.whenDone().catch(asis)).toEqual(new TypeError(`Unknown request received: "test"`));
+        expect(await onResponse.whenDone().catch(asis)).toEqual(
+          new TypeError(`Unknown request received: "test"`),
+        );
       });
       it('aborts response when buffered request can not be sent', async () => {
-
         const whenResponded = channel.request('test', {})(noop);
         const target = new DirectCommChannel({ to: unit, processor: new HandlerCommProcessor() });
         const error = new Error('Test');
 
-        spyOn(target, 'request').mockImplementation(() => { throw error; });
+        spyOn(target, 'request').mockImplementation(() => {
+          throw error;
+        });
 
         targets.send(target);
 
-        expect(await whenResponded.whenDone().catch(asis)).toEqual(new CommError(
-            unit,
-            `Failed to send request "test" to ${unit}`,
-            error,
-        ));
+        expect(await whenResponded.whenDone().catch(asis)).toEqual(
+          new CommError(unit, `Failed to send request "test" to ${unit}`, error),
+        );
       });
       it('aborts response when buffered request aborted', async () => {
-
         const whenResponded = channel.request('test', {})(noop);
         const reason = new Error('Reason');
 
         targets.supply.off(reason);
 
-        expect(await whenResponded.whenDone().catch(asis)).toEqual(new CommError(
-            unit,
-            `Request "test" to ${unit} aborted`,
-            reason,
-        ));
+        expect(await whenResponded.whenDone().catch(asis)).toEqual(
+          new CommError(unit, `Request "test" to ${unit} aborted`, reason),
+        );
       });
     });
 
     describe('supply', () => {
       it('closes target channel', async () => {
-
         const target = new DirectCommChannel({ to: unit, processor: new HandlerCommProcessor() });
 
         targets.send(target);
@@ -309,7 +297,6 @@ describe('ProxyCommChannel', () => {
     });
 
     describe('buffering', () => {
-
       let targets: EventEmitter<[CommChannel?]>;
       let channel: ProxyCommChannel;
 
@@ -362,7 +349,6 @@ describe('ProxyCommChannel', () => {
         expect(handler.receive).toHaveBeenCalledTimes(2);
       });
       it('starts buffering when `undefined` target received', () => {
-
         const target1 = new DirectCommChannel({ to: unit, processor: new HandlerCommProcessor() });
 
         targets.send(target1);

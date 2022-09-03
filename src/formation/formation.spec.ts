@@ -6,7 +6,6 @@ import { Unit } from '../unit';
 import { Formation } from './formation';
 
 describe('Formation', () => {
-
   beforeEach(() => {
     OrderTest.setup();
   });
@@ -16,7 +15,6 @@ describe('Formation', () => {
 
   describe('asFormation', () => {
     it('refers itself', () => {
-
       const formation = OrderTest.run(() => new Formation());
 
       expect(formation.asFormation).toBe(formation);
@@ -26,7 +24,6 @@ describe('Formation', () => {
   describe('deploy', () => {
     describe('after order evaluation', () => {
       it('does not deploy the unit', async () => {
-
         const logger = {
           warn: jest.fn<(...message: unknown[]) => void>(),
         } as Partial<Logger> as Logger;
@@ -42,7 +39,7 @@ describe('Formation', () => {
         await OrderTest.evaluate();
 
         expect(logger.warn).toHaveBeenCalledWith(
-            `${unit} can not be deployed to ${OrderTest.formation} outside the order`,
+          `${unit} can not be deployed to ${OrderTest.formation} outside the order`,
         );
       });
     });

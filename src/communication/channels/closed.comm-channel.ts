@@ -37,18 +37,23 @@ export class ClosedCommChannel implements CommChannel {
 
   signal<TSignal extends CommPacket>(name: string, _signal: TSignal): never {
     throw new CommError(
-        this.to,
-        `Can not send signal "${name}" to ${this.#to} over closed channel`,
-        this.#reason,
+      this.to,
+      `Can not send signal "${name}" to ${this.#to} over closed channel`,
+      this.#reason,
     );
   }
 
-  request<TRequest extends CommPacket, TResponse = CommPacket>(name: string, _request: TRequest): OnEvent<[TResponse]> {
-    return onEventBy(({ supply }) => supply.off(new CommError(
-        this.to,
-        `Can not send request "${name}" to ${this.#to} over closed channel`,
-        this.#reason,
-    )));
+  request<TRequest extends CommPacket, TResponse = CommPacket>(
+    name: string,
+    _request: TRequest,
+  ): OnEvent<[TResponse]> {
+    return onEventBy(({ supply }) => supply.off(
+        new CommError(
+          this.to,
+          `Can not send request "${name}" to ${this.#to} over closed channel`,
+          this.#reason,
+        ),
+      ));
   }
 
 }

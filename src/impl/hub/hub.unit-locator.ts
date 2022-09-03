@@ -14,17 +14,15 @@ export class Hub$UnitLocator implements UnitLocator {
   }
 
   static setupAsset(target: CxEntry.Target<UnitLocator>): void {
-
     const locator = new Hub$UnitLocator(target);
 
     target.provide(cxConstAsset(UnitLocator, locator));
-    target.provide(cxConstAsset(
-        CommProtocol,
-        {
-          name: UnitLocationCommRequest,
-          respond: (request: UnitLocationCommRequest) => locator.#locateUnit(request),
-        },
-    ));
+    target.provide(
+      cxConstAsset(CommProtocol, {
+        name: UnitLocationCommRequest,
+        respond: (request: UnitLocationCommRequest) => locator.#locateUnit(request),
+      }),
+    );
   }
 
   readonly #host: Formation$Host;
@@ -36,15 +34,15 @@ export class Hub$UnitLocator implements UnitLocator {
   }
 
   locateUnit(unit: Unit): OnEvent<[UnitLocation]> {
-    return this.#host.trackDeployments(unit).read.do(
-        mapAfter(formations => new Hub$UnitLocation(this.#host, formations)),
-    );
+    return this.#host
+      .trackDeployments(unit)
+      .read.do(mapAfter(formations => new Hub$UnitLocation(this.#host, formations)));
   }
 
   #locateUnit({ unit }: UnitLocationCommRequest): OnEvent<[UnitLocationCommResponse]> {
-    return this.#host.trackDeployments(this.#orderUnits.unitByUid(unit, Unit)).read.do(
-        mapAfter_(formations => ({ formations: [...formations.keys()] })),
-    );
+    return this.#host
+      .trackDeployments(this.#orderUnits.unitByUid(unit, Unit))
+      .read.do(mapAfter_(formations => ({ formations: [...formations.keys()] })));
   }
 
 }

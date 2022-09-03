@@ -10,19 +10,16 @@ import { DueSqdnLog } from './due-sqdn-log';
  *
  * @typeParam TTarget - Processed message type.
  */
-export interface SqdnLoggable<TTarget extends DueSqdnLog.Target = DueSqdnLog.Target> extends Loggable<TTarget> {
-
+export interface SqdnLoggable<TTarget extends DueSqdnLog.Target = DueSqdnLog.Target>
+  extends Loggable<TTarget> {
   toLog(target: TTarget): void | unknown;
-
 }
 
 export namespace SqdnLoggable {
-
   /**
    * Squadron log message details to process and log.
    */
   export interface Details {
-
     unit?: {
       name: string;
       uid: string;
@@ -30,7 +27,5 @@ export namespace SqdnLoggable {
     };
 
     [key: string | symbol]: unknown | undefined;
-
   }
-
 }

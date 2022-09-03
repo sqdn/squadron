@@ -10,9 +10,8 @@ import { Unit$Deployment } from './unit.deployment.impl';
 import { UnitContext__entry } from './unit.entries.impl';
 
 export function UnitContext$createBuilder<TUnit extends Unit>(
-    deployment: Unit$Deployment<TUnit>,
+  deployment: Unit$Deployment<TUnit>,
 ): CxBuilder<UnitContext<TUnit>> {
-
   const { host, unit } = deployment;
 
   if (host.formation.uid === unit.uid) {
@@ -20,8 +19,8 @@ export function UnitContext$createBuilder<TUnit extends Unit>(
   }
 
   return new CxBuilder<UnitContext<TUnit>>(
-      (get, builder) => new Unit$Context(deployment, get, builder),
-      host.perUnitCxPeer,
+    (get, builder) => new Unit$Context(deployment, get, builder),
+    host.perUnitCxPeer,
   );
 }
 
@@ -31,9 +30,9 @@ class Unit$Context<TUnit extends Unit> implements UnitContext<TUnit> {
   readonly #get: CxAccessor;
 
   constructor(
-      deployment: Unit$Deployment<TUnit>,
-      get: CxAccessor,
-      builder: CxBuilder<UnitContext<TUnit>>,
+    deployment: Unit$Deployment<TUnit>,
+    get: CxAccessor,
+    builder: CxBuilder<UnitContext<TUnit>>,
   ) {
     this.#deployment = deployment;
     this.#get = get;

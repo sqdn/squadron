@@ -11,7 +11,6 @@ import { UnitStatus } from './unit-status';
  * Context becomes available within formation the unit arrived to.
  */
 export interface UnitContext<TUnit extends Unit = any> extends CxValues {
-
   /**
    * The hub reference the unit created by.
    */
@@ -31,13 +30,12 @@ export interface UnitContext<TUnit extends Unit = any> extends CxValues {
    * An `AfterEvent` keeper of current status of the unit.
    */
   readonly readStatus: AfterEvent<[UnitStatus]>;
-
 }
 
 /**
  * Unit context entry containing the context instance itself.
  */
 export const UnitContext: CxEntry<UnitContext> = {
-  perContext: (/*#__PURE__*/ cxSingle()),
+  perContext: /*#__PURE__*/ cxSingle(),
   toString: () => '[UnitContext]',
 };

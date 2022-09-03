@@ -10,7 +10,6 @@ import { isCommProcessor } from './handlers/comm-handler.impl';
  * Can be constructed out of {@link CommHandler command handlers} as {@link HandlerCommProcessor}.
  */
 export interface CommProcessor {
-
   /**
    * Handles received signal.
    *
@@ -36,7 +35,6 @@ export interface CommProcessor {
    * @returns Either `OnEvent` sender of response data packets, or falsy value if unknown request received.
    */
   respond(name: string, request: CommPacket): OnEvent<[CommPacket]> | false | null | undefined;
-
 }
 
 /**
@@ -46,7 +44,9 @@ export interface CommProcessor {
  *
  * @returns Communication processor.
  */
-export function commProcessorBy(handler?: CommReceiver | CommResponder | CommProcessor): CommProcessor {
+export function commProcessorBy(
+  handler?: CommReceiver | CommResponder | CommProcessor,
+): CommProcessor {
   if (!handler) {
     return NoopCommProcessor;
   }

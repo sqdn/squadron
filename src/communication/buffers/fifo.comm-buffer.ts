@@ -39,7 +39,6 @@ export class FIFOCommBuffer<T> implements CommBuffer<T> {
   }
 
   #add(command: T): void {
-
     const index = this.#tail;
 
     if (++this.#tail >= this.#commands.length) {

@@ -20,24 +20,28 @@ export class SqdnLauncher {
       return this.#launchData;
     }
     if (isMainThread) {
-      return this.#launchData = undefined;
+      return (this.#launchData = undefined);
     }
 
     const launchData = workerData as Formation$LaunchData;
 
-    return this.#launchData = {
+    return (this.#launchData = {
       ...launchData,
       hubPort: moveMessagePortToContext(launchData.hubPort, this.vmContext),
-    };
+    });
   }
 
-  async launchModule(launchModuleId: string, options?: Parameters<Module['evaluate']>[0]): Promise<void> {
-
+  async launchModule(
+    launchModuleId: string,
+    options?: Parameters<Module['evaluate']>[0],
+  ): Promise<void> {
     const launchModule = await this.#moduleByURL(this.#moduleIdToURL(launchModuleId)).module;
 
     await launchModule.evaluate(options);
 
-    const launch = (launchModule.namespace as Record<string, unknown>).default as (loader: SqdnLauncher) => void;
+    const launch = (launchModule.namespace as Record<string, unknown>).default as (
+      loader: SqdnLauncher,
+    ) => void;
 
     return launch(this);
   }
@@ -47,22 +51,27 @@ export class SqdnLauncher {
   }
 
   async resolveModule(specifier: string, referencingModule: Module): Promise<Module> {
-    return await (this.#moduleByURL(this.#moduleURL(specifier, referencingModule))).module;
+    return await this.#moduleByURL(this.#moduleURL(specifier, referencingModule)).module;
   }
 
   #moduleURL(specifier: string, referencingModule: Module): URL {
+    const referrer = this.#moduleByURL(
+      this.#moduleIdToURL(referencingModule.identifier),
+      specifier,
+    );
 
-    const referrer = this.#moduleByURL(this.#moduleIdToURL(referencingModule.identifier), specifier);
-
-    return pathToFileURL(this.#resolve(specifier, { paths: [fileURLToPath(referrer.sourceURL.href)] }));
+    return pathToFileURL(
+      this.#resolve(specifier, { paths: [fileURLToPath(referrer.sourceURL.href)] }),
+    );
   }
 
   #moduleIdToURL(specifier: string): URL {
     if (
-        specifier.startsWith('./')
-        || specifier.startsWith('../')
-        || specifier === '.'
-        || specifier === '..') {
+      specifier.startsWith('./')
+      || specifier.startsWith('../')
+      || specifier === '.'
+      || specifier === '..'
+    ) {
       // Relative URL.
       return pathToFileURL(this.#resolve(fileURLToPath(new URL(specifier, this.rootURL).href)));
     }
@@ -72,7 +81,6 @@ export class SqdnLauncher {
   }
 
   #moduleByURL(sourceURL: URL, specifier?: string): SqdnLaunchModule {
-
     const href = sourceURL.href;
     const cached = this.#cache.get(href);
 

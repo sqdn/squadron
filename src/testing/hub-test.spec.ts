@@ -3,7 +3,6 @@ import { FormationContext } from '../formation';
 import { HubTest } from './hub-test';
 
 describe('HubTest', () => {
-
   afterEach(() => {
     HubTest.reset();
   });
@@ -19,5 +18,4 @@ describe('HubTest', () => {
       expect(HubTest.formation).toBe(HubTest.hub);
     });
   });
-
 });

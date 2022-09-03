@@ -36,7 +36,6 @@ export class Formation$CommLinker implements CommLinker {
   }
 
   static setupAsset(target: CxEntry.Target<CommLinker>): void {
-
     const linker = new Formation$CommLinker(target);
 
     target.provide(cxConstAsset(CommLinker, linker));
@@ -53,11 +52,9 @@ export class Formation$CommLinker implements CommLinker {
   }
 
   link(formation: Formation): CommLink {
-
     let link = this.#links.get(formation.uid);
 
     if (!link) {
-
       const host = this.#context.get(Formation$Host);
       const logger = this.#context.get(Logger);
 
@@ -67,31 +64,35 @@ export class Formation$CommLinker implements CommLinker {
       } else {
         // Other formation. Request new link.
 
-        const onResponse = this.#ctlChannel.request<LinkMessagePortCommRequest, LinkMessagePortCommResponse>(
-            LinkMessagePortCommRequest,
-            {
-              fromFormation: this.#context.formation.uid,
-              toFormation: formation.uid,
-            },
+        const onResponse = this.#ctlChannel.request<
+          LinkMessagePortCommRequest,
+          LinkMessagePortCommResponse
+        >(LinkMessagePortCommRequest, {
+          fromFormation: this.#context.formation.uid,
+          toFormation: formation.uid,
+        });
+        const processor = commProcessorBy(
+          this.#context.get(CommProtocol).channelProcessor(formation),
         );
-        const processor = commProcessorBy(this.#context.get(CommProtocol).channelProcessor(formation));
         const target: OnEvent<[CommChannel]> = onResponse.do(
-            mapOn_(({ port }) => new MessageCommChannel({
-              to: formation,
-              port,
-              processor,
-              logger,
-            })),
+          mapOn_(
+            ({ port }) => new MessageCommChannel({
+                to: formation,
+                port,
+                processor,
+                logger,
+              }),
+          ),
         );
 
         link = new Formation$CommLink(
-            host,
-            formation,
-            new ProxyCommChannel({
-              to: formation,
-              target,
-              logger,
-            }),
+          host,
+          formation,
+          new ProxyCommChannel({
+            to: formation,
+            target,
+            logger,
+          }),
         );
       }
 
@@ -109,11 +110,7 @@ class Formation$CommLink implements CommLink {
   readonly #to: Formation;
   readonly #channel: CommChannel;
 
-  constructor(
-      host: Formation$Host,
-      to: Formation,
-      channel: CommChannel,
-  ) {
+  constructor(host: Formation$Host, to: Formation, channel: CommChannel) {
     this.#host = host;
     this.#to = to;
     this.#channel = channel;
@@ -124,27 +121,28 @@ class Formation$CommLink implements CommLink {
   }
 
   connect(to: Unit): CommChannel {
-
     const { context } = this.#host;
     const logger = context.get(Logger);
     const { port1, port2 } = new MessageChannel();
     const onPortAccepted = this.#channel.request<UseMessagePortCommRequest>(
-        UseMessagePortCommRequest,
-        {
-          meta: { transferList: [port2] },
-          fromFormation: context.formation.uid,
-          toUnit: to.uid,
-          port: port2,
-        },
+      UseMessagePortCommRequest,
+      {
+        meta: { transferList: [port2] },
+        fromFormation: context.formation.uid,
+        toUnit: to.uid,
+        port: port2,
+      },
     );
     const processor = commProcessorBy(context.get(CommProtocol).channelProcessor(to));
     const target: OnEvent<[CommChannel]> = onPortAccepted.do(
-        mapOn_(() => new MessageCommChannel({
-          to,
-          port: port1,
-          processor,
-          logger,
-        })),
+      mapOn_(
+        () => new MessageCommChannel({
+            to,
+            port: port1,
+            processor,
+            logger,
+          }),
+      ),
     );
 
     return new ProxyCommChannel({

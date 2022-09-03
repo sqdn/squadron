@@ -5,7 +5,6 @@ import { Unit } from '../../unit';
 import { HandlerCommProtocol } from './handler.comm-protocol';
 
 describe('HandlerCommProtocol', () => {
-
   beforeEach(() => {
     OrderTest.setup();
   });
@@ -14,7 +13,6 @@ describe('HandlerCommProtocol', () => {
   });
 
   it('handles missing channel processor', () => {
-
     const protocol = new HandlerCommProtocol({
       channelProcessor: noop,
     });

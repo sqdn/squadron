@@ -7,7 +7,6 @@ describe('commProcessorBy', () => {
     expect(commProcessorBy()).toBe(NoopCommProcessor);
   });
   it('does not convert processor', () => {
-
     const processor = new HandlerCommProcessor();
 
     expect(commProcessorBy(processor)).toBe(processor);

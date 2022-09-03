@@ -25,22 +25,19 @@ export class DirectCommChannel implements CommChannel {
    * @param supply - Communication channel supply. A new one will be created by default.
    * @param processor - Communication processor of the commands sent by constructed channel.
    */
-  constructor(
-      {
-        to,
-        supply = new Supply(),
-        processor,
-      }: {
-        to: Unit;
-        supply?: Supply | undefined;
-        processor: CommProcessor;
-      },
-  ) {
+  constructor({
+    to,
+    supply = new Supply(),
+    processor,
+  }: {
+    to: Unit;
+    supply?: Supply | undefined;
+    processor: CommProcessor;
+  }) {
     this.#to = to;
     this.#supply = supply;
     this.#processor = new FinalCommProcessor(processor);
     this.supply.whenOff(reason => {
-
       const closed = new ClosedCommChannel(this.to, reason);
 
       this.#processor = {
@@ -66,13 +63,13 @@ export class DirectCommChannel implements CommChannel {
     this.#processor.receive(name, signal);
   }
 
-  request<TRequest extends CommPacket, TResponse = CommPacket>(name: string, request: TRequest): OnEvent<[TResponse]> {
-
+  request<TRequest extends CommPacket, TResponse = CommPacket>(
+    name: string,
+    request: TRequest,
+  ): OnEvent<[TResponse]> {
     const onResponse = this.#processor.respond(name, request) as OnEvent<[TResponse]>;
 
-    return this.supply.isOff
-        ? onResponse
-        : onResponse.do(supplyOn(this));
+    return this.supply.isOff ? onResponse : onResponse.do(supplyOn(this));
   }
 
 }
