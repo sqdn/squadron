@@ -46,7 +46,7 @@
     "@proc7ts/push-iterator": "^3.1.0",
     "@proc7ts/supply": "^1.2.3",
     "@proc7ts/workbench": "^1.2.0",
-    "uuid": "^8.3.2"
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@jest/globals": "^29.0.2",
@@ -55,12 +55,12 @@
     "@run-z/eslint-config": "^3.2.2",
     "@run-z/log-z": "^2.1.0",
     "@run-z/rollup-helpers": "^2.0.0",
-    "@types/node": "^16.11.56",
+    "@types/node": "^16.11.58",
     "@types/uuid": "^8.3.4",
-    "@typescript-eslint/eslint-plugin": "^5.36.1",
-    "@typescript-eslint/parser": "^5.36.1",
+    "@typescript-eslint/eslint-plugin": "^5.36.2",
+    "@typescript-eslint/parser": "^5.36.2",
     "eslint": "^8.23.0",
-    "eslint-plugin-jest": "^27.0.1",
+    "eslint-plugin-jest": "^27.0.3",
     "gh-pages": "^4.0.0",
     "jest": "^29.0.2",
     "jest-junit": "^14.0.1",
@@ -73,10 +73,10 @@
     "rollup-plugin-typescript2": "^0.33.0",
     "run-z": "^1.10.0",
     "shx": "^0.3.4",
-    "ts-jest": "29.0.0-next.0",
+    "ts-jest": "^29.0.0",
     "tslib": "^2.4.0",
     "typedoc": "^0.23.14",
-    "typescript": "^4.8.2"
+    "typescript": "^4.8.3"
   },
   "scripts": {
     "all": "run-z build,lint,test",
