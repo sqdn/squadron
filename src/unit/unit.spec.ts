@@ -6,7 +6,7 @@ import { Supply } from '@proc7ts/supply';
 import { dueLogZ, zlogINFO, ZLogLevel } from '@run-z/log-z';
 import { fileURLToPath } from 'node:url';
 import { Formation } from '../formation';
-import { OrderInstruction } from '../order';
+import { OrderInstruction, OrderSubject } from '../order';
 import { OrderTest } from '../testing';
 import { Unit } from './unit';
 
@@ -262,7 +262,7 @@ describe('Unit', () => {
         expect.objectContaining({
           formation: test.formation,
           unit,
-        }),
+        }) as unknown as OrderSubject<TestUnit>,
       );
     });
     it('records instruction of already deployed unit', async () => {
@@ -282,7 +282,7 @@ describe('Unit', () => {
         expect.objectContaining({
           formation: test.formation,
           unit,
-        }),
+        }) as unknown as OrderSubject<TestUnit>,
       );
     });
     it('does not record instruction when unit withdrawn', async () => {

@@ -3,7 +3,7 @@ import { onEventBy, onPromise } from '@proc7ts/fun-events';
 import { consoleLogger } from '@proc7ts/logger';
 import { asis, newPromiseResolver, noop } from '@proc7ts/primitives';
 import { Supply } from '@proc7ts/supply';
-import { SpyInstance, spyOn } from 'jest-mock';
+import { Mock, spyOn } from 'jest-mock';
 import { MessageChannel, MessagePort } from 'node:worker_threads';
 import { OrderTest } from '../../testing';
 import { Unit } from '../../unit';
@@ -18,10 +18,10 @@ interface TestPacket extends CommPacket {
 }
 
 describe('MessageCommChannel', () => {
-  let errorSpy: SpyInstance<(...args: unknown[]) => void>;
+  let errorSpy: Mock<(...args: unknown[]) => void>;
 
   beforeEach(() => {
-    errorSpy = spyOn(consoleLogger, 'error');
+    errorSpy = spyOn(consoleLogger, 'error') as typeof errorSpy;
     OrderTest.setup();
   });
   afterEach(() => {
@@ -97,7 +97,9 @@ describe('MessageCommChannel', () => {
       channel.signal<TestPacket>('ping', { payload: 'test' });
       await resolver.promise();
 
-      expect(receiver.receive).toHaveBeenCalledWith(expect.objectContaining({ payload: 'test' }));
+      expect(receiver.receive).toHaveBeenCalledWith(
+        expect.objectContaining({ payload: 'test' }) as unknown as TestPacket,
+      );
     });
     it('transfers objects', async () => {
       const resolver = newPromiseResolver();

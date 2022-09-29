@@ -3,7 +3,7 @@ import { EventEmitter, onEventBy, onPromise } from '@proc7ts/fun-events';
 import { consoleLogger, processingLogger } from '@proc7ts/logger';
 import { asis, noop } from '@proc7ts/primitives';
 import { neverSupply, Supply } from '@proc7ts/supply';
-import { SpyInstance, spyOn } from 'jest-mock';
+import { Mock, spyOn } from 'jest-mock';
 import { OrderTest } from '../../testing';
 import { Unit } from '../../unit';
 import { FIFOCommBuffer } from '../buffers';
@@ -21,12 +21,12 @@ interface TestPacket extends CommPacket {
 }
 
 describe('ProxyCommChannel', () => {
-  let errorSpy: SpyInstance<(...args: unknown[]) => void>;
-  let warnSpy: SpyInstance<(...args: unknown[]) => void>;
+  let errorSpy: Mock<(...args: unknown[]) => void>;
+  let warnSpy: Mock<(...args: unknown[]) => void>;
 
   beforeEach(() => {
-    errorSpy = spyOn(consoleLogger, 'error').mockImplementation(noop);
-    warnSpy = spyOn(consoleLogger, 'warn').mockImplementation(noop);
+    errorSpy = spyOn(consoleLogger, 'error').mockImplementation(noop) as typeof errorSpy;
+    warnSpy = spyOn(consoleLogger, 'warn').mockImplementation(noop) as typeof warnSpy;
     OrderTest.setup();
   });
   afterEach(() => {

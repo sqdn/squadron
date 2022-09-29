@@ -557,7 +557,7 @@ describe('OrderSubject', () => {
   describe('withdraw', () => {
     it('executes withdrawal task', async () => {
       let subj!: OrderSubject;
-      const withdrawal = jest.fn<() => void>();
+      const withdrawal = jest.fn<(reason: unknown) => void>();
 
       await OrderTest.run(async () => {
         const unit = new Unit();
@@ -584,7 +584,7 @@ describe('OrderSubject', () => {
     });
     it('executes withdrawal task added by execution task', async () => {
       let subj!: OrderSubject;
-      const withdrawal = jest.fn<() => void>();
+      const withdrawal = jest.fn<(reason: unknown) => void>();
 
       const unit = await OrderTest.run(async () => {
         const unit = new Unit();
@@ -622,8 +622,8 @@ describe('OrderSubject', () => {
 
       let subj!: OrderSubject;
       const failure = new Error('Test failure');
-      const withdrawal1 = jest.fn<() => void>();
-      const withdrawal2 = jest.fn<() => void>(() => Promise.reject(failure));
+      const withdrawal1 = jest.fn<(reason: unknown) => void>();
+      const withdrawal2 = jest.fn<(reason: unknown) => void>(() => Promise.reject(failure));
 
       const unit = await OrderTest.run(async () => {
         const unit = new Unit();
@@ -659,7 +659,7 @@ describe('OrderSubject', () => {
 
   describe('executeUponWithdrawal', () => {
     it('schedules withdrawal task during withdrawal', async () => {
-      const withdrawal = jest.fn<() => void>();
+      const withdrawal = jest.fn<(reason: unknown) => void>();
       let subj!: OrderSubject;
 
       await OrderTest.run(async () => {
