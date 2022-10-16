@@ -2,7 +2,6 @@ import { externalModules } from '@run-z/rollup-helpers';
 import path from 'node:path';
 import { defineConfig } from 'rollup';
 import flatDts from 'rollup-plugin-flat-dts';
-import sourcemaps from 'rollup-plugin-sourcemaps';
 import ts from 'rollup-plugin-typescript2';
 import typescript from 'typescript';
 
@@ -20,31 +19,30 @@ export default defineConfig({
       tsconfig: 'tsconfig.main.json',
       cacheRoot: 'target/.rts2_cache',
     }),
-    sourcemaps(),
   ],
   external: externalModules(),
-  manualChunks(id) {
-    if (id.startsWith(path.resolve('src', 'testing') + path.sep)) {
-      return 'squadron.testing';
-    }
-    if (id.startsWith(path.resolve('src', 'launch', 'formation') + path.sep)) {
-      return 'squadron.launch.formation';
-    }
-    if (id.startsWith(path.resolve('src', 'launch', 'hub') + path.sep)) {
-      return 'squadron.launch.hub';
-    }
-    if (id.startsWith(path.resolve('src', 'launch') + path.sep)) {
-      return 'squadron.launch';
-    }
-
-    return 'squadron';
-  },
   output: {
     dir: '.',
     format: 'esm',
     sourcemap: true,
     entryFileNames: 'dist/[name].js',
     chunkFileNames: 'dist/_[name].js',
+    manualChunks(id) {
+      if (id.startsWith(path.resolve('src', 'testing') + path.sep)) {
+        return 'squadron.testing';
+      }
+      if (id.startsWith(path.resolve('src', 'launch', 'formation') + path.sep)) {
+        return 'squadron.launch.formation';
+      }
+      if (id.startsWith(path.resolve('src', 'launch', 'hub') + path.sep)) {
+        return 'squadron.launch.hub';
+      }
+      if (id.startsWith(path.resolve('src', 'launch') + path.sep)) {
+        return 'squadron.launch';
+      }
+
+      return 'squadron';
+    },
     plugins: [
       flatDts({
         tsconfig: 'tsconfig.main.json',
