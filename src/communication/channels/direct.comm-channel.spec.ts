@@ -116,7 +116,7 @@ describe('DirectCommChannel', () => {
     it('responds to request', async () => {
       const responder: CommResponder<TestPacket, TestPacket> = {
         name: 'ping',
-        respond: jest.fn(request => onPromise({ ...request, payload: { re: request.payload } })),
+        respond: jest.fn((request: TestPacket) => onPromise({ ...request, payload: { re: request.payload } })),
       };
 
       processor = commProcessorBy(responder);
@@ -128,7 +128,7 @@ describe('DirectCommChannel', () => {
     it('responds to request by command processor', async () => {
       const responder: CommResponder<TestPacket, TestPacket> = {
         name: 'ping',
-        respond: jest.fn(request => onPromise({ ...request, payload: { re: request.payload } })),
+        respond: jest.fn((request: TestPacket) => onPromise({ ...request, payload: { re: request.payload } })),
       };
 
       processor = new HandlerCommProcessor(new HandlerCommProcessor(responder));

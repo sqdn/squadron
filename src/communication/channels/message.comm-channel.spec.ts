@@ -127,7 +127,7 @@ describe('MessageCommChannel', () => {
     it('sends request', async () => {
       const handler: CommResponder<TestPacket, TestPacket> = {
         name: 'ping',
-        respond: jest.fn(request => onPromise({ ...request, payload: { re: request.payload } })),
+        respond: jest.fn((request: TestPacket) => onPromise({ ...request, payload: { re: request.payload } })),
       };
 
       remoteProcessor = new HandlerCommProcessor(handler);
