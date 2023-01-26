@@ -51,7 +51,7 @@
   "devDependencies": {
     "@jest/globals": "^29.4.0",
     "@proc7ts/context-values": "^7.0.1",
-    "@proc7ts/fun-events": "^10.5.1",
+    "@proc7ts/fun-events": "^10.5.2",
     "@run-z/eslint-config": "^3.3.1",
     "@run-z/log-z": "^2.1.1",
     "@run-z/rollup-helpers": "^2.1.0",
