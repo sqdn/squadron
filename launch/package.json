@@ -1,4 +1,0 @@
-{
-  "main": "../dist/squadron.launch.js",
-  "types": "./index.d.ts"
-}
