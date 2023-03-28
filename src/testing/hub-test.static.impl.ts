@@ -2,7 +2,7 @@ import { Formation } from '../formation';
 import { FormationTest } from './formation-test';
 import { HubTest } from './hub-test';
 import { HubTest$Instance } from './hub-test.instance.impl';
-import { OrderTest$get, OrderTest$set } from './order-test.instace.impl';
+import { OrderTest$get, OrderTest$set } from './order-test.instance.impl';
 import { OrderTest$StaticBase } from './order-test.static.impl';
 
 export class HubTest$Static extends OrderTest$StaticBase<HubTest> implements HubTest.Static {

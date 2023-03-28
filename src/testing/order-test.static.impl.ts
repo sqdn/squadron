@@ -5,11 +5,11 @@ import { Hub } from '../hub';
 import { OrderContext } from '../order';
 import { OrderTest } from './order-test';
 import {
-  OrderTest$get,
   OrderTest$Instance,
+  OrderTest$get,
   OrderTest$reset,
   OrderTest$set,
-} from './order-test.instace.impl';
+} from './order-test.instance.impl';
 
 export abstract class OrderTest$StaticBase<TTest extends OrderTest> implements OrderTest {
 

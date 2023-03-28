@@ -6,7 +6,7 @@ import { FormationTest } from './formation-test';
 import { HubTest } from './hub-test';
 import { HubTest$Instance } from './hub-test.instance.impl';
 import { OrderTest } from './order-test';
-import { OrderTest$Instance } from './order-test.instace.impl';
+import { OrderTest$Instance } from './order-test.instance.impl';
 
 export class FormationTest$Nested extends OrderTest$Instance implements FormationTest {
 

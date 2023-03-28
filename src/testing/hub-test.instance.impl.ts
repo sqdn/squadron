@@ -3,14 +3,14 @@ import { Logger } from '@proc7ts/logger';
 import { MessageChannel } from 'node:worker_threads';
 import { CommChannel, MessageCommChannel } from '../communication';
 import { Formation } from '../formation';
-import { FormationStarter, FormationStartOptions } from '../hub';
+import { FormationStartOptions, FormationStarter } from '../hub';
 import { Formation$createAssets } from '../impl/formation';
 import { Hub$createAssets } from '../impl/hub';
 import { FormationTest } from './formation-test';
 import { FormationTest$Nested } from './formation-test.nested.impl';
 import { HubTest } from './hub-test';
 import { OrderTest } from './order-test';
-import { OrderTest$defaultHub, OrderTest$Instance } from './order-test.instace.impl';
+import { OrderTest$Instance, OrderTest$defaultHub } from './order-test.instance.impl';
 
 export class HubTest$Instance extends OrderTest$Instance implements HubTest {
 
